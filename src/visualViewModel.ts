@@ -1,14 +1,18 @@
-export interface CategoryViewModel {
-    value: string;
-    identity: string;
-    color: string;
+import powerbi from "powerbi-visuals-api";
+import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import DataViewTableRow = powerbi.DataViewTableRow;
+
+export interface TableCellData {
+    value: any;
+    column: DataViewMetadataColumn;
 }
 
-export interface ValueViewModel {
-    values: any[];
+export interface TableRowData {
+    cells: TableCellData[];
+    numericValues: number[];
 }
 
-export interface VisualViewModel {
-    categories: CategoryViewModel[];
-    values: ValueViewModel[];
+export interface TableViewModel {
+    columns: DataViewMetadataColumn[];
+    rows: TableRowData[];
 }

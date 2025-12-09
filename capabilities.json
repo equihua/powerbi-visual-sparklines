@@ -1,38 +1,30 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
-        },
-        {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
-        }
+      "name": "values",
+      "kind": "GroupingOrMeasure",
+      "displayName": "Columnas"
+    }
     ],
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
-                    "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+      "table": {
+        "rows": {
+          "select": [{ "for": { "in": "values" } }]
+        }
+      }
+    }
+    ],
+    "objects": {
+        "general": {
+            "displayName": "General",
+            "properties": {
+                "textSize": {
+                    "displayName": "Tamaño de texto",
+                    "type": { "formatting": { "fontSize": true } }
                 }
             }
         }
-    ],
+    },
     "privileges": []
 }

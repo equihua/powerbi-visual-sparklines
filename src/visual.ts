@@ -26,9 +26,10 @@
 
 "use strict";
 
-import { transpose } from "d3-array";
-import { formatPrefix } from "d3-format";
 import { select } from "d3-selection";
+import { line } from "d3-shape";
+import { scaleLinear } from "d3-scale";
+import { min, max } from "d3-array";
 import "./../style/visual.less";
 
 import powerbi from "powerbi-visuals-api";
@@ -42,78 +43,198 @@ import IViewport = powerbi.IViewport;
 
 import { VisualFormattingSettingsModel } from "./settings";
 import { visualTransform } from "./visualTransform";
-import { CategoryViewModel, VisualViewModel } from "./visualViewModel";
+import { TableViewModel, TableRowData } from "./visualViewModel";
 
-"use strict";
+type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
+
+interface SparklineConfig {
+    width: number;
+    height: number;
+    padding: number;
+    strokeColor: string;
+    strokeWidth: number;
+}
+
+const SPARKLINE_CONFIG: SparklineConfig = {
+    width: 60,
+    height: 20,
+    padding: 2,
+    strokeColor: "#0078D4",
+    strokeWidth: 1.5
+};
+
+const DEFAULT_TEXT_SIZE = 12;
+const SPARKLINE_COLUMN_TITLE = "Tendencia";
+
 export class Visual implements IVisual {
-    private target: d3.Selection<any, any, any, any>;
-    private table: d3.Selection<any, any, any, any>;
-    private tHead: d3.Selection<any, any, any, any>;
-    private tBody: d3.Selection<any, any, any, any>;
+    private readonly target: HTMLElement;
+    private readonly container: Selection<HTMLDivElement>;
+    private readonly formattingSettingsService: FormattingSettingsService;
     private formattingSettings: VisualFormattingSettingsModel;
-    private formattingSettingsService: FormattingSettingsService;
 
     constructor(options: VisualConstructorOptions) {
         this.formattingSettingsService = new FormattingSettingsService();
-
-        let target: d3.Selection<any, any, any, any> = this.target = select(options.element).append("div")
-            .classed("powerbi-demo-wrapper", true);
-
-        let table: d3.Selection<any, any, any, any> = this.table = target.append("table")
-            .classed("powerbi-demo-table", true);
-
-        this.tHead = table.append("thead").append("tr");
-        this.tBody = table.append("tbody");
+        this.target = options.element;
+        this.container = select(this.target)
+            .append("div")
+            .classed("pbi-table-container", true);
     }
 
     public update(options: VisualUpdateOptions): void {
-        this.updateInternal(options, visualTransform(options.dataViews));
-    }
+        this.updateFormattingSettings(options);
 
-    public updateInternal(options: VisualUpdateOptions, viewModel: VisualViewModel): void {
+        const viewModel = visualTransform(options.dataViews);
         if (!viewModel) {
+            this.clearContainer();
             return;
         }
 
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, Object.assign({}, ...options.dataViews));
-        this.updateContainerViewports(options.viewport);
-
-        let transposedSeries: any[][] = transpose(viewModel.values.map((d: any) => d.values.map((d: any) => d)));
-        let thSelection: d3.Selection<any, any, any, any> = this.tHead.selectAll("th").data(viewModel.categories);
-        thSelection.enter().append("th");
-        thSelection.text((d: CategoryViewModel) => d.value);
-        thSelection.exit().remove();
-
-        let trSelection: d3.Selection<any, any, any, any> = this.tBody.selectAll("tr").data(transposedSeries);
-        let tr: d3.Selection<any, any, any, any> = trSelection.enter().append("tr");
-        tr.selectAll("td").data((d: any) => d).enter().append("td")
-            .attr("data-th", (d: any, i: number) => viewModel.categories[i].value)
-            .text((d: number) => this.format(d));
-
-        trSelection.exit().remove();
+        const textSize = this.getTextSize(options.dataViews?.[0]);
+        this.renderTable(viewModel, textSize, options.viewport);
     }
 
-    private updateContainerViewports(viewport: IViewport): void {
-        if (!viewport) {
-            return;
+    private updateFormattingSettings(options: VisualUpdateOptions): void {
+        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
+            VisualFormattingSettingsModel,
+            options.dataViews?.[0]
+        );
+    }
+
+    private clearContainer(): void {
+        this.container.selectAll("*").remove();
+    }
+
+    private renderTable(viewModel: TableViewModel, textSize: number, viewport: IViewport): void {
+        this.clearContainer();
+
+        const tableElement = this.createTableElement(textSize, viewport);
+        this.renderTableHeader(tableElement, viewModel.columns);
+        this.renderTableBody(tableElement, viewModel.rows);
+    }
+
+    private createTableElement(textSize: number, viewport: IViewport): Selection<HTMLTableElement> {
+        return this.container
+            .append("table")
+            .classed("pbi-custom-table", true)
+            .style("font-size", `${textSize}px`)
+            .style("width", `${viewport.width}px`);
+    }
+
+    private renderTableHeader(
+        tableElement: Selection<HTMLTableElement>,
+        columns: powerbi.DataViewMetadataColumn[]
+    ): void {
+        const headerRow = tableElement
+            .append("thead")
+            .append("tr");
+
+        columns.forEach(column => {
+            headerRow.append("th").text(column.displayName);
+        });
+
+        headerRow.append("th").text(SPARKLINE_COLUMN_TITLE);
+    }
+
+    private renderTableBody(
+        tableElement: Selection<HTMLTableElement>,
+        rows: TableRowData[]
+    ): void {
+        const tbody = tableElement.append("tbody");
+
+        rows.forEach(rowData => {
+            this.renderTableRow(tbody, rowData);
+        });
+    }
+
+    private renderTableRow(
+        tbody: Selection<HTMLTableSectionElement>,
+        rowData: TableRowData
+    ): void {
+        const tr = tbody.append("tr");
+
+        rowData.cells.forEach(cell => {
+            const formattedValue = this.formatValue(cell.value, cell.column);
+            tr.append("td").text(formattedValue);
+        });
+
+        const sparklineTd = tr.append("td");
+        if (rowData.numericValues.length > 1) {
+            this.renderSparkline(sparklineTd, rowData.numericValues);
         }
-        const width: number = viewport.width;
-        this.tHead.classed("dynamic", width > 400);
-        this.table.attr("width", width);
     }
 
-    private round(x, n) {
-        return n == null ? Math.round(x) : Math.round(x * (n = Math.pow(10, n))) / n;
+    private renderSparkline(container: Selection<HTMLTableCellElement>, data: number[]): void {
+        const config = SPARKLINE_CONFIG;
+
+        const svg = container
+            .append("svg")
+            .attr("width", config.width)
+            .attr("height", config.height);
+
+        const scales = this.createSparklineScales(data, config);
+        const pathData = this.generateSparklinePath(data, scales);
+
+        svg.append("path")
+            .attr("fill", "none")
+            .attr("stroke", config.strokeColor)
+            .attr("stroke-width", config.strokeWidth)
+            .attr("d", pathData);
     }
 
-    private format(d: number): string {
-        return formatPrefix("d", this.round(d, 2))(d);
+    private createSparklineScales(data: number[], config: SparklineConfig) {
+        const xScale = scaleLinear()
+            .domain([0, data.length - 1])
+            .range([config.padding, config.width - config.padding]);
+
+        const minValue = min(data) ?? 0;
+        const maxValue = max(data) ?? 0;
+        const yScale = scaleLinear()
+            .domain([minValue, maxValue])
+            .range([config.height - config.padding, config.padding]);
+
+        return { xScale, yScale };
     }
 
-    /**
-     * Returns properties pane formatting model content hierarchies, properties and latest formatting values, Then populate properties pane.
-     * This method is called once every time we open properties pane or when the user edit any format property. 
-     */
+    private generateSparklinePath(
+        data: number[],
+        scales: { xScale: d3.ScaleLinear<number, number>; yScale: d3.ScaleLinear<number, number> }
+    ): string | null {
+        const lineGenerator = line<number>()
+            .x((d, i) => scales.xScale(i))
+            .y(d => scales.yScale(d));
+
+        return lineGenerator(data);
+    }
+
+    private formatValue(value: any, column: powerbi.DataViewMetadataColumn): string {
+        if (value == null) {
+            return "";
+        }
+
+        if (typeof value === "number") {
+            return this.formatNumericValue(value, column.format);
+        }
+
+        if (value instanceof Date) {
+            return value.toLocaleDateString();
+        }
+
+        return String(value);
+    }
+
+    private formatNumericValue(value: number, format?: string): string {
+        if (format?.includes("%")) {
+            return `${(value * 100).toFixed(2)}%`;
+        }
+
+        return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    private getTextSize(dataView?: DataView): number {
+        const textSize = dataView?.metadata?.objects?.["general"]?.["textSize"];
+        return (textSize as number) ?? DEFAULT_TEXT_SIZE;
+    }
+
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
