@@ -2,11 +2,10 @@
 
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
-import DataViewTable = powerbi.DataViewTable;
 import DataViewTableRow = powerbi.DataViewTableRow;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 
-import { TableViewModel, TableRowData } from "./visualViewModel";
+import { TableViewModel, TableRowData, SparklineColumnData } from "./visualViewModel";
 
 export function visualTransform(dataViews: DataView[]): TableViewModel | null {
     const dataView = dataViews?.[0];
@@ -16,25 +15,49 @@ export function visualTransform(dataViews: DataView[]): TableViewModel | null {
         return null;
     }
 
+    const categoryColumns = table.columns.filter(col => col.roles?.["category"]);
+    const valueColumns = table.columns.filter(col => col.roles?.["values"]);
+    const sparklineColumns = table.columns.filter(col => col.roles?.["sparklineValues"]);
+
+    const displayColumns = [...categoryColumns, ...valueColumns];
+    const categoryCount = categoryColumns.length;
+    const valueCount = valueColumns.length;
+
     return {
-        columns: table.columns,
-        rows: transformRows(table.rows, table.columns)
+        columns: displayColumns,
+        sparklineColumns: sparklineColumns,
+        rows: transformRows(table.rows, table.columns, categoryCount, valueCount, sparklineColumns)
     };
 }
 
 function transformRows(
     rows: DataViewTableRow[],
-    columns: DataViewMetadataColumn[]
+    allColumns: DataViewMetadataColumn[],
+    categoryCount: number,
+    valueCount: number,
+    sparklineColumns: DataViewMetadataColumn[]
 ): TableRowData[] {
-    return rows.map(row => ({
-        cells: row.map((value, index) => ({
+    const displayColumnCount = categoryCount + valueCount;
+    
+    return rows.map(row => {
+        const cells = row.slice(0, displayColumnCount).map((value, index) => ({
             value,
-            column: columns[index]
-        })),
-        numericValues: extractNumericValues(row)
-    }));
-}
+            column: allColumns[index]
+        }));
 
-function extractNumericValues(row: DataViewTableRow): number[] {
-    return row.filter(value => typeof value === "number") as number[];
+        const sparklineData: SparklineColumnData[] = sparklineColumns.map((column, index) => {
+            const columnIndex = displayColumnCount + index;
+            const value = row[columnIndex];
+            
+            return {
+                column: column,
+                values: typeof value === "number" ? [value] : []
+            };
+        });
+
+        return {
+            cells,
+            sparklineColumns: sparklineData
+        };
+    });
 }

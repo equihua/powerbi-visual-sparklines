@@ -38,7 +38,6 @@ import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
-import DataView = powerbi.DataView;
 import IViewport = powerbi.IViewport;
 
 import { VisualFormattingSettingsModel } from "./settings";
@@ -46,25 +45,6 @@ import { visualTransform } from "./visualTransform";
 import { TableViewModel, TableRowData } from "./visualViewModel";
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
-
-interface SparklineConfig {
-    width: number;
-    height: number;
-    padding: number;
-    strokeColor: string;
-    strokeWidth: number;
-}
-
-const SPARKLINE_CONFIG: SparklineConfig = {
-    width: 60,
-    height: 20,
-    padding: 2,
-    strokeColor: "#0078D4",
-    strokeWidth: 1.5
-};
-
-const DEFAULT_TEXT_SIZE = 12;
-const SPARKLINE_COLUMN_TITLE = "Tendencia";
 
 export class Visual implements IVisual {
     private readonly target: HTMLElement;
@@ -81,34 +61,60 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions): void {
-        this.updateFormattingSettings(options);
-
         const viewModel = visualTransform(options.dataViews);
         if (!viewModel) {
             this.clearContainer();
             return;
         }
 
-        const textSize = this.getTextSize(options.dataViews?.[0]);
-        this.renderTable(viewModel, textSize, options.viewport);
+        this.formattingSettings = new VisualFormattingSettingsModel();
+        this.formattingSettings.populateSparklineCards(viewModel.sparklineColumns);
+
+        this.updateFormattingSettings(options);
+
+        this.renderTable(viewModel, options.viewport);
     }
 
     private updateFormattingSettings(options: VisualUpdateOptions): void {
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
-            VisualFormattingSettingsModel,
-            options.dataViews?.[0]
-        );
+        const dataView = options.dataViews?.[0];
+        if (!dataView) return;
+
+        if (dataView.metadata?.objects?.["general"]) {
+            const generalObj = dataView.metadata.objects["general"];
+            if (generalObj["textSize"]) {
+                this.formattingSettings.general.textSize.value = generalObj["textSize"] as number;
+            }
+            if (generalObj["alternateRowColor"]) {
+                this.formattingSettings.general.alternateRowColor.value = generalObj["alternateRowColor"] as any;
+            }
+        }
+
+        this.formattingSettings.sparklineCards.forEach(card => {
+            if (dataView.metadata?.objects?.[card.name]) {
+                const cardObj = dataView.metadata.objects[card.name];
+                if (cardObj["chartType"]) {
+                    card.chartType.value = cardObj["chartType"] as any;
+                }
+                if (cardObj["color"]) {
+                    card.color.value = cardObj["color"] as any;
+                }
+                if (cardObj["lineWidth"]) {
+                    card.lineWidth.value = cardObj["lineWidth"] as number;
+                }
+            }
+        });
     }
 
     private clearContainer(): void {
         this.container.selectAll("*").remove();
     }
 
-    private renderTable(viewModel: TableViewModel, textSize: number, viewport: IViewport): void {
+    private renderTable(viewModel: TableViewModel, viewport: IViewport): void {
         this.clearContainer();
 
+        const textSize = this.formattingSettings.general.textSize.value;
         const tableElement = this.createTableElement(textSize, viewport);
-        this.renderTableHeader(tableElement, viewModel.columns);
+        this.renderTableHeader(tableElement, viewModel.columns, viewModel.sparklineColumns);
         this.renderTableBody(tableElement, viewModel.rows);
     }
 
@@ -122,7 +128,8 @@ export class Visual implements IVisual {
 
     private renderTableHeader(
         tableElement: Selection<HTMLTableElement>,
-        columns: powerbi.DataViewMetadataColumn[]
+        columns: powerbi.DataViewMetadataColumn[],
+        sparklineColumns: powerbi.DataViewMetadataColumn[]
     ): void {
         const headerRow = tableElement
             .append("thead")
@@ -132,7 +139,9 @@ export class Visual implements IVisual {
             headerRow.append("th").text(column.displayName);
         });
 
-        headerRow.append("th").text(SPARKLINE_COLUMN_TITLE);
+        sparklineColumns.forEach(column => {
+            headerRow.append("th").text(column.displayName);
+        });
     }
 
     private renderTableBody(
@@ -140,57 +149,262 @@ export class Visual implements IVisual {
         rows: TableRowData[]
     ): void {
         const tbody = tableElement.append("tbody");
+        const alternateColor = this.formattingSettings.general.alternateRowColor.value.value;
 
-        rows.forEach(rowData => {
-            this.renderTableRow(tbody, rowData);
+        rows.forEach((rowData, index) => {
+            this.renderTableRow(tbody, rowData, index, alternateColor);
         });
     }
 
     private renderTableRow(
         tbody: Selection<HTMLTableSectionElement>,
-        rowData: TableRowData
+        rowData: TableRowData,
+        index: number,
+        alternateColor: string
     ): void {
         const tr = tbody.append("tr");
+
+        if (index % 2 === 1) {
+            tr.style("background-color", alternateColor);
+        }
 
         rowData.cells.forEach(cell => {
             const formattedValue = this.formatValue(cell.value, cell.column);
             tr.append("td").text(formattedValue);
         });
 
-        const sparklineTd = tr.append("td");
-        if (rowData.numericValues.length > 1) {
-            this.renderSparkline(sparklineTd, rowData.numericValues);
+        rowData.sparklineColumns.forEach((sparklineData, sparklineIndex) => {
+            const sparklineTd = tr.append("td");
+            if (sparklineData.values.length > 0) {
+                const settings = this.formattingSettings.sparklineCards[sparklineIndex];
+                this.renderSparkline(sparklineTd, sparklineData.values, settings);
+            }
+        });
+    }
+
+    private renderSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const chartType = settings?.chartType?.value?.value || "line";
+
+        switch (chartType) {
+            case "line":
+                this.renderLineSparkline(container, data, settings);
+                break;
+            case "bar":
+                this.renderBarSparkline(container, data, settings);
+                break;
+            case "area":
+                this.renderAreaSparkline(container, data, settings);
+                break;
+            case "pie":
+                this.renderPieSparkline(container, data, settings);
+                break;
+            case "donut":
+                this.renderDonutSparkline(container, data, settings);
+                break;
+            default:
+                this.renderLineSparkline(container, data, settings);
         }
     }
 
-    private renderSparkline(container: Selection<HTMLTableCellElement>, data: number[]): void {
-        const config = SPARKLINE_CONFIG;
+    private renderLineSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const width = 60;
+        const height = 20;
+        const padding = 2;
+        const strokeColor = settings?.color?.value?.value || "#0078D4";
+        const strokeWidth = settings?.lineWidth?.value || 1.5;
 
         const svg = container
             .append("svg")
-            .attr("width", config.width)
-            .attr("height", config.height);
+            .attr("width", width)
+            .attr("height", height);
 
-        const scales = this.createSparklineScales(data, config);
+        const scales = this.createSparklineScales(data, width, height, padding);
         const pathData = this.generateSparklinePath(data, scales);
 
         svg.append("path")
             .attr("fill", "none")
-            .attr("stroke", config.strokeColor)
-            .attr("stroke-width", config.strokeWidth)
+            .attr("stroke", strokeColor)
+            .attr("stroke-width", strokeWidth)
             .attr("d", pathData);
     }
 
-    private createSparklineScales(data: number[], config: SparklineConfig) {
+    private renderBarSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const width = 60;
+        const height = 20;
+        const padding = 2;
+        const fillColor = settings?.color?.value?.value || "#0078D4";
+
+        const svg = container
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const xScale = scaleLinear()
+            .domain([0, data.length])
+            .range([padding, width - padding]);
+
+        const maxValue = max(data) ?? 0;
+        const yScale = scaleLinear()
+            .domain([0, maxValue])
+            .range([height - padding, padding]);
+
+        const barWidth = (width - 2 * padding) / data.length - 1;
+
+        data.forEach((value, index) => {
+            svg.append("rect")
+                .attr("x", xScale(index))
+                .attr("y", yScale(value))
+                .attr("width", barWidth)
+                .attr("height", height - padding - yScale(value))
+                .attr("fill", fillColor);
+        });
+    }
+
+    private renderAreaSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const width = 60;
+        const height = 20;
+        const padding = 2;
+        const fillColor = settings?.color?.value?.value || "#0078D4";
+        const strokeWidth = settings?.lineWidth?.value || 1.5;
+
+        const svg = container
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const scales = this.createSparklineScales(data, width, height, padding);
+
+        const areaPoints = data.map((d, i) =>
+            `${scales.xScale(i)},${scales.yScale(d)}`
+        ).join(" ");
+
+        const baselineY = height - padding;
+        const areaPath = `M${padding},${baselineY} L${areaPoints} L${width - padding},${baselineY} Z`;
+
+        svg.append("path")
+            .attr("fill", fillColor)
+            .attr("fill-opacity", 0.3)
+            .attr("stroke", fillColor)
+            .attr("stroke-width", strokeWidth)
+            .attr("d", areaPath);
+    }
+
+    private renderPieSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const size = 20;
+        const radius = size / 2 - 2;
+        const fillColor = settings?.color?.value?.value || "#0078D4";
+
+        const svg = container
+            .append("svg")
+            .attr("width", size)
+            .attr("height", size);
+
+        const total = data.reduce((sum, val) => sum + val, 0);
+        let currentAngle = 0;
+
+        data.forEach((value, index) => {
+            const sliceAngle = (value / total) * 2 * Math.PI;
+            const endAngle = currentAngle + sliceAngle;
+
+            const x1 = radius + radius * Math.cos(currentAngle);
+            const y1 = radius + radius * Math.sin(currentAngle);
+            const x2 = radius + radius * Math.cos(endAngle);
+            const y2 = radius + radius * Math.sin(endAngle);
+
+            const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+            const pathData = `M ${radius},${radius} L ${x1},${y1} A ${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
+
+            const opacity = 1 - (index * 0.2);
+            svg.append("path")
+                .attr("d", pathData)
+                .attr("fill", fillColor)
+                .attr("fill-opacity", opacity)
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 0.5);
+
+            currentAngle = endAngle;
+        });
+    }
+
+    private renderDonutSparkline(
+        container: Selection<HTMLTableCellElement>,
+        data: number[],
+        settings: any
+    ): void {
+        const size = 20;
+        const outerRadius = size / 2 - 2;
+        const innerRadius = outerRadius * 0.5;
+        const fillColor = settings?.color?.value?.value || "#0078D4";
+
+        const svg = container
+            .append("svg")
+            .attr("width", size)
+            .attr("height", size);
+
+        const total = data.reduce((sum, val) => sum + val, 0);
+        let currentAngle = 0;
+
+        data.forEach((value, index) => {
+            const sliceAngle = (value / total) * 2 * Math.PI;
+            const endAngle = currentAngle + sliceAngle;
+
+            const x1Outer = outerRadius + outerRadius * Math.cos(currentAngle);
+            const y1Outer = outerRadius + outerRadius * Math.sin(currentAngle);
+            const x2Outer = outerRadius + outerRadius * Math.cos(endAngle);
+            const y2Outer = outerRadius + outerRadius * Math.sin(endAngle);
+
+            const x1Inner = outerRadius + innerRadius * Math.cos(currentAngle);
+            const y1Inner = outerRadius + innerRadius * Math.sin(currentAngle);
+            const x2Inner = outerRadius + innerRadius * Math.cos(endAngle);
+            const y2Inner = outerRadius + innerRadius * Math.sin(endAngle);
+
+            const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+            const pathData = `M ${x1Outer},${y1Outer} A ${outerRadius},${outerRadius} 0 ${largeArc},1 ${x2Outer},${y2Outer} L ${x2Inner},${y2Inner} A ${innerRadius},${innerRadius} 0 ${largeArc},0 ${x1Inner},${y1Inner} Z`;
+
+            const opacity = 1 - (index * 0.2);
+            svg.append("path")
+                .attr("d", pathData)
+                .attr("fill", fillColor)
+                .attr("fill-opacity", opacity)
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 0.5);
+
+            currentAngle = endAngle;
+        });
+    }
+
+    private createSparklineScales(data: number[], width: number, height: number, padding: number) {
         const xScale = scaleLinear()
             .domain([0, data.length - 1])
-            .range([config.padding, config.width - config.padding]);
+            .range([padding, width - padding]);
 
         const minValue = min(data) ?? 0;
         const maxValue = max(data) ?? 0;
         const yScale = scaleLinear()
             .domain([minValue, maxValue])
-            .range([config.height - config.padding, config.padding]);
+            .range([height - padding, padding]);
 
         return { xScale, yScale };
     }
@@ -200,7 +414,7 @@ export class Visual implements IVisual {
         scales: { xScale: d3.ScaleLinear<number, number>; yScale: d3.ScaleLinear<number, number> }
     ): string | null {
         const lineGenerator = line<number>()
-            .x((d, i) => scales.xScale(i))
+            .x((_d, i) => scales.xScale(i))
             .y(d => scales.yScale(d));
 
         return lineGenerator(data);
@@ -228,11 +442,6 @@ export class Visual implements IVisual {
         }
 
         return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    }
-
-    private getTextSize(dataView?: DataView): number {
-        const textSize = dataView?.metadata?.objects?.["general"]?.["textSize"];
-        return (textSize as number) ?? DEFAULT_TEXT_SIZE;
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {

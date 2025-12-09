@@ -1,29 +1,45 @@
+/* ============================================================================
+   Power BI Custom Visual: Table + Sparklines
+   Estilo basado en la tabla nativa de Power BI
+   Incluye animaciones, hover y microinteracciones
+============================================================================ */
+
 .pbi-table-container {
   width: 100%;
   height: 100%;
   overflow: auto;
+  background-color: transparent;
 }
 
+/* ===========================================================
+   TABLA BASE
+=========================================================== */
 .pbi-custom-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Segoe UI', 'wf_segoe-ui_normal', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-  font-size: 12px;
+  font-family: 'Segoe UI', sans-serif;
   color: #252423;
+  table-layout: auto;
+  border-spacing: 0;
+  transition: all 0.2s ease-in-out;
 
   th {
     background: #f3f2f1;
     border-bottom: 1px solid #e1dfdd;
     text-align: left;
     font-weight: 600;
-    padding: 6px 12px;
-    white-space: nowrap;
+    padding: 4px 8px;
+    color: #201f1e;
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
 
   td {
     border-bottom: 1px solid #e1dfdd;
-    padding: 6px 12px;
+    padding: 4px 8px;
     vertical-align: middle;
+    transition: background-color 0.15s ease-in-out;
   }
 
   tr:nth-child(even) {
@@ -32,9 +48,106 @@
 
   tr:hover {
     background: #edebe9;
+    transition: background-color 0.2s ease;
   }
 
-  svg {
-    display: block;
+  /* Última columna (sparklines) */
+  td.sparkline-cell {
+    width: 70px;
+    min-width: 70px;
+    text-align: center;
+    padding: 0;
   }
+}
+
+/* ===========================================================
+   SPARKLINES
+=========================================================== */
+.pbi-custom-table svg {
+  overflow: visible;
+  shape-rendering: geometricPrecision;
+  transition: all 0.2s ease-out;
+
+  path {
+    transition: stroke 0.25s ease, stroke-width 0.25s ease;
+  }
+
+  path:hover {
+    stroke-width: 2;
+    stroke: #005a9e;
+  }
+
+  circle {
+    transition: opacity 0.2s ease, r 0.2s ease;
+    opacity: 0;
+  }
+
+  /* Aparecen al pasar el mouse sobre la fila */
+  tr:hover & circle {
+    opacity: 1;
+  }
+
+  circle:hover {
+    r: 3;
+    fill: #004578;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVIDAD
+=========================================================== */
+@media (max-width: 600px) {
+  .pbi-custom-table {
+    font-size: 10px;
+
+    th,
+    td {
+      padding: 2px 4px;
+    }
+
+    td.sparkline-cell {
+      width: 50px;
+      min-width: 50px;
+    }
+  }
+}
+
+/* ===========================================================
+   SCROLL & SOMBRAS OPCIONALES
+=========================================================== */
+.pbi-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pbi-table-container::-webkit-scrollbar-thumb {
+  background-color: #c8c6c4;
+  border-radius: 4px;
+}
+
+.pbi-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #a19f9d;
+}
+
+.pbi-table-container::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* ===========================================================
+   ANIMACIÓN DE ENTRADA DE SPARKLINES
+   Dibujo progresivo tipo "chart reveal"
+=========================================================== */
+@keyframes sparkline-draw {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dasharray: 1000 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+.pbi-custom-table svg path {
+  animation: sparkline-draw 1.2s ease-out;
 }

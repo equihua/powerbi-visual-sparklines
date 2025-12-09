@@ -1,19 +1,45 @@
 {
     "dataRoles": [
         {
-      "name": "values",
-      "kind": "GroupingOrMeasure",
-      "displayName": "Columnas"
-    }
+            "name": "category",
+            "kind": "Grouping",
+            "displayName": "Categoría"
+        },
+        {
+            "name": "values",
+            "kind": "Measure",
+            "displayName": "Valores"
+        },
+        {
+            "name": "sparklineValues",
+            "kind": "Measure",
+            "displayName": "Valores Sparkline"
+        }
     ],
     "dataViewMappings": [
         {
-      "table": {
-        "rows": {
-          "select": [{ "for": { "in": "values" } }]
+            "table": {
+                "rows": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "category"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "values"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "sparklineValues"
+                            }
+                        }
+                    ]
+                }
+            }
         }
-      }
-    }
     ],
     "objects": {
         "general": {
@@ -21,7 +47,21 @@
             "properties": {
                 "textSize": {
                     "displayName": "Tamaño de texto",
-                    "type": { "formatting": { "fontSize": true } }
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "alternateRowColor": {
+                    "displayName": "Color de filas alternadas",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
                 }
             }
         }

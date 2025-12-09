@@ -26,26 +26,76 @@
 "use strict";
 
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import powerbi from "powerbi-visuals-api";
 
-import FormattingSettingsModel = formattingSettings.Model;
-// import FormattingSettingsCard = formattingSettings.Card;
-// import FormattingSettingsSlice = formattingSettings.Slice;
+export class GeneralSettings extends formattingSettings.SimpleCard {
+    textSize = new formattingSettings.NumUpDown({
+        name: "textSize",
+        displayName: "Tamaño de texto",
+        value: 12
+    });
 
-// TODO: fill all visual settings here
-// class DataPointCardSettings extends FormattingSettingsCard {
-//     fill = new formattingSettings.ColorPicker({
-//         name: "fill", // Property name from capabilities.json
-//         displayName: "Fill",
-//         value: { value: "#000000" }
-//     });
+    alternateRowColor = new formattingSettings.ColorPicker({
+        name: "alternateRowColor",
+        displayName: "Color de filas alternadas",
+        value: { value: "#faf9f8" }
+    });
 
-//     name: string = "dataPoint"; // Object name from capabilities.json
-//     displayName: string = "Data colors";
-//     slices: Array<FormattingSettingsSlice> = [this.fill];
-// }
+    name: string = "general";
+    displayName: string = "General";
+    slices = [this.textSize, this.alternateRowColor];
+}
 
-export class VisualFormattingSettingsModel extends FormattingSettingsModel {
-    // TODO: fill all visual settings here
-    // public dataPointCardSettings: FormattingSettingsCard = new DataPointCardSettings();
-    // cards = [this.dataPointCardSettings];
+export class SparklineColumnSettings extends formattingSettings.SimpleCard {
+    chartType = new formattingSettings.ItemDropdown({
+        name: "chartType",
+        displayName: "Tipo de gráfico",
+        items: [
+            { value: "line", displayName: "Línea" },
+            { value: "bar", displayName: "Barras" },
+            { value: "area", displayName: "Área" },
+            { value: "pie", displayName: "Circular" },
+            { value: "donut", displayName: "Anillo" }
+        ],
+        value: { value: "line", displayName: "Línea" }
+    });
+
+    color = new formattingSettings.ColorPicker({
+        name: "color",
+        displayName: "Color",
+        value: { value: "#0078D4" }
+    });
+
+    lineWidth = new formattingSettings.NumUpDown({
+        name: "lineWidth",
+        displayName: "Grosor de línea",
+        value: 1.5
+    });
+
+    name: string;
+    displayName: string;
+    slices = [this.chartType, this.color, this.lineWidth];
+
+    constructor(columnName: string, displayName: string) {
+        super();
+        this.name = columnName;
+        this.displayName = displayName;
+    }
+}
+
+export class VisualFormattingSettingsModel extends formattingSettings.Model {
+    general = new GeneralSettings();
+    sparklineCards: SparklineColumnSettings[] = [];
+
+    cards: formattingSettings.SimpleCard[] = [this.general];
+
+    populateSparklineCards(columns: powerbi.DataViewMetadataColumn[]): void {
+        this.sparklineCards = columns.map(col =>
+            new SparklineColumnSettings(
+                `sparkline_${col.queryName || col.displayName}`,
+                col.displayName
+            )
+        );
+        this.cards = [this.general, ...this.sparklineCards];
+    }
 }
