@@ -42,7 +42,7 @@ import IViewport = powerbi.IViewport;
 
 import { VisualFormattingSettingsModel } from "./settings";
 import { visualTransform } from "./visualTransform";
-import { TableViewModel, TableRowData } from "./visualViewModel";
+import { TableViewModel, TableRowData, SparklineDataPoint } from "./visualViewModel";
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
@@ -67,42 +67,51 @@ export class Visual implements IVisual {
             return;
         }
 
-        this.formattingSettings = new VisualFormattingSettingsModel();
-        this.formattingSettings.populateSparklineCards(viewModel.sparklineColumns);
+        if (!this.formattingSettings) {
+            this.formattingSettings = new VisualFormattingSettingsModel();
+            this.formattingSettings.populateSparklineCards(viewModel.sparklineColumns);
+        }
 
-        this.updateFormattingSettings(options);
+        const dataView = options.dataViews[0];
 
-        this.renderTable(viewModel, options.viewport);
-    }
+        if (dataView?.metadata?.objects) {
+            this.formattingSettings.sparklineCards.forEach(card => {
+                const cardSettings = dataView.metadata.objects[card.name];
+                if (cardSettings) {
+                    console.log(`Loading settings for ${card.name}:`, cardSettings);
 
-    private updateFormattingSettings(options: VisualUpdateOptions): void {
-        const dataView = options.dataViews?.[0];
-        if (!dataView) return;
+                    if (cardSettings["chartType"]) {
+                        card.chartType.value = cardSettings["chartType"] as any;
+                    }
+                    if (cardSettings["color"]) {
+                        card.color.value = cardSettings["color"] as any;
+                    }
+                    if (cardSettings["lineWidth"]) {
+                        card.lineWidth.value = cardSettings["lineWidth"] as number;
+                    }
+                }
+            });
 
-        if (dataView.metadata?.objects?.["general"]) {
-            const generalObj = dataView.metadata.objects["general"];
-            if (generalObj["textSize"]) {
-                this.formattingSettings.general.textSize.value = generalObj["textSize"] as number;
-            }
-            if (generalObj["alternateRowColor"]) {
-                this.formattingSettings.general.alternateRowColor.value = generalObj["alternateRowColor"] as any;
+            const generalSettings = dataView.metadata.objects["general"];
+            if (generalSettings) {
+                if (generalSettings["textSize"]) {
+                    this.formattingSettings.general.textSize.value = generalSettings["textSize"] as number;
+                }
+                if (generalSettings["alternateRowColor"]) {
+                    this.formattingSettings.general.alternateRowColor.value = generalSettings["alternateRowColor"] as any;
+                }
             }
         }
 
-        this.formattingSettings.sparklineCards.forEach(card => {
-            if (dataView.metadata?.objects?.[card.name]) {
-                const cardObj = dataView.metadata.objects[card.name];
-                if (cardObj["chartType"]) {
-                    card.chartType.value = cardObj["chartType"] as any;
-                }
-                if (cardObj["color"]) {
-                    card.color.value = cardObj["color"] as any;
-                }
-                if (cardObj["lineWidth"]) {
-                    card.lineWidth.value = cardObj["lineWidth"] as number;
-                }
-            }
-        });
+        console.log("Final formatting settings:", this.formattingSettings);
+        console.log("Sparkline cards after loading:", this.formattingSettings.sparklineCards.map(c => ({
+            name: c.name,
+            chartType: c.chartType.value,
+            color: c.color.value,
+            lineWidth: c.lineWidth.value
+        })));
+
+        this.renderTable(viewModel, options.viewport);
     }
 
     private clearContainer(): void {
@@ -175,44 +184,52 @@ export class Visual implements IVisual {
 
         rowData.sparklineColumns.forEach((sparklineData, sparklineIndex) => {
             const sparklineTd = tr.append("td");
-            if (sparklineData.values.length > 0) {
+            console.log(`Sparkline ${sparklineIndex}:`, sparklineData.dataPoints.length, "points", sparklineData.dataPoints);
+            if (sparklineData.dataPoints.length > 0) {
                 const settings = this.formattingSettings.sparklineCards[sparklineIndex];
-                this.renderSparkline(sparklineTd, sparklineData.values, settings);
+                console.log(`Rendering sparkline with settings:`, settings?.chartType?.value);
+                this.renderSparkline(sparklineTd, sparklineData.dataPoints, settings);
             }
         });
     }
 
     private renderSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
+        console.log("renderSparkline called with settings:", {
+            chartType: settings?.chartType?.value?.value,
+            color: settings?.color?.value?.value,
+            lineWidth: settings?.lineWidth?.value
+        });
+
         const chartType = settings?.chartType?.value?.value || "line";
 
         switch (chartType) {
             case "line":
-                this.renderLineSparkline(container, data, settings);
+                this.renderLineSparkline(container, dataPoints, settings);
                 break;
             case "bar":
-                this.renderBarSparkline(container, data, settings);
+                this.renderBarSparkline(container, dataPoints, settings);
                 break;
             case "area":
-                this.renderAreaSparkline(container, data, settings);
+                this.renderAreaSparkline(container, dataPoints, settings);
                 break;
             case "pie":
-                this.renderPieSparkline(container, data, settings);
+                this.renderPieSparkline(container, dataPoints, settings);
                 break;
             case "donut":
-                this.renderDonutSparkline(container, data, settings);
+                this.renderDonutSparkline(container, dataPoints, settings);
                 break;
             default:
-                this.renderLineSparkline(container, data, settings);
+                this.renderLineSparkline(container, dataPoints, settings);
         }
     }
 
     private renderLineSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
         const width = 60;
@@ -221,11 +238,14 @@ export class Visual implements IVisual {
         const strokeColor = settings?.color?.value?.value || "#0078D4";
         const strokeWidth = settings?.lineWidth?.value || 1.5;
 
+        console.log("renderLineSparkline - strokeColor:", strokeColor, "strokeWidth:", strokeWidth);
+
         const svg = container
             .append("svg")
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const scales = this.createSparklineScales(data, width, height, padding);
         const pathData = this.generateSparklinePath(data, scales);
 
@@ -238,7 +258,7 @@ export class Visual implements IVisual {
 
     private renderBarSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
         const width = 60;
@@ -251,6 +271,7 @@ export class Visual implements IVisual {
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const xScale = scaleLinear()
             .domain([0, data.length])
             .range([padding, width - padding]);
@@ -274,7 +295,7 @@ export class Visual implements IVisual {
 
     private renderAreaSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
         const width = 60;
@@ -288,6 +309,7 @@ export class Visual implements IVisual {
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const scales = this.createSparklineScales(data, width, height, padding);
 
         const areaPoints = data.map((d, i) =>
@@ -307,7 +329,7 @@ export class Visual implements IVisual {
 
     private renderPieSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
         const size = 20;
@@ -319,6 +341,7 @@ export class Visual implements IVisual {
             .attr("width", size)
             .attr("height", size);
 
+        const data = dataPoints.map(d => d.y);
         const total = data.reduce((sum, val) => sum + val, 0);
         let currentAngle = 0;
 
@@ -349,7 +372,7 @@ export class Visual implements IVisual {
 
     private renderDonutSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
+        dataPoints: SparklineDataPoint[],
         settings: any
     ): void {
         const size = 20;
@@ -362,6 +385,7 @@ export class Visual implements IVisual {
             .attr("width", size)
             .attr("height", size);
 
+        const data = dataPoints.map(d => d.y);
         const total = data.reduce((sum, val) => sum + val, 0);
         let currentAngle = 0;
 

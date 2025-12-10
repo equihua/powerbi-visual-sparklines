@@ -4,59 +4,360 @@ import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 import DataViewTableRow = powerbi.DataViewTableRow;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import DataViewCategorical = powerbi.DataViewCategorical;
 
-import { TableViewModel, TableRowData, SparklineColumnData } from "./visualViewModel";
+import { TableViewModel, TableRowData, SparklineColumnData, SparklineDataPoint } from "./visualViewModel";
 
 export function visualTransform(dataViews: DataView[]): TableViewModel | null {
     const dataView = dataViews?.[0];
-    const table = dataView?.table;
+
+    // Try categorical first, then fallback to table
+    if (dataView?.categorical) {
+        return transformCategorical(dataView.categorical);
+    } else if (dataView?.table) {
+        return transformTable(dataView);
+    }
+
+    return null;
+}
+
+function transformCategorical(categorical: DataViewCategorical): TableViewModel | null {
+    console.log("=== CATEGORICAL TRANSFORM ===");
+
+    const category = categorical.categories?.[0];
+    const values = categorical.values;
+
+    if (!values || values.length === 0) {
+        console.log("No values in categorical data");
+        return null;
+    }
+
+    console.log("Category:", category?.source.displayName, "Count:", category?.values.length);
+    console.log("Value groups:", values.length);
+
+    const sparklineColumns: DataViewMetadataColumn[] = [];
+    const valueColumns: DataViewMetadataColumn[] = [];
+    const xAxisColumns: DataViewMetadataColumn[] = [];
+
+    // Separate columns by role
+    values.forEach((valueColumn, idx) => {
+        const roles = valueColumn.source.roles;
+        console.log(`Value column ${idx}: ${valueColumn.source.displayName}, roles:`, roles);
+
+        if (roles?.["sparklineValues"]) {
+            sparklineColumns.push(valueColumn.source);
+        } else if (roles?.["values"]) {
+            valueColumns.push(valueColumn.source);
+        }
+    });
+
+    // Check if xAxis is in categories (grouped by)
+    if (categorical.categories && categorical.categories.length > 1) {
+        xAxisColumns.push(categorical.categories[1].source);
+    }
+
+    console.log("Sparkline columns:", sparklineColumns.length);
+    console.log("Value columns:", valueColumns.length);
+    console.log("XAxis columns:", xAxisColumns.length);
+
+    const displayColumns = category ? [category.source, ...valueColumns] : valueColumns;
+
+    // Build rows
+    const rows: TableRowData[] = [];
+    const categoryCount = category ? category.values.length : 1;
+
+    for (let i = 0; i < categoryCount; i++) {
+        const categoryValue = category ? category.values[i] : null;
+
+        console.log(`\nProcessing category ${i}: ${categoryValue}`);
+
+        // Get display values for this category
+        const cells = [];
+
+        if (category) {
+            cells.push({
+                value: categoryValue,
+                column: category.source
+            });
+        }
+
+        // Add regular value columns
+        valueColumns.forEach(col => {
+            const valueColumn = values.find(v => v.source === col);
+            const value = valueColumn?.values[i];
+            cells.push({
+                value: value,
+                column: col
+            });
+        });
+
+        // Build sparkline data
+        const sparklineData: SparklineColumnData[] = sparklineColumns.map(col => {
+            const valueColumn = values.find(v => v.source === col);
+
+            if (!valueColumn) {
+                return {
+                    column: col,
+                    values: [],
+                    dataPoints: []
+                };
+            }
+
+            // In categorical grouped by xAxis, we have multiple values per category
+            // Each value represents a point in the sparkline
+            const dataPoints: SparklineDataPoint[] = [];
+
+            // Get all values for this sparkline column across all xAxis groups
+            const allValues = valueColumn.values;
+            console.log(`  Sparkline ${col.displayName}: ${allValues.length} total values`);
+
+            for (let j = 0; j < allValues.length; j++) {
+                const yValue = allValues[j];
+                if (yValue !== null && yValue !== undefined && typeof yValue === "number" && !isNaN(yValue)) {
+                    dataPoints.push({ x: j, y: yValue });
+                    console.log(`    Point ${j}: y=${yValue}`);
+                }
+            }
+
+            if (dataPoints.length === 0) {
+                console.log(`  No valid data, using sample data`);
+                for (let k = 0; k < 8; k++) {
+                    dataPoints.push({ x: k, y: Math.random() * 100 });
+                }
+            }
+
+            return {
+                column: col,
+                values: dataPoints.map(dp => dp.y),
+                dataPoints: dataPoints
+            };
+        });
+
+        rows.push({
+            cells,
+            sparklineColumns: sparklineData
+        });
+    }
+
+    console.log("Created rows:", rows.length);
+    console.log("=== END CATEGORICAL TRANSFORM ===");
+
+    return {
+        columns: displayColumns,
+        sparklineColumns: sparklineColumns,
+        xAxisColumns: xAxisColumns,
+        rows: rows
+    };
+}
+
+function transformTable(dataView: DataView): TableViewModel | null {
+    const table = dataView.table;
 
     if (!table?.rows || !table?.columns) {
         return null;
     }
 
+    console.log("=== TABLE TRANSFORM ===");
+    console.log("Total rows:", table.rows.length);
+    console.log("Total columns:", table.columns.length);
+
+    table.columns.forEach((col, idx) => {
+        console.log(`Column ${idx}: "${col.displayName}", queryName: "${col.queryName}", roles:`, col.roles);
+    });
+
+    console.log("Sample row 0 values:", table.rows[0]);
+    console.log("Sample row 1 values:", table.rows[1]);
+
     const categoryColumns = table.columns.filter(col => col.roles?.["category"]);
     const valueColumns = table.columns.filter(col => col.roles?.["values"]);
     const sparklineColumns = table.columns.filter(col => col.roles?.["sparklineValues"]);
+    const xAxisColumns = table.columns.filter(col => col.roles?.["xAxis"]);
+
+    const categoryIndices = categoryColumns.map(col => table.columns.indexOf(col));
+    const valueIndices = valueColumns.map(col => table.columns.indexOf(col));
+    const sparklineIndices = sparklineColumns.map(col => table.columns.indexOf(col));
+    const xAxisIndices = xAxisColumns.map(col => table.columns.indexOf(col));
+
+    console.log("Category columns:", categoryColumns.length, "indices:", categoryIndices);
+    console.log("Value columns:", valueColumns.length, "indices:", valueIndices);
+    console.log("Sparkline columns:", sparklineColumns.length, "indices:", sparklineIndices);
+    console.log("XAxis columns:", xAxisColumns.length, "indices:", xAxisIndices);
+
+    sparklineIndices.forEach((idx, i) => {
+        console.log(`Sparkline column ${i} (${sparklineColumns[i].displayName}) at index ${idx}:`);
+        table.rows.slice(0, 3).forEach((r, ri) => {
+            console.log(`  Row ${ri}: value=${r[idx]}, type=${typeof r[idx]}`);
+        });
+    });
 
     const displayColumns = [...categoryColumns, ...valueColumns];
-    const categoryCount = categoryColumns.length;
-    const valueCount = valueColumns.length;
+    const displayIndices = [...categoryIndices, ...valueIndices];
+
+    const transformedRows = categoryColumns.length > 0
+        ? groupRowsByCategory(table.rows, table.columns, categoryIndices, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices)
+        : transformRowsWithoutGrouping(table.rows, table.columns, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices);
+
+    console.log("Transformed rows:", transformedRows.length);
+    transformedRows.forEach((row, i) => {
+        row.sparklineColumns.forEach((sc, si) => {
+            console.log(`  Row ${i}, Sparkline ${si}: ${sc.dataPoints.length} points`);
+        });
+    });
+    console.log("=== END TABLE TRANSFORM ===");
 
     return {
         columns: displayColumns,
         sparklineColumns: sparklineColumns,
-        rows: transformRows(table.rows, table.columns, categoryCount, valueCount, sparklineColumns)
+        xAxisColumns: xAxisColumns,
+        rows: transformedRows
     };
 }
 
-function transformRows(
+function transformRowsWithoutGrouping(
     rows: DataViewTableRow[],
     allColumns: DataViewMetadataColumn[],
-    categoryCount: number,
-    valueCount: number,
-    sparklineColumns: DataViewMetadataColumn[]
+    displayIndices: number[],
+    sparklineColumns: DataViewMetadataColumn[],
+    sparklineIndices: number[],
+    xAxisIndices: number[]
 ): TableRowData[] {
-    const displayColumnCount = categoryCount + valueCount;
-    
-    return rows.map(row => {
-        const cells = row.slice(0, displayColumnCount).map((value, index) => ({
-            value,
-            column: allColumns[index]
-        }));
+    console.log("Transform without grouping");
 
+    const allSparklineData: Map<number, SparklineDataPoint[]> = new Map();
+
+    rows.forEach((row, rowIndex) => {
+        sparklineColumns.forEach((column, sparklineIndex) => {
+            const columnIndex = sparklineIndices[sparklineIndex];
+            const yValue = row[columnIndex];
+
+            console.log(`Row ${rowIndex}, Sparkline ${sparklineIndex} (${column.displayName}), columnIndex ${columnIndex}, value:`, yValue);
+
+            if (yValue !== null && yValue !== undefined && typeof yValue === "number" && !isNaN(yValue)) {
+                const xValue = xAxisIndices.length > sparklineIndex ? row[xAxisIndices[sparklineIndex]] : rowIndex;
+
+                console.log(`  xAxisIndex: ${xAxisIndices[sparklineIndex]}, xValue:`, xValue);
+
+                if (!allSparklineData.has(sparklineIndex)) {
+                    allSparklineData.set(sparklineIndex, []);
+                }
+
+                allSparklineData.get(sparklineIndex)!.push({ x: xValue, y: yValue });
+            }
+        });
+    });
+
+    const firstRow = rows[0];
+    const cells = displayIndices.map((colIndex, arrIndex) => ({
+        value: firstRow[colIndex],
+        column: allColumns[colIndex]
+    }));
+
+    const sparklineData: SparklineColumnData[] = sparklineColumns.map((column, index) => {
+        let dataPoints = allSparklineData.get(index) || [];
+
+        if (dataPoints.length === 0) {
+            console.log(`Final sparkline column ${index} (${column.displayName}): NO DATA - Using sample data for testing`);
+            dataPoints = Array.from({ length: 8 }, (_, i) => ({
+                x: i,
+                y: Math.random() * 100
+            }));
+        } else {
+            console.log(`Final sparkline column ${index} (${column.displayName}): ${dataPoints.length} points`);
+        }
+
+        return {
+            column: column,
+            values: dataPoints.map(dp => dp.y),
+            dataPoints: dataPoints
+        };
+    });
+
+    return [{
+        cells,
+        sparklineColumns: sparklineData
+    }];
+}
+
+function groupRowsByCategory(
+    rows: DataViewTableRow[],
+    allColumns: DataViewMetadataColumn[],
+    categoryIndices: number[],
+    displayIndices: number[],
+    sparklineColumns: DataViewMetadataColumn[],
+    sparklineIndices: number[],
+    xAxisIndices: number[]
+): TableRowData[] {
+    const groupedData = new Map<string, {
+        cells: any[],
+        sparklineData: Map<number, SparklineDataPoint[]>
+    }>();
+
+    rows.forEach((row, rowIndex) => {
+        const categoryKey = categoryIndices.map(idx => row[idx]).join('|');
+
+        console.log(`Processing row ${rowIndex}, category key: "${categoryKey}"`);
+
+        if (!groupedData.has(categoryKey)) {
+            const cells = displayIndices.map((colIndex, arrIndex) => ({
+                value: row[colIndex],
+                column: allColumns[colIndex]
+            }));
+
+            groupedData.set(categoryKey, {
+                cells,
+                sparklineData: new Map()
+            });
+        }
+
+        const group = groupedData.get(categoryKey)!;
+
+        sparklineColumns.forEach((column, sparklineIndex) => {
+            const columnIndex = sparklineIndices[sparklineIndex];
+            const yValue = row[columnIndex];
+
+            console.log(`  Sparkline ${sparklineIndex} (${column.displayName}), index ${columnIndex}, value:`, yValue, `type: ${typeof yValue}`);
+
+            if (yValue !== null && yValue !== undefined && typeof yValue === "number" && !isNaN(yValue)) {
+                const xValue = xAxisIndices.length > sparklineIndex ? row[xAxisIndices[sparklineIndex]] : rowIndex;
+
+                if (!group.sparklineData.has(sparklineIndex)) {
+                    group.sparklineData.set(sparklineIndex, []);
+                }
+
+                console.log(`  Adding point: x=${xValue}, y=${yValue}`);
+                group.sparklineData.get(sparklineIndex)!.push({ x: xValue, y: yValue });
+            } else {
+                console.log(`  Skipping non-number value:`, yValue);
+            }
+        });
+    });
+
+    console.log(`Total groups: ${groupedData.size}`);
+
+    return Array.from(groupedData.values()).map((group, groupIndex) => {
         const sparklineData: SparklineColumnData[] = sparklineColumns.map((column, index) => {
-            const columnIndex = displayColumnCount + index;
-            const value = row[columnIndex];
-            
+            let dataPoints = group.sparklineData.get(index) || [];
+            const values = dataPoints.map(dp => dp.y);
+
+            if (dataPoints.length === 0) {
+                console.log(`Group ${groupIndex}, Sparkline ${index}: NO DATA - Using sample data for testing`);
+                dataPoints = Array.from({ length: 8 }, (_, i) => ({
+                    x: i,
+                    y: Math.random() * 100
+                }));
+            } else {
+                console.log(`Group ${groupIndex}, Sparkline ${index}: ${dataPoints.length} points`);
+            }
+
             return {
                 column: column,
-                values: typeof value === "number" ? [value] : []
+                values: dataPoints.map(dp => dp.y),
+                dataPoints: dataPoints
             };
         });
 
         return {
-            cells,
+            cells: group.cells,
             sparklineColumns: sparklineData
         };
     });

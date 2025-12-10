@@ -90,12 +90,15 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
     cards: formattingSettings.SimpleCard[] = [this.general];
 
     populateSparklineCards(columns: powerbi.DataViewMetadataColumn[]): void {
-        this.sparklineCards = columns.map(col =>
-            new SparklineColumnSettings(
-                `sparkline_${col.queryName || col.displayName}`,
-                col.displayName
-            )
-        );
-        this.cards = [this.general, ...this.sparklineCards];
+        if (this.sparklineCards.length === 0 || this.sparklineCards.length !== columns.length) {
+            this.sparklineCards = columns.map(col => {
+                const cardName = `sparkline_${col.queryName || col.displayName}`;
+                console.log(`Creating sparkline card: ${cardName} for column: ${col.displayName}`);
+                return new SparklineColumnSettings(cardName, col.displayName);
+            });
+
+            this.cards = [this.general, ...this.sparklineCards];
+            console.log("Sparkline cards created:", this.sparklineCards.map(c => c.name));
+        }
     }
 }

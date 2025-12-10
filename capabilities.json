@@ -3,40 +3,48 @@
         {
             "name": "category",
             "kind": "Grouping",
-            "displayName": "Categoría"
+            "displayName": "Renglones"
         },
         {
             "name": "values",
             "kind": "Measure",
-            "displayName": "Valores"
+            "displayName": "Columnas"
         },
         {
             "name": "sparklineValues",
             "kind": "Measure",
-            "displayName": "Valores Sparkline"
+            "displayName": "Columnas Sparkline"
+        },
+        {
+            "name": "xAxis",
+            "kind": "Grouping",
+            "displayName": "Eje X"
         }
     ],
     "dataViewMappings": [
         {
-            "table": {
-                "rows": {
-                    "select": [
-                        {
-                            "for": {
-                                "in": "category"
-                            }
-                        },
-                        {
-                            "for": {
-                                "in": "values"
-                            }
-                        },
-                        {
-                            "for": {
-                                "in": "sparklineValues"
-                            }
-                        }
-                    ]
+            "conditions": [
+                {
+                    "category": { "max": 1 },
+                    "values": { "min": 0 },
+                    "sparklineValues": { "min": 0 },
+                    "xAxis": { "max": 1 }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": { "in": "category" },
+                    "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                },
+                "values": {
+                    "group": {
+                        "by": "xAxis",
+                        "select": [
+                            { "for": { "in": "values" } },
+                            { "for": { "in": "sparklineValues" } }
+                        ],
+                        "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                    }
                 }
             }
         }
