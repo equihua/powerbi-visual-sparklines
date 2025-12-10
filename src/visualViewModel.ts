@@ -6,9 +6,15 @@ export interface TableCellData {
     column: DataViewMetadataColumn;
 }
 
+export interface SparklineDataPoint {
+    x: any;
+    y: number;
+}
+
 export interface SparklineColumnData {
     column: DataViewMetadataColumn;
     values: number[];
+    dataPoints: SparklineDataPoint[];
 }
 
 export interface TableRowData {
@@ -19,5 +25,6 @@ export interface TableRowData {
 export interface TableViewModel {
     columns: DataViewMetadataColumn[];
     sparklineColumns: DataViewMetadataColumn[];
+    xAxisColumns: DataViewMetadataColumn[];
     rows: TableRowData[];
 }

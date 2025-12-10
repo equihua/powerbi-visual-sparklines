@@ -33,31 +33,45 @@ import { min, max } from "d3-array";
 import "./../style/visual.less";
 
 import powerbi from "powerbi-visuals-api";
-import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IViewport = powerbi.IViewport;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
+import VisualObjectInstance = powerbi.VisualObjectInstance;
+import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
 
-import { VisualFormattingSettingsModel } from "./settings";
+import { SparklineColumnSettings } from "./settings";
 import { visualTransform } from "./visualTransform";
-import { TableViewModel, TableRowData } from "./visualViewModel";
+import { TableViewModel, TableRowData, SparklineDataPoint } from "./visualViewModel";
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 export class Visual implements IVisual {
     private readonly target: HTMLElement;
     private readonly container: Selection<HTMLDivElement>;
-    private readonly formattingSettingsService: FormattingSettingsService;
-    private formattingSettings: VisualFormattingSettingsModel;
+    private host: IVisualHost;
+    private sparklineColumns: powerbi.DataViewMetadataColumn[] = [];
+    private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
+    private generalSettings: {
+        textSize: number;
+        alternateRowColor: boolean;
+    };
+    private currentSelectedColumn: string = "";
 
     constructor(options: VisualConstructorOptions) {
-        this.formattingSettingsService = new FormattingSettingsService();
+        this.host = options.host;
         this.target = options.element;
         this.container = select(this.target)
             .append("div")
             .classed("pbi-table-container", true);
+
+        this.generalSettings = {
+            textSize: 12,
+            alternateRowColor: true
+        };
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -67,42 +81,65 @@ export class Visual implements IVisual {
             return;
         }
 
-        this.formattingSettings = new VisualFormattingSettingsModel();
-        this.formattingSettings.populateSparklineCards(viewModel.sparklineColumns);
+        const dataView = options.dataViews[0];
+        this.sparklineColumns = viewModel.sparklineColumns;
 
-        this.updateFormattingSettings(options);
-
-        this.renderTable(viewModel, options.viewport);
-    }
-
-    private updateFormattingSettings(options: VisualUpdateOptions): void {
-        const dataView = options.dataViews?.[0];
-        if (!dataView) return;
-
-        if (dataView.metadata?.objects?.["general"]) {
-            const generalObj = dataView.metadata.objects["general"];
-            if (generalObj["textSize"]) {
-                this.formattingSettings.general.textSize.value = generalObj["textSize"] as number;
+        if (dataView?.metadata?.objects) {
+            const generalObjects = dataView.metadata.objects["general"];
+            if (generalObjects) {
+                if (generalObjects["textSize"] !== undefined) {
+                    this.generalSettings.textSize = generalObjects["textSize"] as number;
+                }
+                if (generalObjects["alternateRowColor"] !== undefined) {
+                    this.generalSettings.alternateRowColor = generalObjects["alternateRowColor"] as boolean;
+                }
             }
-            if (generalObj["alternateRowColor"]) {
-                this.formattingSettings.general.alternateRowColor.value = generalObj["alternateRowColor"] as any;
+
+            const sparklineObjects = dataView.metadata.objects["sparklineSettings"];
+            if (sparklineObjects && sparklineObjects["selectedColumn"]) {
+                this.currentSelectedColumn = sparklineObjects["selectedColumn"] as string;
+            } else if (!this.currentSelectedColumn && this.sparklineColumns.length > 0) {
+                this.currentSelectedColumn = this.sparklineColumns[0].queryName || this.sparklineColumns[0].displayName || "";
             }
+        } else if (!this.currentSelectedColumn && this.sparklineColumns.length > 0) {
+            this.currentSelectedColumn = this.sparklineColumns[0].queryName || this.sparklineColumns[0].displayName || "";
         }
 
-        this.formattingSettings.sparklineCards.forEach(card => {
-            if (dataView.metadata?.objects?.[card.name]) {
-                const cardObj = dataView.metadata.objects[card.name];
-                if (cardObj["chartType"]) {
-                    card.chartType.value = cardObj["chartType"] as any;
+        viewModel.sparklineColumns.forEach((column) => {
+            const columnKey = column.queryName || column.displayName || "";
+            const columnObjects = column.objects;
+
+            if (columnObjects && columnObjects["sparklineColumn"]) {
+                const sparklineObj = columnObjects["sparklineColumn"];
+
+                const settings: SparklineColumnSettings = {
+                    chartType: "line",
+                    color: "#0078D4",
+                    lineWidth: 1.5
+                };
+
+                if (sparklineObj["chartType"]) {
+                    settings.chartType = sparklineObj["chartType"] as string;
                 }
-                if (cardObj["color"]) {
-                    card.color.value = cardObj["color"] as any;
+                if (sparklineObj["color"]) {
+                    const colorValue = sparklineObj["color"] as any;
+                    settings.color = colorValue.solid?.color || colorValue;
                 }
-                if (cardObj["lineWidth"]) {
-                    card.lineWidth.value = cardObj["lineWidth"] as number;
+                if (sparklineObj["lineWidth"]) {
+                    settings.lineWidth = sparklineObj["lineWidth"] as number;
                 }
+
+                this.sparklineSettings.set(columnKey, settings);
+            } else if (!this.sparklineSettings.has(columnKey)) {
+                this.sparklineSettings.set(columnKey, {
+                    chartType: "line",
+                    color: "#0078D4",
+                    lineWidth: 1.5
+                });
             }
         });
+
+        this.renderTable(viewModel, options.viewport);
     }
 
     private clearContainer(): void {
@@ -112,7 +149,7 @@ export class Visual implements IVisual {
     private renderTable(viewModel: TableViewModel, viewport: IViewport): void {
         this.clearContainer();
 
-        const textSize = this.formattingSettings.general.textSize.value;
+        const textSize = this.generalSettings.textSize;
         const tableElement = this.createTableElement(textSize, viewport);
         this.renderTableHeader(tableElement, viewModel.columns, viewModel.sparklineColumns);
         this.renderTableBody(tableElement, viewModel.rows);
@@ -149,10 +186,10 @@ export class Visual implements IVisual {
         rows: TableRowData[]
     ): void {
         const tbody = tableElement.append("tbody");
-        const alternateColor = this.formattingSettings.general.alternateRowColor.value.value;
+        const useAlternateColor = this.generalSettings.alternateRowColor;
 
         rows.forEach((rowData, index) => {
-            this.renderTableRow(tbody, rowData, index, alternateColor);
+            this.renderTableRow(tbody, rowData, index, useAlternateColor);
         });
     }
 
@@ -160,12 +197,12 @@ export class Visual implements IVisual {
         tbody: Selection<HTMLTableSectionElement>,
         rowData: TableRowData,
         index: number,
-        alternateColor: string
+        useAlternateColor: boolean
     ): void {
         const tr = tbody.append("tr");
 
-        if (index % 2 === 1) {
-            tr.style("background-color", alternateColor);
+        if (useAlternateColor && index % 2 === 1) {
+            tr.style("background-color", "#f0f0f0");
         }
 
         rowData.cells.forEach(cell => {
@@ -175,57 +212,63 @@ export class Visual implements IVisual {
 
         rowData.sparklineColumns.forEach((sparklineData, sparklineIndex) => {
             const sparklineTd = tr.append("td");
-            if (sparklineData.values.length > 0) {
-                const settings = this.formattingSettings.sparklineCards[sparklineIndex];
-                this.renderSparkline(sparklineTd, sparklineData.values, settings);
+            if (sparklineData.dataPoints.length > 0) {
+                const seriesKey = sparklineData.column.queryName || sparklineData.column.displayName || `column${sparklineIndex}`;
+                const settings = this.sparklineSettings.get(seriesKey) || {
+                    chartType: "line",
+                    color: "#0078D4",
+                    lineWidth: 1.5
+                };
+                this.renderSparkline(sparklineTd, sparklineData.dataPoints, settings);
             }
         });
     }
 
     private renderSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
-        const chartType = settings?.chartType?.value?.value || "line";
+        const chartType = settings.chartType || "line";
 
         switch (chartType) {
             case "line":
-                this.renderLineSparkline(container, data, settings);
+                this.renderLineSparkline(container, dataPoints, settings);
                 break;
             case "bar":
-                this.renderBarSparkline(container, data, settings);
+                this.renderBarSparkline(container, dataPoints, settings);
                 break;
             case "area":
-                this.renderAreaSparkline(container, data, settings);
+                this.renderAreaSparkline(container, dataPoints, settings);
                 break;
             case "pie":
-                this.renderPieSparkline(container, data, settings);
+                this.renderPieSparkline(container, dataPoints, settings);
                 break;
             case "donut":
-                this.renderDonutSparkline(container, data, settings);
+                this.renderDonutSparkline(container, dataPoints, settings);
                 break;
             default:
-                this.renderLineSparkline(container, data, settings);
+                this.renderLineSparkline(container, dataPoints, settings);
         }
     }
 
     private renderLineSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
         const width = 60;
         const height = 20;
         const padding = 2;
-        const strokeColor = settings?.color?.value?.value || "#0078D4";
-        const strokeWidth = settings?.lineWidth?.value || 1.5;
+        const strokeColor = settings.color || "#0078D4";
+        const strokeWidth = settings.lineWidth || 1.5;
 
         const svg = container
             .append("svg")
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const scales = this.createSparklineScales(data, width, height, padding);
         const pathData = this.generateSparklinePath(data, scales);
 
@@ -238,19 +281,20 @@ export class Visual implements IVisual {
 
     private renderBarSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
         const width = 60;
         const height = 20;
         const padding = 2;
-        const fillColor = settings?.color?.value?.value || "#0078D4";
+        const fillColor = settings.color || "#0078D4";
 
         const svg = container
             .append("svg")
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const xScale = scaleLinear()
             .domain([0, data.length])
             .range([padding, width - padding]);
@@ -274,20 +318,21 @@ export class Visual implements IVisual {
 
     private renderAreaSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
         const width = 60;
         const height = 20;
         const padding = 2;
-        const fillColor = settings?.color?.value?.value || "#0078D4";
-        const strokeWidth = settings?.lineWidth?.value || 1.5;
+        const fillColor = settings.color || "#0078D4";
+        const strokeWidth = settings.lineWidth || 1.5;
 
         const svg = container
             .append("svg")
             .attr("width", width)
             .attr("height", height);
 
+        const data = dataPoints.map(d => d.y);
         const scales = this.createSparklineScales(data, width, height, padding);
 
         const areaPoints = data.map((d, i) =>
@@ -307,18 +352,19 @@ export class Visual implements IVisual {
 
     private renderPieSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
         const size = 20;
         const radius = size / 2 - 2;
-        const fillColor = settings?.color?.value?.value || "#0078D4";
+        const fillColor = settings.color || "#0078D4";
 
         const svg = container
             .append("svg")
             .attr("width", size)
             .attr("height", size);
 
+        const data = dataPoints.map(d => d.y);
         const total = data.reduce((sum, val) => sum + val, 0);
         let currentAngle = 0;
 
@@ -349,19 +395,20 @@ export class Visual implements IVisual {
 
     private renderDonutSparkline(
         container: Selection<HTMLTableCellElement>,
-        data: number[],
-        settings: any
+        dataPoints: SparklineDataPoint[],
+        settings: SparklineColumnSettings
     ): void {
         const size = 20;
         const outerRadius = size / 2 - 2;
         const innerRadius = outerRadius * 0.5;
-        const fillColor = settings?.color?.value?.value || "#0078D4";
+        const fillColor = settings.color || "#0078D4";
 
         const svg = container
             .append("svg")
             .attr("width", size)
             .attr("height", size);
 
+        const data = dataPoints.map(d => d.y);
         const total = data.reduce((sum, val) => sum + val, 0);
         let currentAngle = 0;
 
@@ -444,7 +491,54 @@ export class Visual implements IVisual {
         return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
     }
 
-    public getFormattingModel(): powerbi.visuals.FormattingModel {
-        return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
+    public enumerateObjectInstances(options: powerbi.EnumerateVisualObjectInstancesOptions): powerbi.VisualObjectInstanceEnumeration {
+        const objectName = options.objectName;
+        const instances: powerbi.VisualObjectInstance[] = [];
+
+        if (objectName === "general") {
+            instances.push({
+                objectName: objectName,
+                properties: {
+                    textSize: this.generalSettings.textSize,
+                    alternateRowColor: this.generalSettings.alternateRowColor
+                },
+                selector: null
+            });
+            return instances;
+        }
+
+        if (objectName === "sparklineColumn") {
+            this.sparklineColumns.forEach((column, index) => {
+                const columnKey = column.queryName || column.displayName || `column${index}`;
+                const settings = this.sparklineSettings.get(columnKey) || {
+                    chartType: "line",
+                    color: "#0078D4",
+                    lineWidth: 1.5
+                };
+
+                const selector: powerbi.data.Selector = {
+                    metadata: columnKey
+                };
+
+                instances.push({
+                    objectName: objectName,
+                    displayName: column.displayName || `Columna ${index + 1}`,
+                    selector: selector,
+                    properties: {
+                        chartType: settings.chartType,
+                        color: {
+                            solid: {
+                                color: settings.color
+                            }
+                        },
+                        lineWidth: settings.lineWidth
+                    }
+                });
+            });
+
+            return instances;
+        }
+
+        return [];
     }
 }
