@@ -8,6 +8,7 @@ interface CellData {
 
 interface TableCellProps {
     cell: CellData;
+    width?: number;
 }
 
 const formatValue = (value: any, column: powerbi.DataViewMetadataColumn): string => {
@@ -34,7 +35,17 @@ const formatNumericValue = (value: number, format?: string): string => {
     return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 };
 
-export const TableCell: React.FC<TableCellProps> = ({ cell }) => {
+export const TableCell: React.FC<TableCellProps> = ({ cell, width }) => {
     const formattedValue = formatValue(cell.value, cell.column);
-    return <td>{formattedValue}</td>;
+    return (
+        <td style={{
+            width: width ? `${width}px` : 'auto',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            padding: '8px 12px'
+        }}>
+            {formattedValue}
+        </td>
+    );
 };

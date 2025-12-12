@@ -1,52 +1,74 @@
 {
     "dataRoles": [
         {
-            "name": "category",
-            "kind": "Grouping",
-            "displayName": "Renglones"
+            "displayName": "Category",
+            "name": "mainCategory",
+            "kind": "Grouping"
         },
         {
-            "name": "values",
-            "kind": "Measure",
-            "displayName": "Columnas"
+            "displayName": "Minigraph Axis",
+            "name": "axis",
+            "kind": "Grouping"
         },
         {
-            "name": "sparklineValues",
-            "kind": "Measure",
-            "displayName": "Columnas Sparkline"
+            "displayName": "Measure Data",
+            "name": "measure",
+            "kind": "Measure"
         },
         {
-            "name": "xAxis",
-            "kind": "Grouping",
-            "displayName": "Eje X"
+            "displayName": "Minigraph Values",
+            "name": "sparklines",
+            "kind": "Measure"
         }
     ],
     "dataViewMappings": [
         {
-            "conditions": [
-                {
-                    "category": { "max": 1 },
-                    "values": { "min": 0 },
-                    "sparklineValues": { "min": 0 },
-                    "xAxis": { "max": 1 }
-                }
-            ],
             "categorical": {
                 "categories": {
-                    "for": { "in": "category" },
-                    "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                    "for": {
+                        "in": "mainCategory"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 1000
+                        }
+                    }
                 },
                 "values": {
                     "group": {
-                        "by": "xAxis",
+                        "by": "axis",
                         "select": [
-                            { "for": { "in": "values" } },
-                            { "for": { "in": "sparklineValues" } }
-                        ],
-                        "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "sparklines"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "dataVolume": 4
+            },
+            "conditions": [
+                {
+                    "mainCategory": {
+                        "max": 1
+                    },
+                    "axis": {
+                        "max": 1
+                    },
+                    "measure": {
+                        "max": 10
+                    },
+                    "sparklines": {
+                        "max": 5
                     }
                 }
-            }
+            ]
         }
     ],
     "objects": {
@@ -65,6 +87,41 @@
                     "displayName": "Color de filas alternadas",
                     "type": {
                         "bool": true
+                    }
+                }
+            }
+        },
+        "tableFeatures": {
+            "displayName": "Características de tabla",
+            "properties": {
+                "enableFilters": {
+                    "displayName": "Habilitar filtros",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "enablePagination": {
+                    "displayName": "Habilitar paginación",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "enableSorting": {
+                    "displayName": "Habilitar ordenamiento",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "enableColumnResize": {
+                    "displayName": "Habilitar redimensión de columnas",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "initialPageSize": {
+                    "displayName": "Tamaño de página inicial",
+                    "type": {
+                        "numeric": true
                     }
                 }
             }
@@ -118,5 +175,19 @@
             }
         }
     },
+    "sorting": {
+        "implicit": {
+            "clauses": [
+                {
+                    "role": "mainCategory",
+                    "direction": 1
+                }
+            ]
+        }
+    },
+    "supportsHighlight": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": false,
+    "suppressDefaultTitle": true,
     "privileges": []
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { scaleLinear } from 'd3-scale';
 import { max } from 'd3-array';
 import { SparklineDataPoint } from '../visualViewModel';
@@ -9,37 +9,54 @@ interface BarSparklineProps {
     settings: SparklineColumnSettings;
 }
 
-export const BarSparkline: React.FC<BarSparklineProps> = ({ dataPoints, settings }) => {
+export const BarSparkline = memo<BarSparklineProps>(({ dataPoints, settings }) => {
     const width = 60;
     const height = 20;
     const padding = 2;
     const fillColor = settings.color || '#0078D4';
 
-    const data = dataPoints.map(d => d.y);
+    const bars = useMemo(() => {
+        const data = dataPoints.map(d => d.y);
 
-    const xScale = scaleLinear()
-        .domain([0, data.length])
-        .range([padding, width - padding]);
+        const xScale = scaleLinear()
+            .domain([0, data.length])
+            .range([padding, width - padding]);
 
-    const maxValue = max(data) ?? 0;
-    const yScale = scaleLinear()
-        .domain([0, maxValue])
-        .range([height - padding, padding]);
+        const maxValue = max(data) ?? 0;
+        const yScale = scaleLinear()
+            .domain([0, maxValue])
+            .range([height - padding, padding]);
 
-    const barWidth = (width - 2 * padding) / data.length - 1;
+        const barWidth = (width - 2 * padding) / data.length - 1;
+
+        return data.map((value, index) => ({
+            x: xScale(index),
+            y: yScale(value),
+            width: barWidth,
+            height: height - padding - yScale(value),
+            key: index
+        }));
+    }, [dataPoints, width, height, padding]);
 
     return (
         <svg width={width} height={height}>
-            {data.map((value, index) => (
+            {bars.map(bar => (
                 <rect
-                    key={index}
-                    x={xScale(index)}
-                    y={yScale(value)}
-                    width={barWidth}
-                    height={height - padding - yScale(value)}
+                    key={bar.key}
+                    x={bar.x}
+                    y={bar.y}
+                    width={bar.width}
+                    height={bar.height}
                     fill={fillColor}
                 />
             ))}
         </svg>
     );
-};
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.dataPoints === nextProps.dataPoints &&
+        prevProps.settings.color === nextProps.settings.color
+    );
+});
+
+BarSparkline.displayName = 'BarSparkline';

@@ -5,23 +5,24 @@ import DataView = powerbi.DataView;
 import DataViewTableRow = powerbi.DataViewTableRow;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewCategorical = powerbi.DataViewCategorical;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 
 import { TableViewModel, TableRowData, SparklineColumnData, SparklineDataPoint } from "./visualViewModel";
 
-export function visualTransform(dataViews: DataView[]): TableViewModel | null {
+export function visualTransform(dataViews: DataView[], host?: IVisualHost): TableViewModel | null {
     const dataView = dataViews?.[0];
 
     // Try categorical first, then fallback to table
     if (dataView?.categorical) {
-        return transformCategorical(dataView.categorical);
+        return transformCategorical(dataView.categorical, host);
     } else if (dataView?.table) {
-        return transformTable(dataView);
+        return transformTable(dataView, host);
     }
 
     return null;
 }
 
-function transformCategorical(categorical: DataViewCategorical): TableViewModel | null {
+function transformCategorical(categorical: DataViewCategorical, host?: IVisualHost): TableViewModel | null {
     console.log("=== CATEGORICAL TRANSFORM ===");
 
     const category = categorical.categories?.[0];
@@ -133,9 +134,16 @@ function transformCategorical(categorical: DataViewCategorical): TableViewModel 
             };
         });
 
+        const selectionId = host && category
+            ? host.createSelectionIdBuilder()
+                .withCategory(category, i)
+                .createSelectionId()
+            : undefined;
+
         rows.push({
             cells,
-            sparklineColumns: sparklineData
+            sparklineColumns: sparklineData,
+            selectionId
         });
     }
 
@@ -150,7 +158,7 @@ function transformCategorical(categorical: DataViewCategorical): TableViewModel 
     };
 }
 
-function transformTable(dataView: DataView): TableViewModel | null {
+function transformTable(dataView: DataView, host?: IVisualHost): TableViewModel | null {
     const table = dataView.table;
 
     if (!table?.rows || !table?.columns) {
@@ -194,8 +202,8 @@ function transformTable(dataView: DataView): TableViewModel | null {
     const displayIndices = [...categoryIndices, ...valueIndices];
 
     const transformedRows = categoryColumns.length > 0
-        ? groupRowsByCategory(table.rows, table.columns, categoryIndices, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices)
-        : transformRowsWithoutGrouping(table.rows, table.columns, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices);
+        ? groupRowsByCategory(table.rows, table.columns, categoryIndices, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices, host, dataView)
+        : transformRowsWithoutGrouping(table.rows, table.columns, displayIndices, sparklineColumns, sparklineIndices, xAxisIndices, host);
 
     console.log("Transformed rows:", transformedRows.length);
     transformedRows.forEach((row, i) => {
@@ -219,7 +227,8 @@ function transformRowsWithoutGrouping(
     displayIndices: number[],
     sparklineColumns: DataViewMetadataColumn[],
     sparklineIndices: number[],
-    xAxisIndices: number[]
+    xAxisIndices: number[],
+    host?: IVisualHost
 ): TableRowData[] {
     console.log("Transform without grouping");
 
@@ -246,29 +255,29 @@ function transformRowsWithoutGrouping(
         });
     });
 
-    const firstRow = rows[0];
     const cells = displayIndices.map((colIndex, arrIndex) => ({
-        value: firstRow[colIndex],
+        value: rows[0][colIndex],
         column: allColumns[colIndex]
     }));
 
     const sparklineData: SparklineColumnData[] = sparklineColumns.map((column, index) => {
         let dataPoints = allSparklineData.get(index) || [];
+        const values = dataPoints.map(dp => dp.y);
 
         if (dataPoints.length === 0) {
-            console.log(`Final sparkline column ${index} (${column.displayName}): NO DATA - Using sample data for testing`);
+            console.log(`Sparkline ${index}: NO DATA - Using sample data for testing`);
             dataPoints = Array.from({ length: 8 }, (_, i) => ({
                 x: i,
                 y: Math.random() * 100
             }));
-        } else {
-            console.log(`Final sparkline column ${index} (${column.displayName}): ${dataPoints.length} points`);
         }
 
+        console.log(`Sparkline ${index} (${column.displayName}): ${dataPoints.length} points`);
+
         return {
-            column: column,
+            column,
             values: dataPoints.map(dp => dp.y),
-            dataPoints: dataPoints
+            dataPoints
         };
     });
 
@@ -285,11 +294,15 @@ function groupRowsByCategory(
     displayIndices: number[],
     sparklineColumns: DataViewMetadataColumn[],
     sparklineIndices: number[],
-    xAxisIndices: number[]
+    xAxisIndices: number[],
+    host?: IVisualHost,
+    dataView?: DataView
 ): TableRowData[] {
     const groupedData = new Map<string, {
         cells: any[],
-        sparklineData: Map<number, SparklineDataPoint[]>
+        sparklineData: Map<number, SparklineDataPoint[]>,
+        categoryValues: any[],
+        rowIndex: number
     }>();
 
     rows.forEach((row, rowIndex) => {
@@ -303,9 +316,13 @@ function groupRowsByCategory(
                 column: allColumns[colIndex]
             }));
 
+            const categoryValues = categoryIndices.map(idx => row[idx]);
+
             groupedData.set(categoryKey, {
                 cells,
-                sparklineData: new Map()
+                sparklineData: new Map(),
+                categoryValues,
+                rowIndex
             });
         }
 
@@ -334,7 +351,7 @@ function groupRowsByCategory(
 
     console.log(`Total groups: ${groupedData.size}`);
 
-    return Array.from(groupedData.values()).map((group, groupIndex) => {
+    return Array.from(groupedData.entries()).map(([categoryKey, group], groupIndex) => {
         const sparklineData: SparklineColumnData[] = sparklineColumns.map((column, index) => {
             let dataPoints = group.sparklineData.get(index) || [];
             const values = dataPoints.map(dp => dp.y);
@@ -345,20 +362,27 @@ function groupRowsByCategory(
                     x: i,
                     y: Math.random() * 100
                 }));
-            } else {
-                console.log(`Group ${groupIndex}, Sparkline ${index}: ${dataPoints.length} points`);
             }
 
+            console.log(`Group ${groupIndex}, Sparkline ${index} (${column.displayName}): ${dataPoints.length} points`);
+
             return {
-                column: column,
+                column,
                 values: dataPoints.map(dp => dp.y),
-                dataPoints: dataPoints
+                dataPoints
             };
         });
 
+        const selectionId = host && dataView?.table && categoryIndices.length > 0
+            ? host.createSelectionIdBuilder()
+                .withTable(dataView.table, group.rowIndex)
+                .createSelectionId()
+            : undefined;
+
         return {
             cells: group.cells,
-            sparklineColumns: sparklineData
+            sparklineColumns: sparklineData,
+            selectionId
         };
     });
 }

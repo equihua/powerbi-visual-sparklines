@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import ISelectionId = powerbi.visuals.ISelectionId;
 
 export interface TableCellData {
     value: any;
@@ -20,6 +21,7 @@ export interface SparklineColumnData {
 export interface TableRowData {
     cells: TableCellData[];
     sparklineColumns: SparklineColumnData[];
+    selectionId?: ISelectionId;
 }
 
 export interface TableViewModel {
