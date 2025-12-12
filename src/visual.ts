@@ -137,7 +137,19 @@ export class Visual implements IVisual {
                     lineWidth: 1.5
                 });
             }
+<<<<<<< HEAD
         });
+=======
+        }
+
+        console.log("Final formatting settings:", this.formattingSettings);
+        console.log("Sparkline cards after loading:", this.formattingSettings.sparklineCards.map(c => ({
+            name: c.name,
+            chartType: c.chartType.value,
+            color: c.color.value,
+            lineWidth: c.lineWidth.value
+        })));
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
 
         this.renderTable(viewModel, options.viewport);
     }
@@ -212,6 +224,7 @@ export class Visual implements IVisual {
 
         rowData.sparklineColumns.forEach((sparklineData, sparklineIndex) => {
             const sparklineTd = tr.append("td");
+<<<<<<< HEAD
             if (sparklineData.dataPoints.length > 0) {
                 const seriesKey = sparklineData.column.queryName || sparklineData.column.displayName || `column${sparklineIndex}`;
                 const settings = this.sparklineSettings.get(seriesKey) || {
@@ -219,6 +232,12 @@ export class Visual implements IVisual {
                     color: "#0078D4",
                     lineWidth: 1.5
                 };
+=======
+            console.log(`Sparkline ${sparklineIndex}:`, sparklineData.dataPoints.length, "points", sparklineData.dataPoints);
+            if (sparklineData.dataPoints.length > 0) {
+                const settings = this.formattingSettings.sparklineCards[sparklineIndex];
+                console.log(`Rendering sparkline with settings:`, settings?.chartType?.value);
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
                 this.renderSparkline(sparklineTd, sparklineData.dataPoints, settings);
             }
         });
@@ -227,9 +246,21 @@ export class Visual implements IVisual {
     private renderSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
     ): void {
         const chartType = settings.chartType || "line";
+=======
+        settings: any
+    ): void {
+        console.log("renderSparkline called with settings:", {
+            chartType: settings?.chartType?.value?.value,
+            color: settings?.color?.value?.value,
+            lineWidth: settings?.lineWidth?.value
+        });
+
+        const chartType = settings?.chartType?.value?.value || "line";
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
 
         switch (chartType) {
             case "line":
@@ -255,13 +286,19 @@ export class Visual implements IVisual {
     private renderLineSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
+=======
+        settings: any
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
     ): void {
         const width = 60;
         const height = 20;
         const padding = 2;
         const strokeColor = settings.color || "#0078D4";
         const strokeWidth = settings.lineWidth || 1.5;
+
+        console.log("renderLineSparkline - strokeColor:", strokeColor, "strokeWidth:", strokeWidth);
 
         const svg = container
             .append("svg")
@@ -282,7 +319,11 @@ export class Visual implements IVisual {
     private renderBarSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
+=======
+        settings: any
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
     ): void {
         const width = 60;
         const height = 20;
@@ -319,7 +360,11 @@ export class Visual implements IVisual {
     private renderAreaSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
+=======
+        settings: any
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
     ): void {
         const width = 60;
         const height = 20;
@@ -353,7 +398,11 @@ export class Visual implements IVisual {
     private renderPieSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
+=======
+        settings: any
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
     ): void {
         const size = 20;
         const radius = size / 2 - 2;
@@ -396,7 +445,11 @@ export class Visual implements IVisual {
     private renderDonutSparkline(
         container: Selection<HTMLTableCellElement>,
         dataPoints: SparklineDataPoint[],
+<<<<<<< HEAD
         settings: SparklineColumnSettings
+=======
+        settings: any
+>>>>>>> 3717aa53a101cdb4d934885eb5052df4d2339daf
     ): void {
         const size = 20;
         const outerRadius = size / 2 - 2;
