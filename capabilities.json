@@ -76,26 +76,11 @@
                     "displayName": "Tipo de gráfico",
                     "type": {
                         "enumeration": [
-                            {
-                                "value": "line",
-                                "displayName": "Línea"
-                            },
-                            {
-                                "value": "bar",
-                                "displayName": "Barras"
-                            },
-                            {
-                                "value": "area",
-                                "displayName": "Área"
-                            },
-                            {
-                                "value": "pie",
-                                "displayName": "Circular"
-                            },
-                            {
-                                "value": "donut",
-                                "displayName": "Anillo"
-                            }
+                            { "value": "line", "displayName": "Línea" },
+                            { "value": "bar", "displayName": "Barras" },
+                            { "value": "area", "displayName": "Área" },
+                            { "value": "pie", "displayName": "Circular" },
+                            { "value": "donut", "displayName": "Anillo" }
                         ]
                     }
                 },
@@ -103,9 +88,7 @@
                     "displayName": "Color",
                     "type": {
                         "fill": {
-                            "solid": {
-                                "color": true
-                            }
+                            "solid": { "color": true }
                         }
                     }
                 },
