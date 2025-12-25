@@ -1,43 +1,37 @@
-import * as React from 'react'
+import * as React from "react";
 
 interface State {}
 
 interface Props {}
 
-export default class Gauge extends React.Component<{}, State> {
+export default class MyComponent extends React.Component<{}, State> {
+  state: State = {};
 
-    state: State = {};
+  /**
+   *
+   */
+  constructor(props: Props) {
+    super(props);
+  }
 
-    /**
-     *
-     */
-    constructor(props: Props) {
-        super(props);
-        
+  private static updateCallback: (data: State) => void = null;
+
+  public static update(data: State): void {
+    if (typeof MyComponent.updateCallback === "function") {
+      MyComponent.updateCallback(data);
     }
+  }
 
-    private static updateCallback: (data: State) => void = null;
+  componentWillUnmount() {
+    //
+    MyComponent.updateCallback = null;
+  }
 
-    public static update(data: State): void {
-        if (typeof Gauge.updateCallback === 'function') {
-            Gauge.updateCallback(data);
-        }
-    }
+  componentDidMount() {
+    MyComponent.updateCallback = (data: State): void => this.setState(data);
+  }
 
-
-    componentWillUnmount() {
-        //
-            Gauge.updateCallback = null;
-    }
-
-    componentDidMount() {
-        Gauge.updateCallback = (data: State): void => this.setState(data); ;
-    }
-
-
-    render() {
-        return (
-            <>{JSON.stringify(this.state)}</>
-        )
-    }
+  render() {
+    return <>{JSON.stringify(this.state)}</>;
+  }
 }

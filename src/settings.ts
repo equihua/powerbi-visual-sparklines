@@ -72,12 +72,40 @@ class DataPointCardSettings extends FormattingSettingsCard {
 }
 
 /**
+ * Sparkline Formatting Card
+ */
+class SparklineCardSettings extends FormattingSettingsCard {
+    lineColor = new formattingSettings.ColorPicker({
+        name: "lineColor",
+        displayName: "Color de línea",
+        value: { value: "#0078D4" }
+    });
+
+    lineWidth = new formattingSettings.NumUpDown({
+        name: "lineWidth",
+        displayName: "Grosor de línea",
+        value: 2
+    });
+
+    showPoints = new formattingSettings.ToggleSwitch({
+        name: "showPoints",
+        displayName: "Mostrar puntos",
+        value: false
+    });
+
+    name: string = "sparklineSettings";
+    displayName: string = "Configuración de Sparklines";
+    slices: Array<FormattingSettingsSlice> = [this.lineColor, this.lineWidth, this.showPoints];
+}
+
+/**
 * visual settings model class
 *
 */
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // Create formatting settings model formatting cards
     dataPointCard = new DataPointCardSettings();
+    sparklineCard = new SparklineCardSettings();
 
-    cards = [this.dataPointCard];
+    cards = [this.dataPointCard, this.sparklineCard];
 }

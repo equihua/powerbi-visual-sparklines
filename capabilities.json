@@ -1,79 +1,97 @@
 {
-    "dataRoles": [
-        {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
-        },
-        {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
-        }
-    ],
-    "objects": {
-        "dataPoint": {
-            "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
-                },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
-                }
-            }
-        }
+  "dataRoles": [
+    {
+      "displayName": "Renglones",
+      "name": "rows",
+      "kind": "Grouping"
     },
-    "dataViewMappings": [
+    {
+      "displayName": "Columnas",
+      "name": "columns",
+      "kind": "GroupingOrMeasure"
+    },
+    {
+      "displayName": "Valores",
+      "name": "values",
+      "kind": "Measure"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "conditions": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
-                    "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
-                }
-            }
+          "rows": {
+            "max": 1000
+          },
+          "values": {
+            "max": 50
+          }
         }
-    ],
-    "privileges": []
+      ],
+      "matrix": {
+        "rows": {
+          "for": {
+            "in": "rows"
+          },
+          "dataReductionAlgorithm": {
+            "top": {
+              "count": 1000
+            }
+          }
+        },
+        "columns": {
+          "for": {
+            "in": "columns"
+          },
+          "dataReductionAlgorithm": {
+            "top": {
+              "count": 100
+            }
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "for": {
+                "in": "values"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "sparklineSettings": {
+      "displayName": "Formato de minigráficos",
+      "properties": {
+        "lineColor": {
+          "displayName": "Color de línea",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "lineWidth": {
+          "displayName": "Grosor de línea",
+          "type": {
+            "numeric": true
+          }
+        },
+        "showPoints": {
+          "displayName": "Mostrar puntos",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    }
+  },
+  "sorting": {
+    "default": {}
+  },
+  "privileges": []
 }
