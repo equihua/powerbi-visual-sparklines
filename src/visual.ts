@@ -1,5 +1,5 @@
 /*
- *  Power BI Visual CLI
+ *  Power BI Visual CLI - Sparklines Visual
  *
  *  Copyright (c) Microsoft Corporation
  *  All rights reserved.
@@ -28,6 +28,16 @@
 import * as d3 from "d3";
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { getValue } from "powerbi-visuals-utils-dataviewutils/lib/dataViewObject";
+import {
+  createTooltipServiceWrapper,
+  ITooltipServiceWrapper,
+} from "powerbi-visuals-utils-tooltiputils";
+import { valueFormatter as valueFormatterFactory } from "powerbi-visuals-utils-formattingutils";
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import ISelectionId = powerbi.visuals.ISelectionId;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+
 import "./../style/visual.less";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -37,471 +47,491 @@ import DataView = powerbi.DataView;
 
 import { VisualFormattingSettingsModel } from "./settings";
 
-type Point = { x: any; y: number | null };
+// Tipo para puntos de datos del sparkline
+interface SparklinePoint {
+  x: number;
+  y: number;
+  label: string;
+  formattedValue?: string;
+}
+
+// Tipo para cada fila del sparkline
+interface SparklineRow {
+  name: string;
+  points: SparklinePoint[];
+  selectionId: ISelectionId;
+}
+
+// Interfaz para configuración de sparkline
+interface SparklineConfig {
+  lineColor: string;
+  lineWidth: number;
+  showPoints: boolean;
+  pointRadius: number;
+}
 
 export class Visual implements IVisual {
   private container: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
   private formattingSettingsService: FormattingSettingsService;
   private formattingSettings: VisualFormattingSettingsModel;
-  private data: any; // processed model stored here
-  private dataViewInfo: any; // información completa del dataView
+  private selectionManager: ISelectionManager;
+  private tooltipServiceWrapper: ITooltipServiceWrapper;
+  private host: IVisualHost;
+  private sparklineData: SparklineRow[] = [];
+  private selectedRowId: ISelectionId | null = null;
+
+  // Parámetros de configuración del sparkline
+  private sparklineSettings: SparklineConfig = {
+    lineColor: "#0078d4",
+    lineWidth: 2,
+    showPoints: false,
+    pointRadius: 3,
+  };
+
+  // Dimensiones del SVG (se ajustarán dinámicamente con viewport)
+  private sparklineWidth = 200;
+  private sparklineHeight = 40;
+  private readonly margin = { top: 5, right: 5, bottom: 5, left: 5 };
+  private readonly maxColumnsBeforeReduction = 50;
 
   constructor(options: VisualConstructorOptions) {
     console.log("Visual constructor", options);
 
+    this.host = options.host;
     this.formattingSettingsService = new FormattingSettingsService();
+    this.selectionManager = this.host.createSelectionManager();
+    this.tooltipServiceWrapper = createTooltipServiceWrapper(
+      this.host.tooltipService,
+      options.element
+    );
+
+    // Crear contenedor principal
     this.container = d3
       .select(options.element)
       .append("div")
-      .attr("class", "sparkline-table");
+      .attr("class", "sparkline-container")
+      .style("padding", "10px")
+      .style("overflow-y", "auto")
+      .style("max-height", "100%")
+      .style("width", "100%");
   }
 
   public update(options: VisualUpdateOptions) {
     try {
       console.log("Visual Update Options:", options);
+
+      // Obtener el dataView principal
       const dataView = options.dataViews && options.dataViews[0];
-      this.container.html("");
+      this.container.html(""); // Limpiar contenedor
 
       if (!dataView || !dataView.matrix) {
         this.renderEmptyState("No data available");
         return;
       }
 
-      this.formattingSettings =
-        this.formattingSettingsService.populateFormattingSettingsModel(
-          VisualFormattingSettingsModel,
-          dataView
-        );
+      // Ajustar dimensiones según viewport
+      this.adjustDimensionsForViewport(options.viewport);
 
-      // Extraer columnas (medidas)
-      const valueSources = dataView.matrix.valueSources || [];
-      const columns = valueSources.map((vs) => ({
-        displayName: vs.displayName,
-        format: vs.format,
-      }));
+      // Obtener configuración de formato
+      this.parseSparklineSettings(dataView);
 
-      // Extraer filas (objetivos)
-      const rowChildren = dataView.matrix.rows?.root?.children || [];
+      // Extraer datos de la matriz
+      this.sparklineData = this.extractSparklineData(dataView);
 
-      // Renderizar tabla
-      const table = this.container
-        .append("table")
-        .attr("class", "sparkline-table");
-      const thead = table.append("thead");
-      const tbody = table.append("tbody");
+      if (this.sparklineData.length === 0) {
+        this.renderEmptyState("No rows to display");
+        return;
+      }
 
-      // Encabezados
-      const headerRow = thead.append("tr");
-      headerRow.append("th").text("Objetivo");
-      columns.forEach((col) => {
-        headerRow.append("th").text(col.displayName);
-      });
-
-      // Filas de datos
-      rowChildren.forEach((row) => {
-        const tr = tbody.append("tr");
-        // Nombre del objetivo
-        const objetivo =
-          row.levelValues && row.levelValues[0]?.value
-            ? row.levelValues[0].value
-            : row.value;
-        tr.append("td").text(String(objetivo));
-        // Valores de medidas
-        columns.forEach((col, idx) => {
-          const valObj = row.values && row.values[idx?.toString()];
-          let value = valObj && valObj.value != null ? valObj.value : "";
-          // Formatear porcentaje si aplica
-          if (
-            col.format &&
-            col.format.includes("%") &&
-            typeof value === "number"
-          ) {
-            value = (value * 100).toFixed(1) + "%";
-          }
-          tr.append("td").text(value);
-        });
-      });
-
-      // Resumen de datos
-      this.data = {
-        rows: rowChildren,
-        summary: {
-          rowCount: rowChildren.length,
-          ColumnsCount: columns.length,
-          valueMeasureCount: columns.length,
-        },
-      };
-
-      // Guardar información completa del dataView
-      this.dataViewInfo = {
-        viewport: {
-          width: options.viewport.width,
-          height: options.viewport.height,
-        },
-        updateType: options.type,
-        operationKind: options.operationKind,
-        metadata: {
-          columns: dataView.metadata.columns.map((col) => ({
-            displayName: col.displayName,
-            queryName: col.queryName,
-            roles: col.roles,
-            type: {
-              text: col.type.text,
-              numeric: col.type.numeric,
-              integer: col.type.integer,
-              bool: col.type.bool,
-            },
-            format: col.format,
-            isMeasure: col.isMeasure || false,
-          })),
-          isDataFilterApplied: dataView.metadata.isDataFilterApplied,
-        },
-        matrix: {
-          rowLevels: dataView.matrix.rows?.levels?.length || 0,
-          columnLevels: dataView.matrix.columns?.levels?.length || 0,
-          rowCount: rowChildren.length,
-          valueSourcesCount: valueSources.length,
-          rowHierarchy: this.extractRowHierarchy(dataView.matrix.rows),
-          columnHierarchy: this.extractColumnHierarchy(dataView.matrix.columns),
-          valueSources: valueSources.map((vs) => ({
-            displayName: vs.displayName,
-            queryName: vs.queryName,
-            format: vs.format,
-            isMeasure: vs.isMeasure,
-          })),
-        },
-      };
-
+      // Renderizar los sparklines
       this.render();
     } catch (error) {
       this.renderError(error);
     }
   }
 
-  private render(): void {
-    this.container.html("");
+  /**
+   * Ajusta las dimensiones del sparkline según el viewport
+   */
+  private adjustDimensionsForViewport(viewport: powerbi.IViewport): void {
+    // Ajustar altura según disponible (menos espacio para labels)
+    const availableHeight = Math.max(40, viewport.height / (this.sparklineData.length + 2));
+    this.sparklineHeight = Math.min(availableHeight - 10, 80);
 
-    if (!this.data || !this.data.rows.length) {
-      this.renderEmptyState("No rows to display");
+    // Ajustar ancho según disponible (menos espacio para labels)
+    this.sparklineWidth = Math.max(100, viewport.width - 200);
+
+    console.log(`Viewport adjusted: ${this.sparklineWidth}x${this.sparklineHeight}`);
+  }
+
+  /**
+   * Parsea la configuración de sparklineSettings desde dataView.objects
+   */
+  private parseSparklineSettings(dataView: DataView): void {
+    const objects = dataView.metadata.objects;
+
+    if (objects) {
+      const sparklineSettings = objects["sparklineSettings"];
+
+      if (sparklineSettings) {
+        // Obtener color de línea
+        const lineColorFill = getValue<any>(sparklineSettings, "lineColor");
+        if (lineColorFill && lineColorFill.solid) {
+          this.sparklineSettings.lineColor = lineColorFill.solid.color;
+        }
+
+        // Obtener grosor de línea
+        const lineWidth = getValue<number>(sparklineSettings, "lineWidth");
+        if (lineWidth !== undefined) {
+          this.sparklineSettings.lineWidth = Math.max(1, lineWidth);
+        }
+
+        // Obtener si mostrar puntos
+        const showPoints = getValue<boolean>(sparklineSettings, "showPoints");
+        if (showPoints !== undefined) {
+          this.sparklineSettings.showPoints = showPoints;
+        }
+      }
+    }
+
+    // Valores por defecto si no se especifican
+    if (!this.sparklineSettings.lineColor) {
+      this.sparklineSettings.lineColor = "#0078d4";
+    }
+    if (!this.sparklineSettings.lineWidth) {
+      this.sparklineSettings.lineWidth = 2;
+    }
+
+    console.log("Sparkline Settings:", this.sparklineSettings);
+  }
+
+  /**
+   * Extrae datos de la matriz para los sparklines
+   */
+  private extractSparklineData(dataView: DataView): SparklineRow[] {
+    const matrix = dataView.matrix;
+    const rowChildren = matrix.rows?.root?.children || [];
+    const columnChildren = matrix.columns?.root?.children || [];
+    const valueSources = matrix.valueSources || [];
+
+    if (rowChildren.length === 0 || columnChildren.length === 0) {
+      return [];
+    }
+
+    // Aplicar data reduction si hay muchas columnas
+    const columnsToShow = columnChildren.length > this.maxColumnsBeforeReduction
+      ? columnChildren.slice(0, this.maxColumnsBeforeReduction)
+      : columnChildren;
+
+    console.log(`Data reduction: ${columnChildren.length} -> ${columnsToShow.length} columns`);
+
+    // Usar la primera medida para el sparkline
+    const valueSourceIndex = 0;
+    const valueFormatter = valueFormatterFactory.create({
+      format: valueSources[valueSourceIndex]?.format || "0.00",
+    });
+
+    const rows: SparklineRow[] = rowChildren.map(
+      (row: any, rowIndex: number) => {
+        // Obtener nombre de la fila
+        const rowName =
+          row.levelValues && row.levelValues[0]?.value
+            ? row.levelValues[0].value
+            : row.value;
+
+        // Extraer puntos de datos para cada columna
+        const points: SparklinePoint[] = columnsToShow.map(
+          (col: any, colIndex: number) => {
+            // La estructura de valores es: row.values[valueSourceIndex]?.value
+            const cellValue =
+              row.values && row.values[valueSourceIndex?.toString()]?.value;
+
+            return {
+              x: colIndex,
+              y: typeof cellValue === "number" ? cellValue : 0,
+              label: col.value || `Col ${colIndex}`,
+              formattedValue: valueFormatter.format(cellValue),
+            };
+          }
+        );
+
+        // Crear selectionId para esta fila
+        const selectionId = this.host
+          .createSelectionIdBuilder()
+          .withMatrixNode(row, matrix.rows.levels)
+          .createSelectionId();
+
+        return {
+          name: String(rowName),
+          points: points,
+          selectionId: selectionId,
+        };
+      }
+    );
+
+    return rows;
+  }
+
+  /**
+   * Renderiza todos los sparklines
+   */
+  private render(): void {
+    // Crear un div para cada fila con su sparkline
+    this.sparklineData.forEach((rowData) => {
+      this.renderSparklineRow(rowData);
+    });
+  }
+
+  /**
+   * Renderiza una fila individual de sparkline
+   */
+  private renderSparklineRow(rowData: SparklineRow): void {
+    const rowDiv = this.container
+      .append("div")
+      .attr("class", "sparkline-row")
+      .style("display", "flex")
+      .style("align-items", "center")
+      .style("margin-bottom", "8px")
+      .style("padding", "6px")
+      .style("background-color", "#f9f9f9")
+      .style("border-radius", "4px")
+      .style("border", "1px solid #e0e0e0")
+      .style("cursor", "pointer")
+      .style("transition", "background-color 0.2s, border-color 0.2s")
+      .on("click", () => this.handleRowClick(rowData))
+      .on("mouseover", () => {
+        rowDiv.style("background-color", "#f0f0f0");
+      })
+      .on("mouseout", () => {
+        const isSelected = this.selectedRowId === rowData.selectionId;
+        rowDiv.style("background-color", isSelected ? "#e8f4f8" : "#f9f9f9");
+      });
+
+    // Etiqueta del nombre de la fila
+    rowDiv
+      .append("div")
+      .style("min-width", "150px")
+      .style("max-width", "150px")
+      .style("margin-right", "10px")
+      .style("font-size", "12px")
+      .style("font-weight", "500")
+      .style("overflow", "hidden")
+      .style("text-overflow", "ellipsis")
+      .style("white-space", "nowrap")
+      .attr("title", rowData.name)
+      .text(rowData.name);
+
+    // SVG del sparkline
+    const svgDiv = rowDiv
+      .append("div")
+      .style("flex", "1")
+      .style("min-width", "0");
+
+    this.renderSparklineSVG(svgDiv, rowData);
+  }
+
+  /**
+   * Renderiza el SVG del sparkline para una fila
+   */
+  private renderSparklineSVG(
+    container: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>,
+    rowData: SparklineRow
+  ): void {
+    const { points } = rowData;
+
+    // Validar que haya puntos
+    if (points.length === 0) {
       return;
     }
 
-    const summaryDiv = this.container
-      .append("div")
-      .style("padding", "20px")
-      .style("font-family", "monospace")
-      .style("background-color", "#f5f5f5")
-      .style("border-radius", "8px")
-      .style("margin-bottom", "20px")
-      .style("max-height", "90vh")
-      .style("overflow-y", "auto")
-      .style("overflow-x", "hidden");
+    // Filtrar valores válidos (no nulos)
+    const validPoints = points.filter((p) => p.y !== null && !isNaN(p.y));
 
-    // Título principal
-    summaryDiv
-      .append("h2")
-      .style("color", "#333")
-      .style("border-bottom", "2px solid #0078d4")
-      .style("padding-bottom", "10px")
-      .text("📊 Resumen Completo del DataView");
-
-    // Viewport
-    summaryDiv
-      .append("h3")
-      .style("color", "#0078d4")
-      .style("margin-top", "20px")
-      .text("🖥️ Viewport");
-
-    summaryDiv
-      .append("ul")
-      .style("list-style", "none")
-      .style("padding-left", "20px").html(`
-        <li>📐 <strong>Ancho:</strong> ${this.dataViewInfo.viewport.width.toFixed(
-          2
-        )} px</li>
-        <li>📏 <strong>Alto:</strong> ${this.dataViewInfo.viewport.height.toFixed(
-          2
-        )} px</li>
-      `);
-
-    // Información de actualización
-    summaryDiv
-      .append("h3")
-      .style("color", "#0078d4")
-      .style("margin-top", "20px")
-      .text("🔄 Información de Actualización");
-
-    summaryDiv
-      .append("ul")
-      .style("list-style", "none")
-      .style("padding-left", "20px").html(`
-        <li>⚡ <strong>Tipo de Actualización:</strong> ${this.dataViewInfo.updateType}</li>
-        <li>🔧 <strong>Tipo de Operación:</strong> ${this.dataViewInfo.operationKind}</li>
-      `);
-
-    // Metadata
-    summaryDiv
-      .append("h3")
-      .style("color", "#0078d4")
-      .style("margin-top", "20px")
-      .text("📋 Metadata");
-
-    summaryDiv
-      .append("ul")
-      .style("list-style", "none")
-      .style("padding-left", "20px").html(`
-        <li>📊 <strong>Total de Columnas:</strong> ${
-          this.dataViewInfo.metadata.columns.length
-        }</li>
-        <li>🔍 <strong>Filtro de Datos Aplicado:</strong> ${
-          this.dataViewInfo.metadata.isDataFilterApplied ? "Sí" : "No"
-        }</li>
-      `);
-
-    // Detalle de columnas
-    summaryDiv
-      .append("h4")
-      .style("color", "#106ebe")
-      .style("margin-top", "15px")
-      .style("margin-left", "20px")
-      .text("📌 Columnas Configuradas:");
-
-    const columnsTable = summaryDiv
-      .append("table")
-      .style("margin-left", "40px")
-      .style("border-collapse", "collapse")
-      .style("margin-top", "10px")
-      .style("background", "white")
-      .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-
-    const colThead = columnsTable.append("thead");
-    const colTbody = columnsTable.append("tbody");
-
-    colThead
-      .append("tr")
-      .style("background-color", "#0078d4")
-      .style("color", "white").html(`
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Nombre</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Query Name</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Roles</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Tipo</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Formato</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Es Medida</th>
-      `);
-
-    this.dataViewInfo.metadata.columns.forEach((col: any) => {
-      const roles = Object.keys(col.roles || {}).join(", ");
-      const tipo = [];
-      if (col.type.text) tipo.push("Texto");
-      if (col.type.numeric) tipo.push("Numérico");
-      if (col.type.integer) tipo.push("Entero");
-      if (col.type.bool) tipo.push("Booleano");
-
-      colTbody.append("tr").style("border-bottom", "1px solid #ddd").html(`
-          <td style="padding: 8px; border: 1px solid #ddd;">${
-            col.displayName
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${
-            col.queryName
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${roles}</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${
-            tipo.join(", ") || "N/A"
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${
-            col.format || "N/A"
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${
-            col.isMeasure ? "✅" : "❌"
-          }</td>
-        `);
-    });
-
-    // Estructura de Matriz
-    summaryDiv
-      .append("h3")
-      .style("color", "#0078d4")
-      .style("margin-top", "20px")
-      .text("🎯 Estructura de Matriz");
-
-    summaryDiv
-      .append("ul")
-      .style("list-style", "none")
-      .style("padding-left", "20px").html(`
-        <li>📊 <strong>Niveles de Filas:</strong> ${this.dataViewInfo.matrix.rowLevels}</li>
-        <li>📊 <strong>Niveles de Columnas:</strong> ${this.dataViewInfo.matrix.columnLevels}</li>
-        <li>📈 <strong>Total de Filas:</strong> ${this.dataViewInfo.matrix.rowCount}</li>
-        <li>📉 <strong>Fuentes de Valores (Medidas):</strong> ${this.dataViewInfo.matrix.valueSourcesCount}</li>
-      `);
-
-    // Jerarquía de Filas
-    if (this.dataViewInfo.matrix.rowHierarchy) {
-      summaryDiv
-        .append("h4")
-        .style("color", "#106ebe")
-        .style("margin-top", "15px")
-        .style("margin-left", "20px")
-        .text("📂 Jerarquía de Filas:");
-
-      summaryDiv
-        .append("pre")
-        .style("margin-left", "40px")
-        .style("background", "white")
-        .style("padding", "10px")
-        .style("border-radius", "4px")
-        .style("overflow-x", "auto")
-        .style("font-size", "12px")
-        .text(JSON.stringify(this.dataViewInfo.matrix.rowHierarchy, null, 2));
+    if (validPoints.length === 0) {
+      return;
     }
 
-    // Jerarquía de Columnas
-    if (this.dataViewInfo.matrix.columnHierarchy) {
-      summaryDiv
-        .append("h4")
-        .style("color", "#106ebe")
-        .style("margin-top", "15px")
-        .style("margin-left", "20px")
-        .text("📂 Jerarquía de Columnas:");
+    // Calcular min/max para la escala Y
+    const minY = Math.min(...validPoints.map((p) => p.y));
+    const maxY = Math.max(...validPoints.map((p) => p.y));
+    const yRange = maxY - minY || 1;
 
-      summaryDiv
-        .append("pre")
-        .style("margin-left", "40px")
-        .style("background", "white")
-        .style("padding", "10px")
-        .style("border-radius", "4px")
-        .style("overflow-x", "auto")
-        .style("font-size", "12px")
-        .text(
-          JSON.stringify(this.dataViewInfo.matrix.columnHierarchy, null, 2)
-        );
+    // Crear escalas
+    const xScale = d3
+      .scaleLinear()
+      .domain([0, points.length - 1])
+      .range([this.margin.left, this.sparklineWidth - this.margin.right]);
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([minY - yRange * 0.1, maxY + yRange * 0.1])
+      .range([this.sparklineHeight - this.margin.bottom, this.margin.top]);
+
+    // Crear la función de línea con curva suave
+    const line = d3
+      .line<SparklinePoint>()
+      .x((d) => xScale(d.x))
+      .y((d) => yScale(d.y))
+      .curve(d3.curveMonotoneX);
+
+    // Crear SVG
+    const svg = container
+      .append("svg")
+      .attr("width", this.sparklineWidth)
+      .attr("height", this.sparklineHeight)
+      .style("background-color", "#ffffff")
+      .style("border-radius", "3px")
+      .style("border", "1px solid #e0e0e0");
+
+    // Crear grupo para poder aplicar estilos
+    const pathElement = svg
+      .append("path")
+      .datum(points)
+      .attr("d", line)
+      .attr("fill", "none")
+      .attr("stroke", this.sparklineSettings.lineColor)
+      .attr("stroke-width", this.sparklineSettings.lineWidth)
+      .attr("class", "sparkline-path")
+      .style("cursor", "pointer")
+      .style("transition", "opacity 0.2s");
+
+    // Dibujar puntos si está habilitado
+    if (this.sparklineSettings.showPoints) {
+      svg
+        .selectAll(".sparkline-point")
+        .data(validPoints)
+        .enter()
+        .append("circle")
+        .attr("class", "sparkline-point")
+        .attr("cx", (d) => xScale(d.x))
+        .attr("cy", (d) => yScale(d.y))
+        .attr("r", this.sparklineSettings.pointRadius)
+        .attr("fill", this.sparklineSettings.lineColor)
+        .style("cursor", "pointer")
+        .style("transition", "opacity 0.2s")
+        .on("mouseover", (event, d) => this.showTooltipWithWrapper(event, d, rowData))
+        .on("mouseout", () => this.hideTooltip());
     }
 
-    // Value Sources
-    summaryDiv
-      .append("h4")
-      .style("color", "#106ebe")
-      .style("margin-top", "15px")
-      .style("margin-left", "20px")
-      .text("📊 Fuentes de Valores (Medidas):");
-
-    const measuresTable = summaryDiv
-      .append("table")
-      .style("margin-left", "40px")
-      .style("border-collapse", "collapse")
-      .style("margin-top", "10px")
-      .style("background", "white")
-      .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-
-    const measuresThead = measuresTable.append("thead");
-    const measuresTbody = measuresTable.append("tbody");
-
-    measuresThead
-      .append("tr")
-      .style("background-color", "#0078d4")
-      .style("color", "white").html(`
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Nombre</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Query Name</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Formato</th>
-        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Es Medida</th>
-      `);
-
-    this.dataViewInfo.matrix.valueSources.forEach((vs: any) => {
-      measuresTbody.append("tr").style("border-bottom", "1px solid #ddd").html(`
-          <td style="padding: 8px; border: 1px solid #ddd;">${
-            vs.displayName
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd; font-size: 11px;">${
-            vs.queryName
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${
-            vs.format || "N/A"
-          }</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${
-            vs.isMeasure ? "✅" : "❌"
-          }</td>
-        `);
-    });
-
-    // Resumen de Datos
-    summaryDiv
-      .append("h3")
-      .style("color", "#0078d4")
-      .style("margin-top", "20px")
-      .text("📊 Resumen de Datos");
-
-    summaryDiv
-      .append("ul")
-      .style("list-style", "none")
-      .style("padding-left", "20px").html(`
-        <li>📋 <strong>Filas de Datos:</strong> ${this.data.summary.rowCount}</li>
-        <li>📊 <strong>Columnas de Datos:</strong> ${this.data.summary.ColumnsCount}</li>
-        <li>📈 <strong>Medidas de Valor:</strong> ${this.data.summary.valueMeasureCount}</li>
-      `);
+    // Agregar listener para tooltip en la línea también
+    pathElement
+      .on("mouseover", (event) => {
+        const [x, y] = d3.pointer(event);
+        const closestPoint = this.getClosestPoint(validPoints, x, xScale, yScale);
+        if (closestPoint) {
+          this.showTooltipWithWrapper(event, closestPoint, rowData);
+        }
+      })
+      .on("mouseout", () => this.hideTooltip());
   }
 
-  private extractRowHierarchy(rows: any): any {
-    if (!rows || !rows.root) return null;
+  /**
+   * Encuentra el punto más cercano al cursor
+   */
+  private getClosestPoint(
+    points: SparklinePoint[],
+    xPos: number,
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>
+  ): SparklinePoint | null {
+    if (points.length === 0) return null;
 
-    return {
-      levels:
-        rows.levels?.map((level: any) => ({
-          sources: level.sources?.map((source: any) => ({
-            displayName: source.displayName,
-            queryName: source.queryName,
-            roles: source.roles,
-          })),
-        })) || [],
-      childrenCount: rows.root.children?.length || 0,
-      children:
-        rows.root.children?.map((child: any) => ({
-          level: child.level,
-          value: child.value,
-          hasValues: !!child.values,
-          valueCount: child.values ? Object.keys(child.values).length : 0,
-        })) || [],
-    };
+    let closestPoint = points[0];
+    let minDistance = Math.abs(xScale(closestPoint.x) - xPos);
+
+    for (let i = 1; i < points.length; i++) {
+      const distance = Math.abs(xScale(points[i].x) - xPos);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = points[i];
+      }
+    }
+
+    return closestPoint;
   }
 
-  private extractColumnHierarchy(columns: any): any {
-    if (!columns || !columns.root) return null;
+  /**
+   * Muestra un tooltip usando TooltipServiceWrapper
+   */
+  private showTooltipWithWrapper(
+    event: MouseEvent | any,
+    point: SparklinePoint,
+    rowData: SparklineRow
+  ): void {
+    const tooltipDataArray = [
+      {
+        displayName: "Row",
+        value: rowData.name,
+      },
+      {
+        displayName: "Column",
+        value: point.label,
+      },
+      {
+        displayName: "Value",
+        value: point.formattedValue || point.y.toFixed(2),
+      },
+    ];
 
-    return {
-      levels:
-        columns.levels?.map((level: any) => ({
-          sources: level.sources?.map((source: any) => ({
-            displayName: source.displayName,
-            queryName: source.queryName,
-            roles: source.roles,
-          })),
-        })) || [],
-      childrenCount: columns.root.children?.length || 0,
-      children:
-        columns.root.children?.map((child: any) => ({
-          level: child.level,
-          value: child.value,
-          hasChildren: !!child.children,
-          childrenCount: child.children?.length || 0,
-        })) || [],
-    };
-  }
-
-  private renderEmptyState(message: string): void {
-    this.container.html(
-      `<div style='padding: 20px; color: #666;'>${message}</div>`
+    this.tooltipServiceWrapper.addTooltip(
+      d3.select(event.target),
+      () => tooltipDataArray,
+      undefined,
+      true
     );
   }
 
+  /**
+   * Maneja el evento de clic en una fila de sparkline
+   */
+  private handleRowClick(rowData: SparklineRow): void {
+    // Actualizar estado de selección
+    this.selectedRowId = this.selectedRowId === rowData.selectionId ? null : rowData.selectionId;
+    
+    // Aplicar selección en Power BI
+    this.selectionManager.select(rowData.selectionId, true);
+  }
+
+  /**
+   * Limpia la selección actual
+   */
+  private clearSelection(): void {
+    this.selectedRowId = null;
+    this.selectionManager.clear();
+  }
+
+  /**
+   * Oculta el tooltip
+   */
+  private hideTooltip(): void {
+    // TooltipServiceWrapper maneja la limpieza automáticamente
+  }
+
+  /**
+   * Renderiza un estado vacío
+   */
+  private renderEmptyState(message: string): void {
+    this.container.html(
+      `<div style='padding: 20px; color: #666; text-align: center;'>${message}</div>`
+    );
+  }
+
+  /**
+   * Renderiza un error
+   */
   private renderError(error: any): void {
     console.error("Error in update method:", error);
     this.container.html(`
       <div style='padding: 20px; color: red;'>
         <h3>Error</h3>
-        <p>${error.message}</p>
+        <p>${error.message || "Unknown error"}</p>
       </div>
     `);
   }
 
-  // Panel de formato de Power BI
+  /**
+   * Obtiene el modelo de formato de Power BI
+   */
   public getFormattingModel(): powerbi.visuals.FormattingModel {
     return this.formattingSettingsService.buildFormattingModel(
       this.formattingSettings
