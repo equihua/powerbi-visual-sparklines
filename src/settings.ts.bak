@@ -28,7 +28,7 @@
 
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
-import FormattingSettingsCard = formattingSettings.SimpleCard;
+import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
@@ -89,14 +89,34 @@ class SparklineLineSettings extends FormattingSettingsCard {
 
   lineWidth = new formattingSettings.NumUpDown({
     name: "lineWidth",
-    displayName: "Grosor de línea (0.5-10)",
+    displayName: "Grosor de línea",
     value: 2,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0.5,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 10,
+      },
+    },
   });
 
   lineOpacity = new formattingSettings.NumUpDown({
     name: "lineOpacity",
-    displayName: "Opacidad de línea (0-100%)",
+    displayName: "Opacidad de línea (%)",
     value: 100,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 100,
+      },
+    },
   });
 
   curveType = new formattingSettings.ItemDropdown({
@@ -128,8 +148,18 @@ class SparklineLineSettings extends FormattingSettingsCard {
 
   areaOpacity = new formattingSettings.NumUpDown({
     name: "areaOpacity",
-    displayName: "Opacidad de área (0-100%)",
+    displayName: "Opacidad de área (%)",
     value: 20,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 100,
+      },
+    },
   });
 
   name: string = "sparklineLineSettings";
@@ -157,8 +187,18 @@ class SparklinePointsSettings extends FormattingSettingsCard {
 
   pointRadius = new formattingSettings.NumUpDown({
     name: "pointRadius",
-    displayName: "Radio de puntos (1-10)",
+    displayName: "Radio de puntos",
     value: 3,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 1,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 10,
+      },
+    },
   });
 
   pointColor = new formattingSettings.ColorPicker({
@@ -169,8 +209,18 @@ class SparklinePointsSettings extends FormattingSettingsCard {
 
   pointBorderWidth = new formattingSettings.NumUpDown({
     name: "pointBorderWidth",
-    displayName: "Grosor de borde (0-5)",
+    displayName: "Grosor de borde",
     value: 0,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 5,
+      },
+    },
   });
 
   pointBorderColor = new formattingSettings.ColorPicker({
@@ -217,20 +267,50 @@ class SparklinePointsSettings extends FormattingSettingsCard {
 class SparklineLayoutSettings extends FormattingSettingsCard {
   sparklineHeight = new formattingSettings.NumUpDown({
     name: "sparklineHeight",
-    displayName: "Altura de sparkline (20-200)",
+    displayName: "Altura de sparkline",
     value: 40,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 20,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 200,
+      },
+    },
   });
 
   sparklineWidth = new formattingSettings.NumUpDown({
     name: "sparklineWidth",
-    displayName: "Ancho de sparkline (50-800)",
+    displayName: "Ancho de sparkline",
     value: 200,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 50,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 800,
+      },
+    },
   });
 
   rowSpacing = new formattingSettings.NumUpDown({
     name: "rowSpacing",
-    displayName: "Espaciado entre filas (0-50)",
+    displayName: "Espaciado entre filas",
     value: 8,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 50,
+      },
+    },
   });
 
   backgroundColor = new formattingSettings.ColorPicker({
@@ -259,8 +339,18 @@ class SparklineLayoutSettings extends FormattingSettingsCard {
 
   borderRadius = new formattingSettings.NumUpDown({
     name: "borderRadius",
-    displayName: "Radio de borde (0-20)",
+    displayName: "Radio de borde",
     value: 4,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 20,
+      },
+    },
   });
 
   name: string = "sparklineLayoutSettings";
@@ -283,14 +373,34 @@ class SparklineLayoutSettings extends FormattingSettingsCard {
 class SparklineLabelSettings extends FormattingSettingsCard {
   labelWidth = new formattingSettings.NumUpDown({
     name: "labelWidth",
-    displayName: "Ancho de etiqueta (50-400)",
+    displayName: "Ancho de etiqueta",
     value: 150,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 50,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 400,
+      },
+    },
   });
 
   fontSize = new formattingSettings.NumUpDown({
     name: "fontSize",
-    displayName: "Tamaño de fuente (8-24)",
+    displayName: "Tamaño de fuente",
     value: 12,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 8,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 24,
+      },
+    },
   });
 
   fontColor = new formattingSettings.ColorPicker({
@@ -373,14 +483,34 @@ class SparklineHighlightSettings extends FormattingSettingsCard {
 
   maxPointRadius = new formattingSettings.NumUpDown({
     name: "maxPointRadius",
-    displayName: "Radio punto máximo (2-12)",
+    displayName: "Radio punto máximo",
     value: 4,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 2,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 12,
+      },
+    },
   });
 
   minPointRadius = new formattingSettings.NumUpDown({
     name: "minPointRadius",
-    displayName: "Radio punto mínimo (2-12)",
+    displayName: "Radio punto mínimo",
     value: 4,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 2,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 12,
+      },
+    },
   });
 
   showReferenceLine = new formattingSettings.ToggleSwitch({
@@ -463,8 +593,18 @@ class SparklineInteractionSettings extends FormattingSettingsCard {
 
   selectionBorderWidth = new formattingSettings.NumUpDown({
     name: "selectionBorderWidth",
-    displayName: "Grosor borde de selección (0-5)",
+    displayName: "Grosor borde de selección",
     value: 2,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 5,
+      },
+    },
   });
 
   showTooltips = new formattingSettings.ToggleSwitch({
@@ -475,8 +615,18 @@ class SparklineInteractionSettings extends FormattingSettingsCard {
 
   animationDuration = new formattingSettings.NumUpDown({
     name: "animationDuration",
-    displayName: "Duración animación (0-2000ms)",
+    displayName: "Duración animación (ms)",
     value: 200,
+    options: {
+      minValue: {
+        type: formattingSettings.ValidatorType.Min,
+        value: 0,
+      },
+      maxValue: {
+        type: formattingSettings.ValidatorType.Max,
+        value: 2000,
+      },
+    },
   });
 
   name: string = "sparklineInteractionSettings";

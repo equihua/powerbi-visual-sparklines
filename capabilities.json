@@ -14,6 +14,11 @@
       "displayName": "Valores",
       "name": "values",
       "kind": "Measure"
+    },
+    {
+      "displayName": "Categoría de minigráfico",
+      "name": "sparklineCategory",
+      "kind": "Grouping"
     }
   ],
   "dataViewMappings": [
@@ -62,8 +67,8 @@
     }
   ],
   "objects": {
-    "sparklineSettings": {
-      "displayName": "Formato de minigráficos",
+    "sparklineLineSettings": {
+      "displayName": "Línea del Sparkline",
       "properties": {
         "lineColor": {
           "displayName": "Color de línea",
@@ -76,15 +81,411 @@
           }
         },
         "lineWidth": {
-          "displayName": "Grosor de línea",
+          "displayName": "Grosor de línea (0.5-10)",
           "type": {
             "numeric": true
           }
         },
+        "lineOpacity": {
+          "displayName": "Opacidad de línea (0-100%)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "curveType": {
+          "displayName": "Tipo de curva",
+          "type": {
+            "enumeration": []
+          }
+        },
+        "showArea": {
+          "displayName": "Mostrar área bajo la línea",
+          "type": {
+            "bool": true
+          }
+        },
+        "areaColor": {
+          "displayName": "Color de área",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "areaOpacity": {
+          "displayName": "Opacidad de área (0-100%)",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "sparklinePointsSettings": {
+      "displayName": "Puntos del Sparkline",
+      "properties": {
         "showPoints": {
           "displayName": "Mostrar puntos",
           "type": {
             "bool": true
+          }
+        },
+        "pointRadius": {
+          "displayName": "Radio de puntos (1-10)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "pointColor": {
+          "displayName": "Color de puntos",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "pointBorderWidth": {
+          "displayName": "Grosor de borde (0-5)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "pointBorderColor": {
+          "displayName": "Color de borde",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "highlightFirstLast": {
+          "displayName": "Destacar primer/último punto",
+          "type": {
+            "bool": true
+          }
+        },
+        "firstPointColor": {
+          "displayName": "Color primer punto",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "lastPointColor": {
+          "displayName": "Color último punto",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "sparklineLayoutSettings": {
+      "displayName": "Diseño y Layout",
+      "properties": {
+        "sparklineHeight": {
+          "displayName": "Altura de sparkline (20-200)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "sparklineWidth": {
+          "displayName": "Ancho de sparkline (50-800)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "rowSpacing": {
+          "displayName": "Espaciado entre filas (0-50)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "backgroundColor": {
+          "displayName": "Color de fondo",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "chartBackgroundColor": {
+          "displayName": "Color de fondo del gráfico",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "showBorder": {
+          "displayName": "Mostrar bordes",
+          "type": {
+            "bool": true
+          }
+        },
+        "borderColor": {
+          "displayName": "Color de borde",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "borderRadius": {
+          "displayName": "Radio de borde (0-20)",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "sparklineLabelSettings": {
+      "displayName": "Etiquetas y Texto",
+      "properties": {
+        "labelWidth": {
+          "displayName": "Ancho de etiqueta (50-400)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "fontSize": {
+          "displayName": "Tamaño de fuente (8-24)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "fontColor": {
+          "displayName": "Color de texto",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "fontBold": {
+          "displayName": "Texto en negrita",
+          "type": {
+            "bool": true
+          }
+        },
+        "showValues": {
+          "displayName": "Mostrar valores",
+          "type": {
+            "bool": true
+          }
+        },
+        "valuePosition": {
+          "displayName": "Posición de valores",
+          "type": {
+            "enumeration": []
+          }
+        },
+        "valueFormat": {
+          "displayName": "Formato de valores",
+          "type": {
+            "enumeration": []
+          }
+        }
+      }
+    },
+    "sparklineHighlightSettings": {
+      "displayName": "Valores Destacados",
+      "properties": {
+        "showMinMax": {
+          "displayName": "Mostrar valores mín/máx",
+          "type": {
+            "bool": true
+          }
+        },
+        "maxPointColor": {
+          "displayName": "Color punto máximo",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "minPointColor": {
+          "displayName": "Color punto mínimo",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "maxPointRadius": {
+          "displayName": "Radio punto máximo (2-12)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "minPointRadius": {
+          "displayName": "Radio punto mínimo (2-12)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "showReferenceLine": {
+          "displayName": "Mostrar línea de referencia",
+          "type": {
+            "bool": true
+          }
+        },
+        "referenceLineValue": {
+          "displayName": "Valor de referencia",
+          "type": {
+            "numeric": true
+          }
+        },
+        "referenceLineColor": {
+          "displayName": "Color línea de referencia",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "referenceLineStyle": {
+          "displayName": "Estilo de línea",
+          "type": {
+            "enumeration": []
+          }
+        }
+      }
+    },
+    "sparklineInteractionSettings": {
+      "displayName": "Interactividad",
+      "properties": {
+        "enableHover": {
+          "displayName": "Habilitar hover",
+          "type": {
+            "bool": true
+          }
+        },
+        "hoverColor": {
+          "displayName": "Color de hover",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "enableSelection": {
+          "displayName": "Habilitar selección",
+          "type": {
+            "bool": true
+          }
+        },
+        "selectionColor": {
+          "displayName": "Color de selección",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "selectionBorderColor": {
+          "displayName": "Color borde de selección",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "selectionBorderWidth": {
+          "displayName": "Grosor borde de selección (0-5)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "showTooltips": {
+          "displayName": "Mostrar tooltips",
+          "type": {
+            "bool": true
+          }
+        },
+        "animationDuration": {
+          "displayName": "Duración animación (0-2000ms)",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "dataPoint": {
+      "displayName": "Data colors",
+      "properties": {
+        "defaultColor": {
+          "displayName": "Default color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "showAllDataPoints": {
+          "displayName": "Show all",
+          "type": {
+            "bool": true
+          }
+        },
+        "fill": {
+          "displayName": "Fill",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "fillRule": {
+          "displayName": "Color saturation",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "fontSize": {
+          "displayName": "Text Size",
+          "type": {
+            "numeric": true
           }
         }
       }

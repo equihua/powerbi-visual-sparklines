@@ -55,10 +55,18 @@ interface SparklinePoint {
   formattedValue?: string;
 }
 
+// Tipo para valores de columnas adicionales
+interface ColumnValue {
+  value: number;
+  formattedValue: string;
+  measureName: string;
+}
+
 // Tipo para cada fila del sparkline
 interface SparklineRow {
   name: string;
   points: SparklinePoint[];
+  columnValues: ColumnValue[];
   selectionId: ISelectionId;
 }
 
@@ -99,6 +107,7 @@ export class Visual implements IVisual {
 
     this.host = options.host;
     this.formattingSettingsService = new FormattingSettingsService();
+    this.formattingSettings = new VisualFormattingSettingsModel();
     this.selectionManager = this.host.createSelectionManager();
     this.tooltipServiceWrapper = createTooltipServiceWrapper(
       this.host.tooltipService,
@@ -168,39 +177,17 @@ export class Visual implements IVisual {
    * Parsea la configuración de sparklineSettings desde dataView.objects
    */
   private parseSparklineSettings(dataView: DataView): void {
-    const objects = dataView.metadata.objects;
+    // Populate formatting settings from dataView
+    this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
+      VisualFormattingSettingsModel,
+      dataView
+    );
 
-    if (objects) {
-      const sparklineSettings = objects["sparklineSettings"];
-
-      if (sparklineSettings) {
-        // Obtener color de línea
-        const lineColorFill = getValue<any>(sparklineSettings, "lineColor");
-        if (lineColorFill && lineColorFill.solid) {
-          this.sparklineSettings.lineColor = lineColorFill.solid.color;
-        }
-
-        // Obtener grosor de línea
-        const lineWidth = getValue<number>(sparklineSettings, "lineWidth");
-        if (lineWidth !== undefined) {
-          this.sparklineSettings.lineWidth = Math.max(1, lineWidth);
-        }
-
-        // Obtener si mostrar puntos
-        const showPoints = getValue<boolean>(sparklineSettings, "showPoints");
-        if (showPoints !== undefined) {
-          this.sparklineSettings.showPoints = showPoints;
-        }
-      }
-    }
-
-    // Valores por defecto si no se especifican
-    if (!this.sparklineSettings.lineColor) {
-      this.sparklineSettings.lineColor = "#0078d4";
-    }
-    if (!this.sparklineSettings.lineWidth) {
-      this.sparklineSettings.lineWidth = 2;
-    }
+    // Extraer valores del nuevo modelo de configuración
+    this.sparklineSettings.lineColor = this.formattingSettings.sparklineLineCard.lineColor.value.value || "#0078d4";
+    this.sparklineSettings.lineWidth = Math.max(0.5, Math.min(10, this.formattingSettings.sparklineLineCard.lineWidth.value));
+    this.sparklineSettings.showPoints = this.formattingSettings.sparklinePointsCard.showPoints.value;
+    this.sparklineSettings.pointRadius = Math.max(1, Math.min(10, this.formattingSettings.sparklinePointsCard.pointRadius.value));
 
     console.log("Sparkline Settings:", this.sparklineSettings);
   }
@@ -214,22 +201,11 @@ export class Visual implements IVisual {
     const columnChildren = matrix.columns?.root?.children || [];
     const valueSources = matrix.valueSources || [];
 
-    if (rowChildren.length === 0 || columnChildren.length === 0) {
+    if (rowChildren.length === 0) {
       return [];
     }
 
-    // Aplicar data reduction si hay muchas columnas
-    const columnsToShow = columnChildren.length > this.maxColumnsBeforeReduction
-      ? columnChildren.slice(0, this.maxColumnsBeforeReduction)
-      : columnChildren;
-
-    console.log(`Data reduction: ${columnChildren.length} -> ${columnsToShow.length} columns`);
-
-    // Usar la primera medida para el sparkline
-    const valueSourceIndex = 0;
-    const valueFormatter = valueFormatterFactory.create({
-      format: valueSources[valueSourceIndex]?.format || "0.00",
-    });
+    console.log(`Extracting data: ${rowChildren.length} rows, ${valueSources.length} measures, ${columnChildren.length} columns`);
 
     const rows: SparklineRow[] = rowChildren.map(
       (row: any, rowIndex: number) => {
@@ -239,21 +215,69 @@ export class Visual implements IVisual {
             ? row.levelValues[0].value
             : row.value;
 
-        // Extraer puntos de datos para cada columna
-        const points: SparklinePoint[] = columnsToShow.map(
-          (col: any, colIndex: number) => {
-            // La estructura de valores es: row.values[valueSourceIndex]?.value
-            const cellValue =
-              row.values && row.values[valueSourceIndex?.toString()]?.value;
+        // Extraer valores de todas las medidas para mostrar como columnas
+        const columnValues: ColumnValue[] = [];
+        
+        // Si no hay columnas (categorías), usar las medidas directamente
+        if (columnChildren.length === 0) {
+          valueSources.forEach((source, idx) => {
+            const cellValue = row.values && row.values[idx]?.value;
+            const formatter = valueFormatterFactory.create({
+              format: source.format || "0.00",
+            });
+            
+            columnValues.push({
+              value: typeof cellValue === "number" ? cellValue : 0,
+              formattedValue: formatter.format(cellValue),
+              measureName: source.displayName || `Measure ${idx + 1}`,
+            });
+          });
+        } else {
+          // Si hay columnas, tomar el primer valor de cada medida
+          valueSources.forEach((source, idx) => {
+            const firstColKey = Object.keys(row.values || {})[idx];
+            const cellValue = row.values && row.values[firstColKey]?.value;
+            const formatter = valueFormatterFactory.create({
+              format: source.format || "0.00",
+            });
+            
+            columnValues.push({
+              value: typeof cellValue === "number" ? cellValue : 0,
+              formattedValue: formatter.format(cellValue),
+              measureName: source.displayName || `Measure ${idx + 1}`,
+            });
+          });
+        }
 
-            return {
+        // Extraer puntos de datos para el sparkline usando la última medida o categoría de sparkline
+        const points: SparklinePoint[] = [];
+        
+        if (columnChildren.length > 0) {
+          // Usar la última medida para el sparkline
+          const sparklineMeasureIdx = valueSources.length - 1;
+          const valueFormatter = valueFormatterFactory.create({
+            format: valueSources[sparklineMeasureIdx]?.format || "0.00",
+          });
+
+          const columnsToShow = columnChildren.length > this.maxColumnsBeforeReduction
+            ? columnChildren.slice(0, this.maxColumnsBeforeReduction)
+            : columnChildren;
+
+          columnsToShow.forEach((col: any, colIndex: number) => {
+            // Buscar el valor correspondiente
+            const valueKey = Object.keys(row.values || {}).find((key) => 
+              key.includes(sparklineMeasureIdx.toString())
+            );
+            const cellValue = row.values && valueKey ? row.values[valueKey]?.values?.[colIndex] : 0;
+
+            points.push({
               x: colIndex,
               y: typeof cellValue === "number" ? cellValue : 0,
               label: col.value || `Col ${colIndex}`,
               formattedValue: valueFormatter.format(cellValue),
-            };
-          }
-        );
+            });
+          });
+        }
 
         // Crear selectionId para esta fila
         const selectionId = this.host
@@ -264,6 +288,7 @@ export class Visual implements IVisual {
         return {
           name: String(rowName),
           points: points,
+          columnValues: columnValues,
           selectionId: selectionId,
         };
       }
@@ -276,10 +301,82 @@ export class Visual implements IVisual {
    * Renderiza todos los sparklines
    */
   private render(): void {
+    // Renderizar encabezados de columna
+    if (this.sparklineData.length > 0) {
+      this.renderTableHeader(this.sparklineData[0]);
+    }
+
     // Crear un div para cada fila con su sparkline
     this.sparklineData.forEach((rowData) => {
       this.renderSparklineRow(rowData);
     });
+  }
+
+  /**
+   * Renderiza los encabezados de la tabla
+   */
+  private renderTableHeader(sampleRow: SparklineRow): void {
+    const headerDiv = this.container
+      .append("div")
+      .attr("class", "sparkline-header")
+      .style("display", "flex")
+      .style("align-items", "center")
+      .style("margin-bottom", "4px")
+      .style("padding", "8px 6px")
+      .style("background-color", "#e8e8e8")
+      .style("border-radius", "4px")
+      .style("border", "1px solid #d0d0d0")
+      .style("font-weight", "600")
+      .style("font-size", "11px")
+      .style("color", "#333");
+
+    // Encabezado de la columna de nombre
+    headerDiv
+      .append("div")
+      .style("min-width", "200px")
+      .style("max-width", "200px")
+      .style("margin-right", "10px")
+      .text("Objetivo");
+
+    // Encabezados de las columnas de valores
+    sampleRow.columnValues.forEach((colValue) => {
+      headerDiv
+        .append("div")
+        .style("min-width", "80px")
+        .style("max-width", "80px")
+        .style("margin-right", "8px")
+        .style("text-align", "right")
+        .style("overflow", "hidden")
+        .style("text-overflow", "ellipsis")
+        .style("white-space", "nowrap")
+        .attr("title", colValue.measureName)
+        .text(this.truncateMeasureName(colValue.measureName));
+    });
+
+    // Encabezado del sparkline
+    if (sampleRow.points.length > 0) {
+      headerDiv
+        .append("div")
+        .style("flex", "1")
+        .style("min-width", "100px")
+        .style("text-align", "center")
+        .text("Tendencia");
+    }
+  }
+
+  /**
+   * Trunca el nombre de la medida para que quepa en el encabezado
+   */
+  private truncateMeasureName(name: string): string {
+    // Eliminar prefijos comunes como "M0_"
+    let truncated = name.replace(/^M\d+_/, "");
+    
+    // Si es muy largo, abreviar
+    if (truncated.length > 12) {
+      truncated = truncated.substring(0, 10) + "..";
+    }
+    
+    return truncated;
   }
 
   /**
@@ -310,10 +407,10 @@ export class Visual implements IVisual {
     // Etiqueta del nombre de la fila
     rowDiv
       .append("div")
-      .style("min-width", "150px")
-      .style("max-width", "150px")
+      .style("min-width", "200px")
+      .style("max-width", "200px")
       .style("margin-right", "10px")
-      .style("font-size", "12px")
+      .style("font-size", "11px")
       .style("font-weight", "500")
       .style("overflow", "hidden")
       .style("text-overflow", "ellipsis")
@@ -321,13 +418,31 @@ export class Visual implements IVisual {
       .attr("title", rowData.name)
       .text(rowData.name);
 
-    // SVG del sparkline
-    const svgDiv = rowDiv
-      .append("div")
-      .style("flex", "1")
-      .style("min-width", "0");
+    // Renderizar columnas de valores
+    rowData.columnValues.forEach((colValue) => {
+      rowDiv
+        .append("div")
+        .style("min-width", "80px")
+        .style("max-width", "80px")
+        .style("margin-right", "8px")
+        .style("font-size", "11px")
+        .style("text-align", "right")
+        .style("overflow", "hidden")
+        .style("text-overflow", "ellipsis")
+        .style("white-space", "nowrap")
+        .attr("title", `${colValue.measureName}: ${colValue.formattedValue}`)
+        .text(colValue.formattedValue);
+    });
 
-    this.renderSparklineSVG(svgDiv, rowData);
+    // SVG del sparkline (si hay puntos)
+    if (rowData.points.length > 0) {
+      const svgDiv = rowDiv
+        .append("div")
+        .style("flex", "1")
+        .style("min-width", "100px");
+
+      this.renderSparklineSVG(svgDiv, rowData);
+    }
   }
 
   /**
@@ -341,6 +456,12 @@ export class Visual implements IVisual {
 
     // Validar que haya puntos
     if (points.length === 0) {
+      container
+        .append("div")
+        .style("text-align", "center")
+        .style("font-size", "10px")
+        .style("color", "#999")
+        .text("Sin datos");
       return;
     }
 
@@ -348,6 +469,12 @@ export class Visual implements IVisual {
     const validPoints = points.filter((p) => p.y !== null && !isNaN(p.y));
 
     if (validPoints.length === 0) {
+      container
+        .append("div")
+        .style("text-align", "center")
+        .style("font-size", "10px")
+        .style("color", "#999")
+        .text("Sin datos");
       return;
     }
 
