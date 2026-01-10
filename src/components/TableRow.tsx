@@ -1,11 +1,13 @@
 import React from 'react';
-import { TableRowData } from '../visualViewModel';
+import { TableRowData, SparklineData } from '../visualViewModel';
 import { SparklineColumnSettings } from '../settings';
 import { TableCell } from './TableCell';
 import { Sparkline } from './Sparkline';
 
 interface TableRowProps {
     rowData: TableRowData;
+    columnNames: string[];
+    sparklineColumnNames: string[];
     index: number;
     alternateRowColor: boolean;
     sparklineSettings: Map<string, SparklineColumnSettings>;
@@ -13,6 +15,8 @@ interface TableRowProps {
 
 export const TableRow: React.FC<TableRowProps> = ({
     rowData,
+    columnNames,
+    sparklineColumnNames,
     index,
     alternateRowColor,
     sparklineSettings
@@ -21,14 +25,12 @@ export const TableRow: React.FC<TableRowProps> = ({
 
     return (
         <tr style={{ backgroundColor }}>
-            {rowData.cells.map((cell, cellIndex) => (
-                <TableCell key={cellIndex} cell={cell} />
+            {columnNames.map((columnName, cellIndex) => (
+                <TableCell key={cellIndex} value={rowData[columnName]} />
             ))}
-            {rowData.sparklineColumns.map((sparklineData, sparklineIndex) => {
-                const seriesKey = sparklineData.column.queryName || 
-                                 sparklineData.column.displayName || 
-                                 `column${sparklineIndex}`;
-                const settings = sparklineSettings.get(seriesKey) || {
+            {sparklineColumnNames.map((columnName, sparklineIndex) => {
+                const sparklineData = rowData[columnName] as SparklineData;
+                const settings = sparklineSettings.get(columnName) || {
                     chartType: 'line',
                     color: '#0078D4',
                     lineWidth: 1.5
@@ -36,9 +38,9 @@ export const TableRow: React.FC<TableRowProps> = ({
 
                 return (
                     <td key={`sparkline-${sparklineIndex}`}>
-                        {sparklineData.dataPoints.length > 0 && (
+                        {sparklineData && sparklineData.Values && sparklineData.Values.length > 0 && (
                             <Sparkline
-                                dataPoints={sparklineData.dataPoints}
+                                sparklineData={sparklineData}
                                 settings={settings}
                             />
                         )}

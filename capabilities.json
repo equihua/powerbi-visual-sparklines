@@ -1,52 +1,74 @@
 {
     "dataRoles": [
         {
-            "name": "category",
-            "kind": "Grouping",
-            "displayName": "Renglones"
+            "displayName": "Category",
+            "name": "mainCategory",
+            "kind": "Grouping"
         },
         {
-            "name": "values",
-            "kind": "Measure",
-            "displayName": "Columnas"
+            "displayName": "Measure Data",
+            "name": "measure",
+            "kind": "Measure"
         },
         {
-            "name": "sparklineValues",
-            "kind": "Measure",
-            "displayName": "Columnas Sparkline"
+            "displayName": "Minigraph Axis",
+            "name": "axis",
+            "kind": "Grouping"
         },
         {
-            "name": "xAxis",
-            "kind": "Grouping",
-            "displayName": "Eje X"
+            "displayName": "Minigraph Data",
+            "name": "sparkline",
+            "kind": "Measure"
         }
     ],
     "dataViewMappings": [
         {
-            "conditions": [
-                {
-                    "category": { "max": 1 },
-                    "values": { "min": 0 },
-                    "sparklineValues": { "min": 0 },
-                    "xAxis": { "max": 1 }
-                }
-            ],
             "categorical": {
                 "categories": {
-                    "for": { "in": "category" },
-                    "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                    "for": {
+                        "in": "mainCategory"
+                    },
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 1000
+                        }
+                    }
                 },
                 "values": {
                     "group": {
-                        "by": "xAxis",
+                        "by": "axis",
                         "select": [
-                            { "for": { "in": "values" } },
-                            { "for": { "in": "sparklineValues" } }
-                        ],
-                        "dataReductionAlgorithm": { "top": { "count": 1000 } }
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "sparkline"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "dataVolume": 4
+            },
+            "conditions": [
+                {
+                    "mainCategory": {
+                        "max": 1
+                    },
+                    "axis": {
+                        "max": 1
+                    },
+                    "measure": {
+                        "max": 10
+                    },
+                    "sparklines": {
+                        "max": 5
                     }
                 }
-            }
+            ]
         }
     ],
     "objects": {
@@ -101,5 +123,19 @@
             }
         }
     },
+    "sorting": {
+        "implicit": {
+            "clauses": [
+                {
+                    "role": "mainCategory",
+                    "direction": 1
+                }
+            ]
+        }
+    },
+    "supportsHighlight": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": false,
+    "suppressDefaultTitle": true,
     "privileges": []
 }

@@ -1,22 +1,16 @@
 import React from 'react';
-import powerbi from 'powerbi-visuals-api';
-
-interface CellData {
-    value: any;
-    column: powerbi.DataViewMetadataColumn;
-}
 
 interface TableCellProps {
-    cell: CellData;
+    value: any;
 }
 
-const formatValue = (value: any, column: powerbi.DataViewMetadataColumn): string => {
+const formatValue = (value: any): string => {
     if (value == null) {
         return '';
     }
 
     if (typeof value === 'number') {
-        return formatNumericValue(value, column.format);
+        return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
     }
 
     if (value instanceof Date) {
@@ -26,15 +20,7 @@ const formatValue = (value: any, column: powerbi.DataViewMetadataColumn): string
     return String(value);
 };
 
-const formatNumericValue = (value: number, format?: string): string => {
-    if (format?.includes('%')) {
-        return `${(value * 100).toFixed(2)}%`;
-    }
-
-    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-};
-
-export const TableCell: React.FC<TableCellProps> = ({ cell }) => {
-    const formattedValue = formatValue(cell.value, cell.column);
+export const TableCell: React.FC<TableCellProps> = ({ value }) => {
+    const formattedValue = formatValue(value);
     return <td>{formattedValue}</td>;
 };

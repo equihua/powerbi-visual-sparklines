@@ -1,20 +1,19 @@
 import React from 'react';
-import powerbi from 'powerbi-visuals-api';
 
 interface TableHeaderProps {
-    columns: powerbi.DataViewMetadataColumn[];
-    sparklineColumns: powerbi.DataViewMetadataColumn[];
+    columnNames: string[];
+    sparklineColumnNames: string[];
 }
 
-export const TableHeader: React.FC<TableHeaderProps> = ({ columns, sparklineColumns }) => {
+export const TableHeader: React.FC<TableHeaderProps> = ({ columnNames, sparklineColumnNames }) => {
     return (
         <thead>
             <tr>
-                {columns.map((column, index) => (
-                    <th key={index}>{column.displayName}</th>
+                {columnNames.map((columnName, index) => (
+                    <th key={index}>{columnName}</th>
                 ))}
-                {sparklineColumns.map((column, index) => (
-                    <th key={`sparkline-${index}`}>{column.displayName}</th>
+                {sparklineColumnNames.map((columnName, index) => (
+                    <th key={`sparkline-${index}`}>{columnName}</th>
                 ))}
             </tr>
         </thead>

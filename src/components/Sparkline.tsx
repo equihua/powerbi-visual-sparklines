@@ -1,5 +1,5 @@
 import React from 'react';
-import { SparklineDataPoint } from '../visualViewModel';
+import { SparklineData, SparklineDataPoint } from '../visualViewModel';
 import { SparklineColumnSettings } from '../settings';
 import { LineSparkline } from './LineSparkline';
 import { BarSparkline } from './BarSparkline';
@@ -8,12 +8,17 @@ import { PieSparkline } from './PieSparkline';
 import { DonutSparkline } from './DonutSparkline';
 
 interface SparklineProps {
-    dataPoints: SparklineDataPoint[];
+    sparklineData: SparklineData;
     settings: SparklineColumnSettings;
 }
 
-export const Sparkline: React.FC<SparklineProps> = ({ dataPoints, settings }) => {
+export const Sparkline: React.FC<SparklineProps> = ({ sparklineData, settings }) => {
     const chartType = settings.chartType || 'line';
+
+    const dataPoints: SparklineDataPoint[] = sparklineData.Values.map((value, index) => ({
+        x: sparklineData.Axis[index] || index,
+        y: value
+    }));
 
     switch (chartType) {
         case 'line':
