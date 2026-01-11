@@ -1,0 +1,74 @@
+{
+    "headerFormatting": {
+        "displayName": "Formato de encabezado",
+        "properties": {
+            "headerAlignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "headerPadding": {
+                "displayName": "Espaciado interno",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "headerBold": {
+                "displayName": "Negrita",
+                "type": {
+                    "bool": true
+                }
+            }
+        }
+    },
+    "totalFormatting": {
+        "displayName": "Formato de totales",
+        "properties": {
+            "totalAlignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "totalDecimalPlaces": {
+                "displayName": "Lugares decimales",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "totalBold": {
+                "displayName": "Negrita",
+                "type": {
+                    "bool": true
+                }
+            }
+        }
+    }
+}

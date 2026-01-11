@@ -1,64 +1,345 @@
-import React from 'react';
-import powerbi from 'powerbi-visuals-api';
-import { TableViewModel, SparklineData } from '../visualViewModel';
-import { SparklineColumnSettings } from '../settings';
-import { TableHeader } from './TableHeader';
-import { TableRow } from './TableRow';
+import React, { useState } from "react";
+import { TableViewModel } from "../visualViewModel";
+import { SparklineColumnSettings } from "../settings";
+import { TableHeader } from "./TableHeader";
+import { TableRow } from "./TableRow";
 
 interface TableProps {
-    viewModel: TableViewModel;
-    textSize: number;
-    alternateRowColor: boolean;
-    sparklineSettings: Map<string, SparklineColumnSettings>;
-    width: number;
+  viewModel: TableViewModel;
+  textSize: number;
+  tableStyle: string;
+  showHorizontalLines: boolean;
+  horizontalLineColor: string;
+  horizontalLineWidth: number;
+  showVerticalLines: boolean;
+  verticalLineColor: string;
+  verticalLineWidth: number;
+  borderStyle: string;
+  borderColor: string;
+  borderWidth: number;
+  borderSection: "all" | "header" | "rows";
+  rowSelection: boolean;
+  rowSelectionColor: string;
+  sortable: boolean;
+  freezeCategories: boolean;
+  searchable: boolean;
+  pagination: boolean;
+  rowsPerPage: number;
+  fontFamily: string;
+  wordWrap: boolean;
+  textOverflow: "clip" | "ellipsis" | "wrap";
+  headerAlignment: "left" | "center" | "right";
+  headerPadding: number;
+  headerBold: boolean;
+  stickyHeader: boolean;
+  headerFontColor: string;
+  headerFontSize: number;
+  headerBackgroundColor: string;
+  rowHeight: number;
+  alternatingRowColor: string;
+  hoverBackgroundColor: string;
+  rowPadding: number;
+  categoryColumnAlignment: "left" | "center" | "right";
+  categoryCellAlignment: "left" | "center" | "right";
+  categoryCellPadding: number;
+  categoryCellFontColor: string;
+  categoryCellFontSize: number;
+  categoryCellBackgroundColor: string;
+  measureCellAlignment: "left" | "center" | "right";
+  measureCellPadding: number;
+  measureCellFontColor: string;
+  measureCellFontSize: number;
+  measureCellBackgroundColor: string;
+  decimalPlaces: number;
+  thousandsSeparator: boolean;
+  currencySymbol: string;
+  currencyPosition: "before" | "after";
+  negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
+  customNegativeColor: string;
+  sparklineSettings: Map<string, SparklineColumnSettings>;
+  width: number;
 }
 
 export const Table: React.FC<TableProps> = ({
-    viewModel,
-    textSize,
-    alternateRowColor,
-    sparklineSettings,
-    width
+  viewModel,
+  textSize,
+  tableStyle,
+  showHorizontalLines,
+  horizontalLineColor,
+  horizontalLineWidth,
+  showVerticalLines,
+  verticalLineColor,
+  verticalLineWidth,
+  borderStyle,
+  borderColor,
+  borderWidth,
+  borderSection,
+  rowSelection,
+  rowSelectionColor,
+  sortable,
+  freezeCategories,
+  searchable,
+  pagination,
+  rowsPerPage,
+  fontFamily,
+  wordWrap,
+  textOverflow,
+  headerAlignment,
+  headerPadding,
+  headerBold,
+  stickyHeader,
+  headerFontColor,
+  headerFontSize,
+  headerBackgroundColor,
+  rowHeight,
+  alternatingRowColor,
+  hoverBackgroundColor,
+  rowPadding,
+  categoryColumnAlignment,
+  categoryCellAlignment,
+  categoryCellPadding,
+  categoryCellFontColor,
+  categoryCellFontSize,
+  categoryCellBackgroundColor,
+  measureCellAlignment,
+  measureCellPadding,
+  measureCellFontColor,
+  measureCellFontSize,
+  measureCellBackgroundColor,
+  decimalPlaces,
+  thousandsSeparator,
+  currencySymbol,
+  currencyPosition,
+  negativeNumberFormat,
+  customNegativeColor,
+  sparklineSettings,
+  width,
 }) => {
-    if (!viewModel || !viewModel.rows || viewModel.rows.length === 0) {
-        return <div>No data available</div>;
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+
+  if (!viewModel || !viewModel.rows || viewModel.rows.length === 0) {
+    return <div>No data available</div>;
+  }
+
+  const firstRow = viewModel.rows[0];
+  const columnNames: string[] = [];
+  const sparklineColumnNames: string[] = [];
+
+  Object.keys(firstRow).forEach((key) => {
+    const value = firstRow[key];
+    if (
+      value &&
+      typeof value === "object" &&
+      "Nombre" in value &&
+      "Axis" in value &&
+      "Values" in value
+    ) {
+      sparklineColumnNames.push(key);
+    } else {
+      columnNames.push(key);
     }
+  });
 
-    const firstRow = viewModel.rows[0];
-    const columnNames: string[] = [];
-    const sparklineColumnNames: string[] = [];
+  const handleSort = (columnName: string) => {
+    if (!sortable) return;
 
-    Object.keys(firstRow).forEach(key => {
-        const value = firstRow[key];
-        if (value && typeof value === 'object' && 'Nombre' in value && 'Axis' in value && 'Values' in value) {
-            sparklineColumnNames.push(key);
-        } else {
-            columnNames.push(key);
-        }
+    if (sortColumn === columnName) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(columnName);
+      setSortDirection("asc");
+    }
+  };
+
+  const handleRowClick = (index: number) => {
+    if (!rowSelection) return;
+    setSelectedRowIndex(selectedRowIndex === index ? null : index);
+  };
+
+  let filteredRows = [...viewModel.rows];
+  if (searchable && searchQuery.trim().length > 0) {
+    const q = searchQuery.toLowerCase();
+    filteredRows = filteredRows.filter((row) => {
+      return columnNames.some((cn) =>
+        String(row[cn]).toLowerCase().includes(q)
+      );
     });
+  }
 
-    return (
-        <table
-            className="sparkline-table"
-            style={{ fontSize: `${textSize}px`, width: `${width}px` }}
-        >
-            <TableHeader
-                columnNames={columnNames}
-                sparklineColumnNames={sparklineColumnNames}
+  let sortedRows = [...filteredRows];
+  if (sortable && sortColumn) {
+    sortedRows.sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
+
+      let comparison = 0;
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        comparison = aValue - bValue;
+      } else {
+        comparison = String(aValue).localeCompare(String(bValue));
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }
+
+  const tableClassName = `sparkline-table ${
+    tableStyle === "striped" ? "striped" : ""
+  }`;
+
+  const startIndex = pagination ? (page - 1) * rowsPerPage : 0;
+  const endIndex = pagination ? startIndex + rowsPerPage : sortedRows.length;
+  const pageRows = sortedRows.slice(startIndex, endIndex);
+
+  const commonBorder = `${borderWidth}px ${borderStyle} ${borderColor}`;
+  const tableBorderStyles =
+    borderSection === "all"
+      ? { border: commonBorder }
+      : borderSection === "header"
+      ? {}
+      : {}; // rows handled in row styles
+
+  return (
+    <div style={{ width: `${width}px`, fontFamily }}>
+      {searchable && (
+        <div style={{ marginBottom: 8 }}>
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: "100%", padding: 6 }}
+          />
+        </div>
+      )}
+      <table
+        className={tableClassName}
+        style={{
+          fontSize: `${textSize}px`,
+          width: `100%`,
+          borderCollapse: "collapse",
+          ...tableBorderStyles,
+        }}
+      >
+        <TableHeader
+          columnNames={columnNames}
+          sparklineColumnNames={sparklineColumnNames}
+          sortable={sortable}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          alignment={headerAlignment}
+          padding={headerPadding}
+          bold={headerBold}
+          sticky={stickyHeader}
+          showVerticalLines={showVerticalLines}
+          verticalLineColor={verticalLineColor}
+          verticalLineWidth={verticalLineWidth}
+          borderBottom={
+            borderSection === "header" || borderSection === "all"
+              ? commonBorder
+              : undefined
+          }
+          fontColor={headerFontColor}
+          fontSize={headerFontSize}
+          backgroundColor={headerBackgroundColor}
+        />
+        <tbody>
+          {pageRows.map((rowData, index) => (
+            <TableRow
+              key={index}
+              rowData={rowData}
+              columnNames={columnNames}
+              sparklineColumnNames={sparklineColumnNames}
+              index={index}
+              tableStyle={tableStyle}
+              showHorizontalLines={showHorizontalLines}
+              horizontalLineColor={horizontalLineColor}
+              horizontalLineWidth={horizontalLineWidth}
+              showVerticalLines={showVerticalLines}
+              verticalLineColor={verticalLineColor}
+              verticalLineWidth={verticalLineWidth}
+              isSelected={rowSelection && selectedRowIndex === index}
+              onRowClick={() => handleRowClick(index)}
+              rowSelectionColor={rowSelectionColor}
+              freezeCategories={freezeCategories}
+              rowHeight={rowHeight}
+              alternatingRowColor={alternatingRowColor}
+              hoverBackgroundColor={hoverBackgroundColor}
+              rowPadding={rowPadding}
+              categoryCellAlignment={categoryCellAlignment}
+              categoryCellPadding={categoryCellPadding}
+              categoryCellFontColor={categoryCellFontColor}
+              categoryCellFontSize={categoryCellFontSize}
+              categoryCellBackgroundColor={categoryCellBackgroundColor}
+              measureCellAlignment={measureCellAlignment}
+              measureCellPadding={measureCellPadding}
+              measureCellFontColor={measureCellFontColor}
+              measureCellFontSize={measureCellFontSize}
+              measureCellBackgroundColor={measureCellBackgroundColor}
+              wordWrap={wordWrap}
+              textOverflow={textOverflow}
+              borderForRows={
+                borderSection === "rows" || borderSection === "all"
+                  ? commonBorder
+                  : undefined
+              }
+              decimalPlaces={decimalPlaces}
+              thousandsSeparator={thousandsSeparator}
+              currencySymbol={currencySymbol}
+              currencyPosition={currencyPosition}
+              negativeNumberFormat={negativeNumberFormat}
+              customNegativeColor={customNegativeColor}
+              sparklineSettings={sparklineSettings}
             />
-            <tbody>
-                {viewModel.rows.map((rowData, index) => (
-                    <TableRow
-                        key={index}
-                        rowData={rowData}
-                        columnNames={columnNames}
-                        sparklineColumnNames={sparklineColumnNames}
-                        index={index}
-                        alternateRowColor={alternateRowColor}
-                        sparklineSettings={sparklineSettings}
-                    />
-                ))}
-            </tbody>
-        </table>
-    );
+          ))}
+        </tbody>
+      </table>
+      {pagination && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: 8,
+          }}
+        >
+          <span>
+            Página {page} de{" "}
+            {Math.max(1, Math.ceil(sortedRows.length / rowsPerPage))}
+          </span>
+          <div>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              Anterior
+            </button>
+            <button
+              onClick={() =>
+                setPage((p) =>
+                  Math.min(Math.ceil(sortedRows.length / rowsPerPage), p + 1)
+                )
+              }
+              disabled={page >= Math.ceil(sortedRows.length / rowsPerPage)}
+              style={{ marginLeft: 8 }}
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };

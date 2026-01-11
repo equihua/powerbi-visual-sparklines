@@ -39,7 +39,7 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IViewport = powerbi.IViewport;
 
 import {
-  SparklineColumnSettings,
+  type SparklineColumnSettings,
   VisualFormattingSettingsModel,
 } from "./settings";
 import { visualTransform } from "./visualTransform";
@@ -88,17 +88,24 @@ export class Visual implements IVisual {
 
     Object.keys(firstRow).forEach((key) => {
       const value = firstRow[key];
-      if (value && typeof value === 'object' && 'Nombre' in value && 'Axis' in value && 'Values' in value) {
+      if (
+        value &&
+        typeof value === "object" &&
+        "Nombre" in value &&
+        "Axis" in value &&
+        "Values" in value
+      ) {
         sparklineColumnNames.push(key);
       }
     });
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
 
-    this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
-      VisualFormattingSettingsModel,
-      options.dataViews[0]
-    );
+    this.formattingSettings =
+      this.formattingSettingsService.populateFormattingSettingsModel(
+        VisualFormattingSettingsModel,
+        options.dataViews[0]
+      );
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
 
@@ -127,7 +134,91 @@ export class Visual implements IVisual {
       React.createElement(Table, {
         viewModel: viewModel,
         textSize: this.formattingSettings.general.textSize.value,
-        alternateRowColor: this.formattingSettings.general.alternateRowColor.value,
+        tableStyle: this.formattingSettings.general.tableStyle.value
+          .value as string,
+        showHorizontalLines:
+          this.formattingSettings.grid.showHorizontalLines.value,
+        horizontalLineColor:
+          this.formattingSettings.grid.horizontalLineColor.value.value,
+        horizontalLineWidth:
+          this.formattingSettings.grid.horizontalLineWidth.value,
+        showVerticalLines: this.formattingSettings.grid.showVerticalLines.value,
+        verticalLineColor:
+          this.formattingSettings.grid.verticalLineColor.value.value,
+        verticalLineWidth: this.formattingSettings.grid.verticalLineWidth.value,
+        borderStyle: this.formattingSettings.advancedBorders.borderStyle.value
+          .value as string,
+        borderColor: this.formattingSettings.grid.borderColor.value.value,
+        borderWidth: this.formattingSettings.grid.borderWidth.value,
+        borderSection: this.formattingSettings.grid.borderSection.value
+          .value as "all" | "header" | "rows",
+        rowSelection: this.formattingSettings.interactivity.rowSelection.value,
+        rowSelectionColor:
+          this.formattingSettings.interactivity.rowSelectionColor.value.value,
+        sortable: this.formattingSettings.interactivity.sortable.value,
+        freezeCategories:
+          this.formattingSettings.interactivity.freezeCategories.value,
+        searchable: this.formattingSettings.interactivity.searchable.value,
+        pagination: this.formattingSettings.interactivity.pagination.value,
+        rowsPerPage: this.formattingSettings.interactivity.rowsPerPage.value,
+        fontFamily: this.formattingSettings.typography.fontFamily.value
+          .value as string,
+        wordWrap: this.formattingSettings.spacing.wordWrap.value,
+        textOverflow: this.formattingSettings.spacing.textOverflow.value
+          .value as "clip" | "ellipsis" | "wrap",
+        headerAlignment: this.formattingSettings.headerFormatting
+          .headerAlignment.value.value as "left" | "center" | "right",
+        headerPadding:
+          this.formattingSettings.headerFormatting.headerPadding.value,
+        headerBold: this.formattingSettings.headerFormatting.headerBold.value,
+        stickyHeader: this.formattingSettings.headerAdvanced.stickyHeader.value,
+        headerFontColor:
+          this.formattingSettings.columnHeader.fontColor.value.value,
+        headerFontSize: this.formattingSettings.columnHeader.fontSize.value,
+        headerBackgroundColor:
+          this.formattingSettings.columnHeader.backgroundColor.value.value,
+        rowHeight: this.formattingSettings.rows.rowHeight.value,
+        alternatingRowColor:
+          this.formattingSettings.rows.alternatingRowColor.value.value,
+        hoverBackgroundColor:
+          this.formattingSettings.rows.hoverBackgroundColor.value.value,
+        rowPadding: this.formattingSettings.rows.rowPadding.value,
+        categoryColumnAlignment: this.formattingSettings.categoryColumn
+          .alignment.value.value as "left" | "center" | "right",
+        categoryCellAlignment: this.formattingSettings.categoryCell.alignment
+          .value.value as "left" | "center" | "right",
+        categoryCellPadding: this.formattingSettings.categoryCell.padding.value,
+        categoryCellFontColor:
+          this.formattingSettings.categoryCell.fontColor.value.value,
+        categoryCellFontSize:
+          this.formattingSettings.categoryCell.fontSize.value,
+        categoryCellBackgroundColor:
+          this.formattingSettings.categoryCell.backgroundColor.value.value,
+        measureCellAlignment: this.formattingSettings.measureCell.alignment
+          .value.value as "left" | "center" | "right",
+        measureCellPadding: this.formattingSettings.measureCell.padding.value,
+        measureCellFontColor:
+          this.formattingSettings.measureCell.fontColor.value.value,
+        measureCellFontSize: this.formattingSettings.measureCell.fontSize.value,
+        measureCellBackgroundColor:
+          this.formattingSettings.measureCell.backgroundColor.value.value,
+        decimalPlaces:
+          this.formattingSettings.cellFormatting.decimalPlaces.value,
+        thousandsSeparator:
+          this.formattingSettings.cellFormatting.thousandsSeparator.value,
+        currencySymbol: this.formattingSettings.numberFormatting.currencySymbol
+          .value.value as string,
+        currencyPosition: this.formattingSettings.numberFormatting
+          .currencyPosition.value.value as "before" | "after",
+        negativeNumberFormat: this.formattingSettings.numberFormatting
+          .negativeNumberFormat.value.value as
+          | "minus"
+          | "parentheses"
+          | "minusred"
+          | "parenthesesred",
+        customNegativeColor:
+          this.formattingSettings.numberFormatting.customNegativeColor.value
+            .value,
         sparklineSettings: this.sparklineSettings,
         width: viewport.width,
       })

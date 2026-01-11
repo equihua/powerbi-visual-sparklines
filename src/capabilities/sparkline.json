@@ -1,0 +1,50 @@
+{
+  "sparklineColumn": {
+    "displayName": "Minigráfico",
+    "properties": {
+      "chartType": {
+        "displayName": "Tipo de gráfico",
+        "type": {
+          "enumeration": [
+            {
+              "value": "line",
+              "displayName": "Línea"
+            },
+            {
+              "value": "bar",
+              "displayName": "Barras"
+            },
+            {
+              "value": "area",
+              "displayName": "Área"
+            },
+            {
+              "value": "pie",
+              "displayName": "Circular"
+            },
+            {
+              "value": "donut",
+              "displayName": "Anillo"
+            }
+          ]
+        }
+      },
+      "color": {
+        "displayName": "Color",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "lineWidth": {
+        "displayName": "Grosor de línea",
+        "type": {
+          "numeric": true
+        }
+      }
+    }
+  }
+}

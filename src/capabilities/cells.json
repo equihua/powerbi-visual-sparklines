@@ -1,0 +1,58 @@
+{
+  "categoryCell": {
+    "displayName": "Celda de categoría",
+    "properties": {
+      "fontColor": {
+        "displayName": "Color de fuente",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "fontSize": {
+        "displayName": "Tamaño de fuente",
+        "type": {
+          "numeric": true
+        }
+      },
+      "backgroundColor": {
+        "displayName": "Color de fondo",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "padding": {
+        "displayName": "Espaciado interno",
+        "type": {
+          "numeric": true
+        }
+      },
+      "alignment": {
+        "displayName": "Alineación",
+        "type": {
+          "enumeration": [
+            {
+              "value": "left",
+              "displayName": "Izquierda"
+            },
+            {
+              "value": "center",
+              "displayName": "Centro"
+            },
+            {
+              "value": "right",
+              "displayName": "Derecha"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

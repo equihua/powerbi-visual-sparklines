@@ -1,0 +1,122 @@
+{
+  "grid": {
+    "displayName": "Cuadrícula",
+    "properties": {
+      "showHorizontalLines": {
+        "displayName": "Líneas de cuadrícula horizontales",
+        "type": {
+          "bool": true
+        }
+      },
+      "horizontalLineColor": {
+        "displayName": "Color",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "horizontalLineWidth": {
+        "displayName": "Ancho",
+        "type": {
+          "numeric": true
+        }
+      },
+      "showVerticalLines": {
+        "displayName": "Líneas de cuadrícula verticales",
+        "type": {
+          "bool": true
+        }
+      },
+      "verticalLineColor": {
+        "displayName": "Color",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "verticalLineWidth": {
+        "displayName": "Ancho",
+        "type": {
+          "numeric": true
+        }
+      },
+      "borderSection": {
+        "displayName": "Borde",
+        "type": {
+          "enumeration": [
+            {
+              "value": "all",
+              "displayName": "Todas"
+            },
+            {
+              "value": "header",
+              "displayName": "Encabezado"
+            },
+            {
+              "value": "rows",
+              "displayName": "Filas"
+            }
+          ]
+        }
+      },
+      "borderTop": {
+        "displayName": "Superior",
+        "type": {
+          "bool": true
+        }
+      },
+      "borderBottom": {
+        "displayName": "Inferior",
+        "type": {
+          "bool": true
+        }
+      },
+      "borderLeft": {
+        "displayName": "Izquierda",
+        "type": {
+          "bool": true
+        }
+      },
+      "borderRight": {
+        "displayName": "Derecha",
+        "type": {
+          "bool": true
+        }
+      },
+      "borderColor": {
+        "displayName": "Color",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "borderWidth": {
+        "displayName": "Ancho",
+        "type": {
+          "numeric": true
+        }
+      },
+      "rowSpacing": {
+        "displayName": "Espaciado interno de las filas",
+        "type": {
+          "numeric": true
+        }
+      },
+      "globalFontSize": {
+        "displayName": "Tamaño de fuente global",
+        "type": {
+          "numeric": true
+        }
+      }
+    }
+  }
+}
