@@ -1,0 +1,68 @@
+{
+  "interactivity": {
+    "displayName": "Interactividad",
+    "properties": {
+      "freezeCategories": {
+        "displayName": "Congelar columna de categoría",
+        "type": {
+          "bool": true
+        }
+      },
+      "rowSelection": {
+        "displayName": "Selección de fila",
+        "type": {
+          "bool": true
+        }
+      },
+      "rowSelectionColor": {
+        "displayName": "Color de fila seleccionada",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "pagination": {
+        "displayName": "Paginación",
+        "type": {
+          "bool": true
+        }
+      },
+      "rowsPerPage": {
+        "displayName": "Filas por página",
+        "type": {
+          "numeric": true
+        }
+      },
+      "searchable": {
+        "displayName": "Búsqueda habilitada",
+        "type": {
+          "bool": true
+        }
+      },
+      "sortable": {
+        "displayName": "Ordenamiento habilitado",
+        "type": {
+          "bool": true
+        }
+      },
+      "scrollBehavior": {
+        "displayName": "Comportamiento de scroll",
+        "type": {
+          "enumeration": [
+            {
+              "value": "smooth",
+              "displayName": "Suave"
+            },
+            {
+              "value": "auto",
+              "displayName": "Automático"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

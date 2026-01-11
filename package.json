@@ -1,10 +1,11 @@
 {
   "name": "visual",
   "scripts": {
-    "pbiviz": "pbiviz",
-    "start": "pbiviz start",
-    "package": "pbiviz package",
-    "lint": "npx eslint ."
+    "build:capabilities": "node src/capabilities/index.js",
+    "start": "npm run build:capabilities && pbiviz start",
+    "package": "npm run build:capabilities && pbiviz package",
+    "lint": "npx eslint .",
+    "pbiviz": "pbiviz"
   },
   "dependencies": {
     "@types/react": "^19.2.7",

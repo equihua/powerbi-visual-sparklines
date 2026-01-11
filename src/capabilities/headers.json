@@ -1,0 +1,182 @@
+{
+    "Valores": {
+        "displayName": "Valores",
+        "properties": {
+            "fontColor": {
+                "displayName": "Color de fuente",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "fontSize": {
+                "displayName": "Tamaño de fuente",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "backgroundColor": {
+                "displayName": "Color de fondo",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "alignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "padding": {
+                "displayName": "Espaciado interno",
+                "type": {
+                    "numeric": true
+                }
+            }
+        }
+    },
+    "columnHeader": {
+        "displayName": "Encabezado de columna",
+        "properties": {
+            "fontColor": {
+                "displayName": "Color de fuente",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "fontSize": {
+                "displayName": "Tamaño de fuente",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "backgroundColor": {
+                "displayName": "Color de fondo",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "alignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "padding": {
+                "displayName": "Espaciado interno",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "bold": {
+                "displayName": "Negrita",
+                "type": {
+                    "bool": true
+                }
+            }
+        }
+    },
+    "total": {
+        "displayName": "Totales",
+        "properties": {
+            "fontColor": {
+                "displayName": "Color de fuente",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "fontSize": {
+                "displayName": "Tamaño de fuente",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "backgroundColor": {
+                "displayName": "Color de fondo",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "alignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "padding": {
+                "displayName": "Espaciado interno",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "bold": {
+                "displayName": "Negrita",
+                "type": {
+                    "bool": true
+                }
+            }
+        }
+    }
+}
