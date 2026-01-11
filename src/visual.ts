@@ -37,7 +37,6 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IViewport = powerbi.IViewport;
-import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 
 import {
   SparklineColumnSettings,
@@ -51,40 +50,22 @@ export class Visual implements IVisual {
   private readonly target: HTMLElement;
   private readonly reactRoot: HTMLDivElement;
   private root: Root | null = null;
-  private host: IVisualHost;
-  private sparklineColumns: powerbi.DataViewMetadataColumn[] = [];
   private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
-  private generalSettings: {
-    textSize: number;
-    alternateRowColor: boolean;
-  };
   private formattingSettings: VisualFormattingSettingsModel;
   private formattingSettingsService: FormattingSettingsService;
 
   constructor(options: VisualConstructorOptions) {
-    this.host = options.host;
     this.target = options.element;
 
     this.reactRoot = document.createElement("div");
     this.reactRoot.className = "sparkline-container";
     this.target.appendChild(this.reactRoot);
 
-    this.generalSettings = {
-      textSize: 12,
-      alternateRowColor: true,
-    };
-
     this.formattingSettingsService = new FormattingSettingsService();
     this.formattingSettings = new VisualFormattingSettingsModel();
   }
 
   public update(options: VisualUpdateOptions): void {
-    this.formattingSettings =
-      this.formattingSettingsService.populateFormattingSettingsModel(
-        VisualFormattingSettingsModel,
-        options.dataViews[0]
-      );
-
     console.log("Visual update", options);
 
     if (!options.dataViews || !options.dataViews[0]) {
@@ -102,31 +83,29 @@ export class Visual implements IVisual {
     console.log("=== ViewModel ===");
     console.table(viewModel.rows);
 
-    const dataView = options.dataViews[0];
-
-    if (dataView?.metadata?.objects) {
-      const generalObjects = dataView.metadata.objects["general"];
-      if (generalObjects) {
-        if (generalObjects["textSize"] !== undefined) {
-          this.generalSettings.textSize = generalObjects["textSize"] as number;
-        }
-        if (generalObjects["alternateRowColor"] !== undefined) {
-          this.generalSettings.alternateRowColor = generalObjects["alternateRowColor"] as boolean;
-        }
-      }
-    }
-
     const firstRow = viewModel.rows[0];
+    const sparklineColumnNames: string[] = [];
+
     Object.keys(firstRow).forEach((key) => {
       const value = firstRow[key];
       if (value && typeof value === 'object' && 'Nombre' in value && 'Axis' in value && 'Values' in value) {
-        const settings: SparklineColumnSettings = {
-          chartType: "line",
-          color: "#0078D4",
-          lineWidth: 1.5
-        };
-        this.sparklineSettings.set(key, settings);
+        sparklineColumnNames.push(key);
       }
+    });
+
+    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+
+    this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
+      VisualFormattingSettingsModel,
+      options.dataViews[0]
+    );
+
+    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+
+    this.sparklineSettings.clear();
+    sparklineColumnNames.forEach((columnName) => {
+      const settings = this.formattingSettings.getSparklineSettings(columnName);
+      this.sparklineSettings.set(columnName, settings);
     });
 
     this.renderTable(viewModel, options.viewport);
@@ -147,8 +126,8 @@ export class Visual implements IVisual {
     this.root.render(
       React.createElement(Table, {
         viewModel: viewModel,
-        textSize: this.generalSettings.textSize,
-        alternateRowColor: this.generalSettings.alternateRowColor,
+        textSize: this.formattingSettings.general.textSize.value,
+        alternateRowColor: this.formattingSettings.general.alternateRowColor.value,
         sparklineSettings: this.sparklineSettings,
         width: viewport.width,
       })

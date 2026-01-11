@@ -75,6 +75,29 @@
         "general": {
             "displayName": "General",
             "properties": {
+                "tableStyle": {
+                    "displayName": "Estilo",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "default",
+                                "displayName": "Predeterminado"
+                            },
+                            {
+                                "value": "striped",
+                                "displayName": "A rayas"
+                            },
+                            {
+                                "value": "bordered",
+                                "displayName": "Con bordes"
+                            },
+                            {
+                                "value": "hover",
+                                "displayName": "Al pasar el ratón"
+                            }
+                        ]
+                    }
+                },
                 "textSize": {
                     "displayName": "Tamaño de texto",
                     "type": {
@@ -82,11 +105,280 @@
                             "fontSize": true
                         }
                     }
-                },
-                "alternateRowColor": {
-                    "displayName": "Color de filas alternadas",
+                }
+            }
+        },
+        "grid": {
+            "displayName": "Cuadrícula",
+            "properties": {
+                "showHorizontalLines": {
+                    "displayName": "Líneas de cuadrícula horizontales",
                     "type": {
                         "bool": true
+                    }
+                },
+                "horizontalLineColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "horizontalLineWidth": {
+                    "displayName": "Ancho",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "showVerticalLines": {
+                    "displayName": "Líneas de cuadrícula verticales",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "verticalLineColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "verticalLineWidth": {
+                    "displayName": "Ancho",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "borderSection": {
+                    "displayName": "Borde",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "all",
+                                "displayName": "Todas"
+                            },
+                            {
+                                "value": "header",
+                                "displayName": "Encabezado"
+                            },
+                            {
+                                "value": "rows",
+                                "displayName": "Filas"
+                            }
+                        ]
+                    }
+                },
+                "borderTop": {
+                    "displayName": "Superior",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderBottom": {
+                    "displayName": "Inferior",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderLeft": {
+                    "displayName": "Izquierda",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderRight": {
+                    "displayName": "Derecha",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borderWidth": {
+                    "displayName": "Ancho",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "rowSpacing": {
+                    "displayName": "Espaciado interno de las filas",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "globalFontSize": {
+                    "displayName": "Tamaño de fuente global",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "Valores": {
+            "displayName": "Valores",
+            "properties": {
+                "fontColor": {
+                    "displayName": "Color de fuente",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño de fuente",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "columnHeader": {
+            "displayName": "Encabezado de columna",
+            "properties": {
+                "fontColor": {
+                    "displayName": "Color de fuente",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño de fuente",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "total": {
+            "displayName": "Totales",
+            "properties": {
+                "fontColor": {
+                    "displayName": "Color de fuente",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño de fuente",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "measureColumn": {
+            "displayName": "Columna de medida",
+            "properties": {
+                "fontColor": {
+                    "displayName": "Color de fuente",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño de fuente",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "measureCell": {
+            "displayName": "Celda de medida",
+            "properties": {
+                "fontColor": {
+                    "displayName": "Color de fuente",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño de fuente",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
                     }
                 }
             }
@@ -98,11 +390,26 @@
                     "displayName": "Tipo de gráfico",
                     "type": {
                         "enumeration": [
-                            { "value": "line", "displayName": "Línea" },
-                            { "value": "bar", "displayName": "Barras" },
-                            { "value": "area", "displayName": "Área" },
-                            { "value": "pie", "displayName": "Circular" },
-                            { "value": "donut", "displayName": "Anillo" }
+                            {
+                                "value": "line",
+                                "displayName": "Línea"
+                            },
+                            {
+                                "value": "bar",
+                                "displayName": "Barras"
+                            },
+                            {
+                                "value": "area",
+                                "displayName": "Área"
+                            },
+                            {
+                                "value": "pie",
+                                "displayName": "Circular"
+                            },
+                            {
+                                "value": "donut",
+                                "displayName": "Anillo"
+                            }
                         ]
                     }
                 },
@@ -110,7 +417,9 @@
                     "displayName": "Color",
                     "type": {
                         "fill": {
-                            "solid": { "color": true }
+                            "solid": {
+                                "color": true
+                            }
                         }
                     }
                 },
