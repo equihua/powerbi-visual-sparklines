@@ -18,16 +18,69 @@ export function visualTransform(
   dataViews: DataView[],
   host?: IVisualHost
 ): TableViewModel | null {
-  const dataView = dataViews?.[0];
+  const dataView = extractDataView(dataViews);
 
-  // Try categorical first, then fallback to table
-  if (dataView?.categorical) {
-    return transformCategorical(dataView.categorical);
+  if (!validateDataView(dataView)) {
+    return null;
   }
 
-  return null;
+  return mapToViewModel(dataView!.categorical!);
 }
 
+/**
+ * Extrae el DataView principal de la lista de DataViews
+ * @param dataViews - Lista de DataViews disponibles
+ * @returns El primer DataView o null si no hay datos
+ */
+function extractDataView(dataViews: DataView[]): DataView | null {
+  return dataViews?.[0] || null;
+}
+
+/**
+ * Valida si el DataView contiene datos válidos y estructura requerida
+ * @param dataView - DataView a validar
+ * @returns true si el DataView es válido, false en caso contrario
+ */
+function validateDataView(dataView: DataView | null): boolean {
+  if (!dataView) {
+    console.log("No dataView provided");
+    return false;
+  }
+
+  if (!dataView.categorical) {
+    console.log("No categorical data in dataView");
+    return false;
+  }
+
+  const categories = dataView.categorical.categories?.[0];
+  const values = dataView.categorical.values;
+
+  if (!categories || !values || values.length === 0) {
+    console.log("No categories or values in categorical data");
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Normaliza y mapea los datos categóricos al modelo de vista de la tabla
+ * @param categorical - Datos categóricos del DataView
+ * @returns ViewModel con las filas transformadas
+ */
+function mapToViewModel(
+  categorical: DataViewCategorical
+): TableViewModel | null {
+  return transformCategorical(categorical);
+}
+
+/**
+ * Transforma los datos categóricos en filas del modelo de vista
+ * Procesa la agrupación de datos por mes, identifica columnas principales y sparklines
+ * @param categorical - Datos categóricos a transformar
+ * @param host - Host visual (opcional)
+ * @returns ViewModel con las filas transformadas
+ */
 function transformCategorical(
   categorical: DataViewCategorical,
   host?: IVisualHost
