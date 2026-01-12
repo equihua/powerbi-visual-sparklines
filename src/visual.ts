@@ -81,6 +81,27 @@ export class Visual implements IVisual {
       return;
     }
 
+    // PASO 1: Actualizar modelo de configuración desde dataView
+    this.formattingSettings =
+      this.formattingSettingsService.populateFormattingSettingsModel(
+        VisualFormattingSettingsModel,
+        options.dataViews[0]
+      );
+
+    console.log("=== Formatting Settings ===", this.formattingSettings);
+    console.log(
+      "Búsqueda habilitada:",
+      this.formattingSettings.general.featuresGroup.searchable.value
+    );
+    console.log(
+      "Ordenamiento habilitado:",
+      this.formattingSettings.general.featuresGroup.sortable.value
+    );
+    console.log(
+      "Selección de fila:",
+      this.formattingSettings.general.selectionGroup.rowSelection.value
+    );
+
     const viewModel = visualTransform(options.dataViews);
 
     if (!viewModel || !viewModel.rows || viewModel.rows.length === 0) {
@@ -111,15 +132,6 @@ export class Visual implements IVisual {
     });
 
     console.log("Measure columns:", measureColumnNames);
-
-    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
-    this.formattingSettings.updateColumnCards(measureColumnNames);
-
-    this.formattingSettings =
-      this.formattingSettingsService.populateFormattingSettingsModel(
-        VisualFormattingSettingsModel,
-        options.dataViews[0]
-      );
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
     this.formattingSettings.updateColumnCards(measureColumnNames);
@@ -159,11 +171,6 @@ export class Visual implements IVisual {
       });
       this.previousColumnHash = newColumnHash;
     }
-    this.columnSettings.clear();
-    measureColumnNames.forEach((columnName) => {
-      const settings = this.formattingSettings.getColumnSettings(columnName);
-      this.columnSettings.set(columnName, settings);
-    });
 
     this.renderTable(viewModel, options.viewport);
   }

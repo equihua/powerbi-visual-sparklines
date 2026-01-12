@@ -49,10 +49,12 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     viewModel,
     width: viewport.width,
 
-    // Configuración general
-    textSize: formattingSettings.general.textSize.value,
-    tableStyle: formattingSettings.general.tableStyle.value.value as string,
-    fontFamily: formattingSettings.typography.fontFamily.value.value as string,
+    // Configuración general (Estilo)
+    textSize: formattingSettings.general.styleGroup.textSize.value,
+    tableStyle: formattingSettings.general.styleGroup.tableStyle.value
+      .value as string,
+    fontFamily: formattingSettings.general.typographyGroup.fontFamily.value
+      .value as string,
 
     // Configuración de grilla
     showHorizontalLines:
@@ -77,20 +79,16 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     borderSection: formattingSettings.grid.bordersGroup.borderSection.value
       .value as "all" | "header" | "rows",
 
-    // Interactividad
-    rowSelection:
-      formattingSettings.interactivity.selectionGroup.rowSelection.value,
+    // Interactividad (Selection, Navigation, Features)
+    rowSelection: formattingSettings.general.selectionGroup.rowSelection.value,
     rowSelectionColor:
-      formattingSettings.interactivity.selectionGroup.rowSelectionColor.value
-        .value,
-    sortable: formattingSettings.interactivity.featuresGroup.sortable.value,
+      formattingSettings.general.selectionGroup.rowSelectionColor.value.value,
+    sortable: formattingSettings.general.featuresGroup.sortable.value,
     freezeCategories:
-      formattingSettings.interactivity.navigationGroup.freezeCategories.value,
-    searchable: formattingSettings.interactivity.featuresGroup.searchable.value,
-    pagination:
-      formattingSettings.interactivity.navigationGroup.pagination.value,
-    rowsPerPage:
-      formattingSettings.interactivity.navigationGroup.rowsPerPage.value,
+      formattingSettings.general.navigationGroup.freezeCategories.value,
+    searchable: formattingSettings.general.featuresGroup.searchable.value,
+    pagination: formattingSettings.general.navigationGroup.pagination.value,
+    rowsPerPage: formattingSettings.general.navigationGroup.rowsPerPage.value,
 
     // Configuración de filas
     rowHeight: formattingSettings.rows.rowDimensionsGroup.rowHeight.value,

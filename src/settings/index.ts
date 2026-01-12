@@ -4,7 +4,7 @@
  */
 
 // Importaciones de clases principales de configuración
-export { GeneralSettings } from "./general";
+export { GeneralCompositeCard } from "./general";
 export { TypographySettings } from "./typography";
 export { InteractivitySettings } from "./interactivity";
 export { GridSettings } from "./grid";

@@ -221,8 +221,8 @@ export class FormattingManager {
 
     return {
       // General
-      textSize: this.formattingSettings.general.textSize.value,
-      tableStyle: this.formattingSettings.general.tableStyle.value
+      textSize: this.formattingSettings.general.styleGroup.textSize.value,
+      tableStyle: this.formattingSettings.general.styleGroup.tableStyle.value
         .value as string,
 
       // Grid - Líneas horizontales
@@ -256,24 +256,22 @@ export class FormattingManager {
 
       // Interactividad
       rowSelection:
-        this.formattingSettings.interactivity.selectionGroup.rowSelection.value,
+        this.formattingSettings.general.selectionGroup.rowSelection.value,
       rowSelectionColor:
-        this.formattingSettings.interactivity.selectionGroup.rowSelectionColor
-          .value.value,
-      sortable:
-        this.formattingSettings.interactivity.featuresGroup.sortable.value,
-      freezeCategories:
-        this.formattingSettings.interactivity.navigationGroup.freezeCategories
+        this.formattingSettings.general.selectionGroup.rowSelectionColor.value
           .value,
+      sortable: this.formattingSettings.general.featuresGroup.sortable.value,
+      freezeCategories:
+        this.formattingSettings.general.navigationGroup.freezeCategories.value,
       searchable:
-        this.formattingSettings.interactivity.featuresGroup.searchable.value,
+        this.formattingSettings.general.featuresGroup.searchable.value,
       pagination:
-        this.formattingSettings.interactivity.navigationGroup.pagination.value,
+        this.formattingSettings.general.navigationGroup.pagination.value,
       rowsPerPage:
-        this.formattingSettings.interactivity.navigationGroup.rowsPerPage.value,
+        this.formattingSettings.general.navigationGroup.rowsPerPage.value,
 
       // Tipografía
-      fontFamily: this.formattingSettings.typography.fontFamily.value
+      fontFamily: this.formattingSettings.general.typographyGroup.value
         .value as string,
 
       // Filas

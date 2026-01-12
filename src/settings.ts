@@ -1,11 +1,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import {
-  GeneralSettings,
+  GeneralCompositeCard,
   GridSettings,
   RowsSettings,
-  InteractivitySettings,
   ColumnSettings,
-  TypographySettings,
   TotalSettings,
   SparklineCompositeCard,
   type ColumnConfigSettings,
@@ -15,9 +13,9 @@ import {
 export type { SparklineColumnSettings, ColumnConfigSettings };
 
 export class VisualFormattingSettingsModel extends formattingSettings.Model {
-  general: GeneralSettings = new GeneralSettings();
-  typography: TypographySettings = new TypographySettings();
-  interactivity: InteractivitySettings = new InteractivitySettings();
+  // Tarjeta General Unificada - Contiene Estilo, Tipografía e Interactividad
+  general: GeneralCompositeCard = new GeneralCompositeCard();
+
   grid: GridSettings = new GridSettings();
   rows: RowsSettings = new RowsSettings();
   columns: ColumnSettings | null = null;
@@ -25,14 +23,7 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   sparklineCard: SparklineCompositeCard | null = null;
 
   cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] =
-    [
-      this.general,
-      this.typography,
-      this.rows,
-      this.grid,
-      this.interactivity,
-      this.total,
-    ];
+    [this.general, this.rows, this.grid, this.total];
 
   public updateColumnCards(measureColumnNames: string[]): void {
     if (measureColumnNames && measureColumnNames.length > 0) {
@@ -79,11 +70,9 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   private rebuildCards(): void {
     this.cards = [
       this.general,
-      this.typography,
       ...(this.columns ? [this.columns] : []),
       this.rows,
       this.grid,
-      this.interactivity,
       this.total,
       ...(this.sparklineCard ? [this.sparklineCard] : []),
     ];
