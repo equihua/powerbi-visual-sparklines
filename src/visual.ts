@@ -40,19 +40,27 @@ import IViewport = powerbi.IViewport;
 
 import {
   type SparklineColumnSettings,
+  type ColumnConfigSettings,
   VisualFormattingSettingsModel,
 } from "./settings";
 import { visualTransform } from "./visualTransform";
 import { TableViewModel } from "./visualViewModel";
-import { Table } from "./components/Table";
+import { TableContainer } from "./components/TableContainer";
+import { generateHash } from "./utils/memoization";
 
 export class Visual implements IVisual {
   private readonly target: HTMLElement;
   private readonly reactRoot: HTMLDivElement;
   private root: Root | null = null;
   private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
+  private columnSettings: Map<string, ColumnConfigSettings> = new Map();
   private formattingSettings: VisualFormattingSettingsModel;
   private formattingSettingsService: FormattingSettingsService;
+
+  // Caches para detectar cambios en configuraciones
+  private previousSparklineHash: string = "";
+  private previousColumnHash: string = "";
+  private previousViewModelHash: string = "";
 
   constructor(options: VisualConstructorOptions) {
     this.target = options.element;
@@ -85,6 +93,7 @@ export class Visual implements IVisual {
 
     const firstRow = viewModel.rows[0];
     const sparklineColumnNames: string[] = [];
+    const measureColumnNames: string[] = [];
 
     Object.keys(firstRow).forEach((key) => {
       const value = firstRow[key];
@@ -96,10 +105,15 @@ export class Visual implements IVisual {
         "Values" in value
       ) {
         sparklineColumnNames.push(key);
+      } else if (typeof value === "number") {
+        measureColumnNames.push(key);
       }
     });
 
+    console.log("Measure columns:", measureColumnNames);
+
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+    this.formattingSettings.updateColumnCards(measureColumnNames);
 
     this.formattingSettings =
       this.formattingSettingsService.populateFormattingSettingsModel(
@@ -108,11 +122,47 @@ export class Visual implements IVisual {
       );
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+    this.formattingSettings.updateColumnCards(measureColumnNames);
 
-    this.sparklineSettings.clear();
-    sparklineColumnNames.forEach((columnName) => {
-      const settings = this.formattingSettings.getSparklineSettings(columnName);
-      this.sparklineSettings.set(columnName, settings);
+    // Calcular hash de configuraciones para detectar cambios reales
+    const newSparklineHash = generateHash({
+      columns: sparklineColumnNames.sort(),
+      settings: sparklineColumnNames.map((col) =>
+        this.formattingSettings.getSparklineSettings(col)
+      ),
+    });
+
+    const newColumnHash = generateHash({
+      columns: measureColumnNames.sort(),
+      settings: measureColumnNames.map((col) =>
+        this.formattingSettings.getColumnSettings(col)
+      ),
+    });
+
+    // Solo actualizar sparklineSettings si realmente cambió
+    if (newSparklineHash !== this.previousSparklineHash) {
+      this.sparklineSettings.clear();
+      sparklineColumnNames.forEach((columnName) => {
+        const settings =
+          this.formattingSettings.getSparklineSettings(columnName);
+        this.sparklineSettings.set(columnName, settings);
+      });
+      this.previousSparklineHash = newSparklineHash;
+    }
+
+    // Solo actualizar columnSettings si realmente cambió
+    if (newColumnHash !== this.previousColumnHash) {
+      this.columnSettings.clear();
+      measureColumnNames.forEach((columnName) => {
+        const settings = this.formattingSettings.getColumnSettings(columnName);
+        this.columnSettings.set(columnName, settings);
+      });
+      this.previousColumnHash = newColumnHash;
+    }
+    this.columnSettings.clear();
+    measureColumnNames.forEach((columnName) => {
+      const settings = this.formattingSettings.getColumnSettings(columnName);
+      this.columnSettings.set(columnName, settings);
     });
 
     this.renderTable(viewModel, options.viewport);
@@ -130,97 +180,14 @@ export class Visual implements IVisual {
       this.root = createRoot(this.reactRoot);
     }
 
+    // Renderizado simplificado: solo pasamos los datos necesarios al contenedor
     this.root.render(
-      React.createElement(Table, {
-        viewModel: viewModel,
-        textSize: this.formattingSettings.general.textSize.value,
-        tableStyle: this.formattingSettings.general.tableStyle.value
-          .value as string,
-        showHorizontalLines:
-          this.formattingSettings.grid.showHorizontalLines.value,
-        horizontalLineColor:
-          this.formattingSettings.grid.horizontalLineColor.value.value,
-        horizontalLineWidth:
-          this.formattingSettings.grid.horizontalLineWidth.value,
-        showVerticalLines: this.formattingSettings.grid.showVerticalLines.value,
-        verticalLineColor:
-          this.formattingSettings.grid.verticalLineColor.value.value,
-        verticalLineWidth: this.formattingSettings.grid.verticalLineWidth.value,
-        borderStyle: this.formattingSettings.advancedBorders.borderStyle.value
-          .value as string,
-        borderColor: this.formattingSettings.grid.borderColor.value.value,
-        borderWidth: this.formattingSettings.grid.borderWidth.value,
-        borderSection: this.formattingSettings.grid.borderSection.value
-          .value as "all" | "header" | "rows",
-        rowSelection: this.formattingSettings.interactivity.rowSelection.value,
-        rowSelectionColor:
-          this.formattingSettings.interactivity.rowSelectionColor.value.value,
-        sortable: this.formattingSettings.interactivity.sortable.value,
-        freezeCategories:
-          this.formattingSettings.interactivity.freezeCategories.value,
-        searchable: this.formattingSettings.interactivity.searchable.value,
-        pagination: this.formattingSettings.interactivity.pagination.value,
-        rowsPerPage: this.formattingSettings.interactivity.rowsPerPage.value,
-        fontFamily: this.formattingSettings.typography.fontFamily.value
-          .value as string,
-        wordWrap: this.formattingSettings.spacing.wordWrap.value,
-        textOverflow: this.formattingSettings.spacing.textOverflow.value
-          .value as "clip" | "ellipsis" | "wrap",
-        headerAlignment: this.formattingSettings.headerFormatting
-          .headerAlignment.value.value as "left" | "center" | "right",
-        headerPadding:
-          this.formattingSettings.headerFormatting.headerPadding.value,
-        headerBold: this.formattingSettings.headerFormatting.headerBold.value,
-        stickyHeader: this.formattingSettings.headerAdvanced.stickyHeader.value,
-        headerFontColor:
-          this.formattingSettings.columnHeader.fontColor.value.value,
-        headerFontSize: this.formattingSettings.columnHeader.fontSize.value,
-        headerBackgroundColor:
-          this.formattingSettings.columnHeader.backgroundColor.value.value,
-        rowHeight: this.formattingSettings.rows.rowHeight.value,
-        alternatingRowColor:
-          this.formattingSettings.rows.alternatingRowColor.value.value,
-        hoverBackgroundColor:
-          this.formattingSettings.rows.hoverBackgroundColor.value.value,
-        rowPadding: this.formattingSettings.rows.rowPadding.value,
-        categoryColumnAlignment: this.formattingSettings.categoryColumn
-          .alignment.value.value as "left" | "center" | "right",
-        categoryCellAlignment: this.formattingSettings.categoryCell.alignment
-          .value.value as "left" | "center" | "right",
-        categoryCellPadding: this.formattingSettings.categoryCell.padding.value,
-        categoryCellFontColor:
-          this.formattingSettings.categoryCell.fontColor.value.value,
-        categoryCellFontSize:
-          this.formattingSettings.categoryCell.fontSize.value,
-        categoryCellBackgroundColor:
-          this.formattingSettings.categoryCell.backgroundColor.value.value,
-        measureCellAlignment: this.formattingSettings.measureCell.alignment
-          .value.value as "left" | "center" | "right",
-        measureCellPadding: this.formattingSettings.measureCell.padding.value,
-        measureCellFontColor:
-          this.formattingSettings.measureCell.fontColor.value.value,
-        measureCellFontSize: this.formattingSettings.measureCell.fontSize.value,
-        measureCellBackgroundColor:
-          this.formattingSettings.measureCell.backgroundColor.value.value,
-        decimalPlaces:
-          this.formattingSettings.cellFormatting.decimalPlaces.value,
-        thousandsSeparator:
-          this.formattingSettings.cellFormatting.thousandsSeparator.value,
-        currencySymbol: this.formattingSettings.numberFormatting.currencySymbol
-          .value.value as string,
-        currencyPosition: this.formattingSettings.numberFormatting
-          .currencyPosition.value.value as "before" | "after",
-        negativeNumberFormat: this.formattingSettings.numberFormatting
-          .negativeNumberFormat.value.value as
-          | "minus"
-          | "parentheses"
-          | "minusred"
-          | "parenthesesred",
-        customNegativeColor:
-          this.formattingSettings.numberFormatting.customNegativeColor.value
-            .value,
+      React.createElement(TableContainer, {
+        viewModel,
+        formattingSettings: this.formattingSettings,
         sparklineSettings: this.sparklineSettings,
-        width: viewport.width,
+        columnSettings: this.columnSettings,
+        viewport,
       })
     );
   }

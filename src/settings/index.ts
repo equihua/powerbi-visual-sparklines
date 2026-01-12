@@ -1,70 +1,21 @@
 /**
  * Módulo de configuraciones de formato.
- * Exporta un único objeto que contiene todas las clases de configuración.
+ * Exporta automáticamente todas las clases de configuración y tipos.
  */
 
-// Importar todas las clases
-import { GeneralSettings } from "./general";
-import { GridSettings } from "./grid";
-import { RowsSettings } from "./rows";
-import { InteractivitySettings } from "./interactivity";
-import {
-  CategoryColumnSettings,
-  CategoryCellSettings,
-  ColumnHeaderSettings,
-  MeasureColumnSettings,
-} from "./columns";
-import { CellFormattingSettings, MeasureCellSettings } from "./cells";
-import { HeaderFormattingSettings, HeaderAdvancedSettings } from "./headers";
-import { TypographySettings } from "./typography";
-import { AdvancedBordersSettings } from "./borders";
-import { SpacingSettings } from "./spacing";
-import { VisualEffectsSettings } from "./effects";
-import { NumberFormattingSettings } from "./numbers";
-import { TotalSettings } from "./totals";
-import {
-  SparklineCompositeCard,
-  type SparklineColumnSettings,
-} from "./sparkline";
+// Importaciones de clases principales de configuración
+export { GeneralSettings } from "./general";
+export { TypographySettings } from "./typography";
+export { InteractivitySettings } from "./interactivity";
+export { GridSettings } from "./grid";
+export { RowsSettings } from "./rows";
+export { ColumnSettings } from "./columns";
+export { TotalSettings } from "./totals";
+export { SparklineCompositeCard } from "./sparkline";
+export { SpacingSettings } from "./spacing";
+export { VisualEffectsSettings } from "./effects";
+export { NumberFormattingSettings } from "./numbers";
 
-/**
- * Objeto que agrupa todas las clases de configuración de formato.
- * Proporciona un punto de entrada único para todas las configuraciones.
- */
-export const Settings = {
-  // Configuraciones básicas
-  GeneralSettings,
-  GridSettings,
-  RowsSettings,
-  InteractivitySettings,
-
-  // Configuraciones de columnas
-  CategoryColumnSettings,
-  CategoryCellSettings,
-  ColumnHeaderSettings,
-  MeasureColumnSettings,
-
-  // Configuraciones de celdas
-  CellFormattingSettings,
-  MeasureCellSettings,
-
-  // Configuraciones de encabezados
-  HeaderFormattingSettings,
-  HeaderAdvancedSettings,
-
-  // Configuraciones de estilo
-  TypographySettings,
-  AdvancedBordersSettings,
-  SpacingSettings,
-  VisualEffectsSettings,
-
-  // Configuraciones numéricas y totales
-  NumberFormattingSettings,
-  TotalSettings,
-
-  // Configuraciones de sparkline
-  SparklineCompositeCard,
-};
-
-// Exportar tipos
-export type { SparklineColumnSettings };
+// Importaciones de tipos
+export type { SparklineColumnSettings } from "./sparkline";
+export type { ColumnConfigSettings } from "./columns";

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import { TableViewModel } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
+import { areMapsEqual } from "../utils/memoization";
 
 interface TableProps {
   viewModel: TableViewModel;
@@ -57,10 +58,90 @@ interface TableProps {
   negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
   customNegativeColor: string;
   sparklineSettings: Map<string, SparklineColumnSettings>;
+  columnSettings: Map<string, ColumnConfigSettings>;
   width: number;
 }
 
-export const Table: React.FC<TableProps> = ({
+/**
+ * Función de comparación personalizada para React.memo
+ * Evita re-renders innecesarios cuando solo cambian valores de formato menores
+ */
+function arePropsEqual(prevProps: TableProps, nextProps: TableProps): boolean {
+  // Comparar datos principales (crítico)
+  if (prevProps.viewModel !== nextProps.viewModel) return false;
+  if (prevProps.width !== nextProps.width) return false;
+
+  // Comparar configuraciones funcionales críticas
+  if (prevProps.pagination !== nextProps.pagination) return false;
+  if (prevProps.rowsPerPage !== nextProps.rowsPerPage) return false;
+  if (prevProps.searchable !== nextProps.searchable) return false;
+  if (prevProps.sortable !== nextProps.sortable) return false;
+  if (prevProps.rowSelection !== nextProps.rowSelection) return false;
+
+  // Comparar Maps (importante para sparklines y configuraciones de columna)
+  if (!areMapsEqual(prevProps.sparklineSettings, nextProps.sparklineSettings))
+    return false;
+  if (!areMapsEqual(prevProps.columnSettings, nextProps.columnSettings))
+    return false;
+
+  // Para props de estilo, solo comparar si realmente cambiaron
+  // (esto es más rápido que re-renderizar todo el componente)
+  const styleProps: (keyof TableProps)[] = [
+    "textSize",
+    "tableStyle",
+    "fontFamily",
+    "borderStyle",
+    "borderColor",
+    "borderWidth",
+    "borderSection",
+    "rowHeight",
+    "alternatingRowColor",
+    "hoverBackgroundColor",
+    "rowPadding",
+    "showHorizontalLines",
+    "horizontalLineColor",
+    "horizontalLineWidth",
+    "showVerticalLines",
+    "verticalLineColor",
+    "verticalLineWidth",
+    "rowSelectionColor",
+    "headerAlignment",
+    "headerPadding",
+    "headerBold",
+    "headerFontColor",
+    "headerFontSize",
+    "headerBackgroundColor",
+    "categoryCellAlignment",
+    "categoryCellPadding",
+    "categoryCellFontColor",
+    "categoryCellFontSize",
+    "categoryCellBackgroundColor",
+    "measureCellAlignment",
+    "measureCellPadding",
+    "measureCellFontColor",
+    "measureCellFontSize",
+    "measureCellBackgroundColor",
+    "decimalPlaces",
+    "thousandsSeparator",
+    "currencySymbol",
+    "currencyPosition",
+    "negativeNumberFormat",
+    "customNegativeColor",
+    "wordWrap",
+    "textOverflow",
+    "freezeCategories",
+    "stickyHeader",
+    "categoryColumnAlignment",
+  ];
+
+  for (const prop of styleProps) {
+    if (prevProps[prop] !== nextProps[prop]) return false;
+  }
+
+  return true;
+}
+
+const TableComponent: React.FC<TableProps> = ({
   viewModel,
   textSize,
   tableStyle,
@@ -113,6 +194,7 @@ export const Table: React.FC<TableProps> = ({
   negativeNumberFormat,
   customNegativeColor,
   sparklineSettings,
+  columnSettings,
   width,
 }) => {
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
@@ -125,24 +207,31 @@ export const Table: React.FC<TableProps> = ({
     return <div>No data available</div>;
   }
 
-  const firstRow = viewModel.rows[0];
-  const columnNames: string[] = [];
-  const sparklineColumnNames: string[] = [];
+  // Memoizar análisis de columnas (solo recalcular si cambian las filas)
+  const columnAnalysis = useMemo(() => {
+    const firstRow = viewModel.rows[0];
+    const columnNames: string[] = [];
+    const sparklineColumnNames: string[] = [];
 
-  Object.keys(firstRow).forEach((key) => {
-    const value = firstRow[key];
-    if (
-      value &&
-      typeof value === "object" &&
-      "Nombre" in value &&
-      "Axis" in value &&
-      "Values" in value
-    ) {
-      sparklineColumnNames.push(key);
-    } else {
-      columnNames.push(key);
-    }
-  });
+    Object.keys(firstRow).forEach((key) => {
+      const value = firstRow[key];
+      if (
+        value &&
+        typeof value === "object" &&
+        "Nombre" in value &&
+        "Axis" in value &&
+        "Values" in value
+      ) {
+        sparklineColumnNames.push(key);
+      } else {
+        columnNames.push(key);
+      }
+    });
+
+    return { columnNames, sparklineColumnNames };
+  }, [viewModel.rows]);
+
+  const { columnNames, sparklineColumnNames } = columnAnalysis;
 
   const handleSort = (columnName: string) => {
     if (!sortable) return;
@@ -160,19 +249,25 @@ export const Table: React.FC<TableProps> = ({
     setSelectedRowIndex(selectedRowIndex === index ? null : index);
   };
 
-  let filteredRows = [...viewModel.rows];
-  if (searchable && searchQuery.trim().length > 0) {
-    const q = searchQuery.toLowerCase();
-    filteredRows = filteredRows.filter((row) => {
-      return columnNames.some((cn) =>
-        String(row[cn]).toLowerCase().includes(q)
-      );
-    });
-  }
+  // Memoizar filtrado (evitar recálculo en cada render)
+  const filteredRows = useMemo(() => {
+    if (!searchable || !searchQuery.trim()) {
+      return viewModel.rows;
+    }
 
-  let sortedRows = [...filteredRows];
-  if (sortable && sortColumn) {
-    sortedRows.sort((a, b) => {
+    const q = searchQuery.toLowerCase();
+    return viewModel.rows.filter((row) =>
+      columnNames.some((cn) => String(row[cn]).toLowerCase().includes(q))
+    );
+  }, [viewModel.rows, searchable, searchQuery, columnNames]);
+
+  // Memoizar ordenamiento (operación costosa)
+  const sortedRows = useMemo(() => {
+    if (!sortable || !sortColumn) {
+      return filteredRows;
+    }
+
+    return [...filteredRows].sort((a, b) => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
 
@@ -189,15 +284,22 @@ export const Table: React.FC<TableProps> = ({
 
       return sortDirection === "asc" ? comparison : -comparison;
     });
-  }
+  }, [filteredRows, sortable, sortColumn, sortDirection]);
+
+  // Memoizar paginación
+  const pageRows = useMemo(() => {
+    if (!pagination) {
+      return sortedRows;
+    }
+
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return sortedRows.slice(startIndex, endIndex);
+  }, [sortedRows, pagination, page, rowsPerPage]);
 
   const tableClassName = `sparkline-table ${
     tableStyle === "striped" ? "striped" : ""
   }`;
-
-  const startIndex = pagination ? (page - 1) * rowsPerPage : 0;
-  const endIndex = pagination ? startIndex + rowsPerPage : sortedRows.length;
-  const pageRows = sortedRows.slice(startIndex, endIndex);
 
   const commonBorder = `${borderWidth}px ${borderStyle} ${borderColor}`;
   const tableBorderStyles =
@@ -254,6 +356,7 @@ export const Table: React.FC<TableProps> = ({
           fontColor={headerFontColor}
           fontSize={headerFontSize}
           backgroundColor={headerBackgroundColor}
+          columnSettings={columnSettings}
         />
         <tbody>
           {pageRows.map((rowData, index) => (
@@ -302,6 +405,7 @@ export const Table: React.FC<TableProps> = ({
               negativeNumberFormat={negativeNumberFormat}
               customNegativeColor={customNegativeColor}
               sparklineSettings={sparklineSettings}
+              columnSettings={columnSettings}
             />
           ))}
         </tbody>
@@ -343,3 +447,6 @@ export const Table: React.FC<TableProps> = ({
     </div>
   );
 };
+
+// Exportar componente memoizado
+export const Table = memo(TableComponent, arePropsEqual);

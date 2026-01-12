@@ -17,10 +17,6 @@
             {
               "value": "bordered",
               "displayName": "Con bordes"
-            },
-            {
-              "value": "hover",
-              "displayName": "Al pasar el ratón"
             }
           ]
         }

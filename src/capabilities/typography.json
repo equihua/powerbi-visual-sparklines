@@ -1,0 +1,82 @@
+{
+  "typography": {
+    "displayName": "Tipografía",
+    "properties": {
+      "fontFamily": {
+        "displayName": "Familia de fuente",
+        "type": {
+          "enumeration": [
+            {
+              "value": "Arial, sans-serif",
+              "displayName": "Arial"
+            },
+            {
+              "value": "Verdana, sans-serif",
+              "displayName": "Verdana"
+            },
+            {
+              "value": "Georgia, serif",
+              "displayName": "Georgia"
+            },
+            {
+              "value": "'Courier New', monospace",
+              "displayName": "Courier New"
+            },
+            {
+              "value": "'Segoe UI', sans-serif",
+              "displayName": "Segoe UI"
+            },
+            {
+              "value": "Tahoma, sans-serif",
+              "displayName": "Tahoma"
+            },
+            {
+              "value": "'Times New Roman', serif",
+              "displayName": "Times New Roman"
+            }
+          ]
+        }
+      },
+      "fontSize": {
+        "displayName": "Tamaño de fuente base",
+        "type": {
+          "numeric": true
+        }
+      },
+      "fontColor": {
+        "displayName": "Color de fuente base",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "lineHeight": {
+        "displayName": "Alto de línea",
+        "type": {
+          "numeric": true
+        }
+      },
+      "letterSpacing": {
+        "displayName": "Espaciado entre letras",
+        "type": {
+          "numeric": true
+        }
+      },
+      "bold": {
+        "displayName": "Negrita global",
+        "type": {
+          "bool": true
+        }
+      },
+      "italic": {
+        "displayName": "Cursiva global",
+        "type": {
+          "bool": true
+        }
+      }
+    }
+  }
+}

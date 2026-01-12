@@ -7,16 +7,10 @@ const capabilitiesPath = path.resolve(basePath, "../../capabilities.json");
 // Orden específico de archivos para mantener la estructura correcta del capabilities.json
 const fileOrder = [
   "general.json",
-  "grid.json",
-  "rows.json",
+  "typography.json",
   "columns.json",
-  "cells.json",
-  "cellFormatting.json",
-  "formatting.json",
-  "headers.json",
-  "measures.json",
-  "advanced.json",
-  "effects.json",
+  "rows.json",
+  "grid.json",
   "interactivity.json",
   "sparkline.json",
 ];

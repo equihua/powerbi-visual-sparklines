@@ -1,56 +1,62 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import {
+  FONT_FAMILY_OPTIONS,
+  TYPOGRAPHY_DEFAULTS,
+} from "../constants/visualDefaults";
 
-/**
- * Configuraciones tipográficas avanzadas.
- * Define familia de fuente, estilos de texto y espaciado.
- */
 export class TypographySettings extends formattingSettings.SimpleCard {
   fontFamily = new formattingSettings.ItemDropdown({
     name: "fontFamily",
     displayName: "Familia de fuente",
-    items: [
-      { value: "arial", displayName: "Arial" },
-      { value: "verdana", displayName: "Verdana" },
-      { value: "georgia", displayName: "Georgia" },
-      { value: "courier", displayName: "Courier" },
-      { value: "segoe", displayName: "Segoe UI" },
-    ],
-    value: { value: "segoe", displayName: "Segoe UI" },
+    items: [...FONT_FAMILY_OPTIONS],
+    value: FONT_FAMILY_OPTIONS[4], // Segoe UI
   });
-  italic = new formattingSettings.ToggleSwitch({
-    name: "italic",
-    displayName: "Cursiva",
-    value: false,
+
+  fontSize = new formattingSettings.NumUpDown({
+    name: "fontSize",
+    displayName: "Tamaño de fuente base",
+    value: TYPOGRAPHY_DEFAULTS.fontSize,
   });
-  underline = new formattingSettings.ToggleSwitch({
-    name: "underline",
-    displayName: "Subrayado",
-    value: false,
+
+  fontColor = new formattingSettings.ColorPicker({
+    name: "fontColor",
+    displayName: "Color de fuente base",
+    value: { value: TYPOGRAPHY_DEFAULTS.fontColor },
   });
-  strikethrough = new formattingSettings.ToggleSwitch({
-    name: "strikethrough",
-    displayName: "Tachado",
-    value: false,
-  });
+
   lineHeight = new formattingSettings.NumUpDown({
     name: "lineHeight",
     displayName: "Alto de línea",
-    value: 1.4,
+    value: TYPOGRAPHY_DEFAULTS.lineHeight,
   });
+
   letterSpacing = new formattingSettings.NumUpDown({
     name: "letterSpacing",
     displayName: "Espaciado entre letras",
-    value: 0,
+    value: TYPOGRAPHY_DEFAULTS.letterSpacing,
+  });
+
+  bold = new formattingSettings.ToggleSwitch({
+    name: "bold",
+    displayName: "Negrita",
+    value: TYPOGRAPHY_DEFAULTS.bold,
+  });
+
+  italic = new formattingSettings.ToggleSwitch({
+    name: "italic",
+    displayName: "Cursiva",
+    value: TYPOGRAPHY_DEFAULTS.italic,
   });
 
   name: string = "typography";
-  displayName: string = "Tipografía avanzada";
+  displayName: string = "Tipografía global";
   slices: formattingSettings.Slice[] = [
     this.fontFamily,
-    this.italic,
-    this.underline,
-    this.strikethrough,
+    this.fontSize,
+    this.fontColor,
     this.lineHeight,
     this.letterSpacing,
+    this.bold,
+    this.italic,
   ];
 }

@@ -1,15 +1,15 @@
 {
   "grid": {
-    "displayName": "Cuadrícula",
+    "displayName": "Cuadrícula y bordes",
     "properties": {
       "showHorizontalLines": {
-        "displayName": "Líneas de cuadrícula horizontales",
+        "displayName": "Líneas horizontales",
         "type": {
           "bool": true
         }
       },
       "horizontalLineColor": {
-        "displayName": "Color",
+        "displayName": "Color líneas horizontales",
         "type": {
           "fill": {
             "solid": {
@@ -19,19 +19,19 @@
         }
       },
       "horizontalLineWidth": {
-        "displayName": "Ancho",
+        "displayName": "Ancho líneas horizontales",
         "type": {
           "numeric": true
         }
       },
       "showVerticalLines": {
-        "displayName": "Líneas de cuadrícula verticales",
+        "displayName": "Líneas verticales",
         "type": {
           "bool": true
         }
       },
       "verticalLineColor": {
-        "displayName": "Color",
+        "displayName": "Color líneas verticales",
         "type": {
           "fill": {
             "solid": {
@@ -41,13 +41,13 @@
         }
       },
       "verticalLineWidth": {
-        "displayName": "Ancho",
+        "displayName": "Ancho líneas verticales",
         "type": {
           "numeric": true
         }
       },
       "borderSection": {
-        "displayName": "Borde",
+        "displayName": "Aplicar bordes a",
         "type": {
           "enumeration": [
             {
@@ -66,31 +66,31 @@
         }
       },
       "borderTop": {
-        "displayName": "Superior",
+        "displayName": "Borde superior",
         "type": {
           "bool": true
         }
       },
       "borderBottom": {
-        "displayName": "Inferior",
+        "displayName": "Borde inferior",
         "type": {
           "bool": true
         }
       },
       "borderLeft": {
-        "displayName": "Izquierda",
+        "displayName": "Borde izquierdo",
         "type": {
           "bool": true
         }
       },
       "borderRight": {
-        "displayName": "Derecha",
+        "displayName": "Borde derecho",
         "type": {
           "bool": true
         }
       },
       "borderColor": {
-        "displayName": "Color",
+        "displayName": "Color de borde",
         "type": {
           "fill": {
             "solid": {
@@ -100,19 +100,58 @@
         }
       },
       "borderWidth": {
-        "displayName": "Ancho",
+        "displayName": "Ancho de borde",
         "type": {
           "numeric": true
+        }
+      },
+      "borderStyle": {
+        "displayName": "Estilo de borde",
+        "type": {
+          "enumeration": [
+            {
+              "value": "solid",
+              "displayName": "Sólido"
+            },
+            {
+              "value": "dashed",
+              "displayName": "Guionado"
+            },
+            {
+              "value": "dotted",
+              "displayName": "Punteado"
+            },
+            {
+              "value": "double",
+              "displayName": "Doble"
+            }
+          ]
+        }
+      },
+      "borderRadius": {
+        "displayName": "Radio de esquina",
+        "type": {
+          "numeric": true
+        }
+      },
+      "shadowBorder": {
+        "displayName": "Sombra de borde",
+        "type": {
+          "bool": true
+        }
+      },
+      "shadowColor": {
+        "displayName": "Color de sombra",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
         }
       },
       "rowSpacing": {
-        "displayName": "Espaciado interno de las filas",
-        "type": {
-          "numeric": true
-        }
-      },
-      "globalFontSize": {
-        "displayName": "Tamaño de fuente global",
+        "displayName": "Espaciado interno de filas",
         "type": {
           "numeric": true
         }
