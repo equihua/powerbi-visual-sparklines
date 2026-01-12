@@ -40,6 +40,7 @@ import IViewport = powerbi.IViewport;
 
 import {
   type SparklineColumnSettings,
+  type ColumnConfigSettings,
   VisualFormattingSettingsModel,
 } from "./settings";
 import { visualTransform } from "./visualTransform";
@@ -51,6 +52,7 @@ export class Visual implements IVisual {
   private readonly reactRoot: HTMLDivElement;
   private root: Root | null = null;
   private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
+  private columnSettings: Map<string, ColumnConfigSettings> = new Map();
   private formattingSettings: VisualFormattingSettingsModel;
   private formattingSettingsService: FormattingSettingsService;
 
@@ -85,6 +87,7 @@ export class Visual implements IVisual {
 
     const firstRow = viewModel.rows[0];
     const sparklineColumnNames: string[] = [];
+    const measureColumnNames: string[] = [];
 
     Object.keys(firstRow).forEach((key) => {
       const value = firstRow[key];
@@ -96,10 +99,15 @@ export class Visual implements IVisual {
         "Values" in value
       ) {
         sparklineColumnNames.push(key);
+      } else if (typeof value === "number") {
+        measureColumnNames.push(key);
       }
     });
 
+    console.log("Measure columns:", measureColumnNames);
+
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+    this.formattingSettings.updateColumnCards(measureColumnNames);
 
     this.formattingSettings =
       this.formattingSettingsService.populateFormattingSettingsModel(
@@ -108,11 +116,23 @@ export class Visual implements IVisual {
       );
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+    this.formattingSettings.updateColumnCards(measureColumnNames);
+
+    if (this.formattingSettings.columns) {
+      const selectedColumn = this.formattingSettings.columns.columnSelector.value.value as string;
+      this.formattingSettings.handleColumnSelectorChange(selectedColumn);
+    }
 
     this.sparklineSettings.clear();
     sparklineColumnNames.forEach((columnName) => {
       const settings = this.formattingSettings.getSparklineSettings(columnName);
       this.sparklineSettings.set(columnName, settings);
+    });
+
+    this.columnSettings.clear();
+    measureColumnNames.forEach((columnName) => {
+      const settings = this.formattingSettings.getColumnSettings(columnName);
+      this.columnSettings.set(columnName, settings);
     });
 
     this.renderTable(viewModel, options.viewport);
@@ -130,6 +150,8 @@ export class Visual implements IVisual {
       this.root = createRoot(this.reactRoot);
     }
 
+    const defaultColumnSettings = this.formattingSettings.getColumnSettings("");
+
     this.root.render(
       React.createElement(Table, {
         viewModel: viewModel,
@@ -137,89 +159,66 @@ export class Visual implements IVisual {
         tableStyle: this.formattingSettings.general.tableStyle.value
           .value as string,
         showHorizontalLines:
-          this.formattingSettings.grid.showHorizontalLines.value,
+          this.formattingSettings.grid.horizontalLinesGroup.showHorizontalLines.value,
         horizontalLineColor:
-          this.formattingSettings.grid.horizontalLineColor.value.value,
+          this.formattingSettings.grid.horizontalLinesGroup.horizontalLineColor.value.value,
         horizontalLineWidth:
-          this.formattingSettings.grid.horizontalLineWidth.value,
-        showVerticalLines: this.formattingSettings.grid.showVerticalLines.value,
+          this.formattingSettings.grid.horizontalLinesGroup.horizontalLineWidth.value,
+        showVerticalLines: this.formattingSettings.grid.verticalLinesGroup.showVerticalLines.value,
         verticalLineColor:
-          this.formattingSettings.grid.verticalLineColor.value.value,
-        verticalLineWidth: this.formattingSettings.grid.verticalLineWidth.value,
-        borderStyle: this.formattingSettings.advancedBorders.borderStyle.value
+          this.formattingSettings.grid.verticalLinesGroup.verticalLineColor.value.value,
+        verticalLineWidth: this.formattingSettings.grid.verticalLinesGroup.verticalLineWidth.value,
+        borderStyle: this.formattingSettings.grid.bordersGroup.borderStyle.value
           .value as string,
-        borderColor: this.formattingSettings.grid.borderColor.value.value,
-        borderWidth: this.formattingSettings.grid.borderWidth.value,
-        borderSection: this.formattingSettings.grid.borderSection.value
+        borderColor: this.formattingSettings.grid.bordersGroup.borderColor.value.value,
+        borderWidth: this.formattingSettings.grid.bordersGroup.borderWidth.value,
+        borderSection: this.formattingSettings.grid.bordersGroup.borderSection.value
           .value as "all" | "header" | "rows",
-        rowSelection: this.formattingSettings.interactivity.rowSelection.value,
+        rowSelection: this.formattingSettings.interactivity.selectionGroup.rowSelection.value,
         rowSelectionColor:
-          this.formattingSettings.interactivity.rowSelectionColor.value.value,
-        sortable: this.formattingSettings.interactivity.sortable.value,
+          this.formattingSettings.interactivity.selectionGroup.rowSelectionColor.value.value,
+        sortable: this.formattingSettings.interactivity.featuresGroup.sortable.value,
         freezeCategories:
-          this.formattingSettings.interactivity.freezeCategories.value,
-        searchable: this.formattingSettings.interactivity.searchable.value,
-        pagination: this.formattingSettings.interactivity.pagination.value,
-        rowsPerPage: this.formattingSettings.interactivity.rowsPerPage.value,
+          this.formattingSettings.interactivity.navigationGroup.freezeCategories.value,
+        searchable: this.formattingSettings.interactivity.featuresGroup.searchable.value,
+        pagination: this.formattingSettings.interactivity.navigationGroup.pagination.value,
+        rowsPerPage: this.formattingSettings.interactivity.navigationGroup.rowsPerPage.value,
         fontFamily: this.formattingSettings.typography.fontFamily.value
           .value as string,
-        wordWrap: this.formattingSettings.spacing.wordWrap.value,
-        textOverflow: this.formattingSettings.spacing.textOverflow.value
-          .value as "clip" | "ellipsis" | "wrap",
-        headerAlignment: this.formattingSettings.headerFormatting
-          .headerAlignment.value.value as "left" | "center" | "right",
-        headerPadding:
-          this.formattingSettings.headerFormatting.headerPadding.value,
-        headerBold: this.formattingSettings.headerFormatting.headerBold.value,
-        stickyHeader: this.formattingSettings.headerAdvanced.stickyHeader.value,
-        headerFontColor:
-          this.formattingSettings.columnHeader.fontColor.value.value,
-        headerFontSize: this.formattingSettings.columnHeader.fontSize.value,
-        headerBackgroundColor:
-          this.formattingSettings.columnHeader.backgroundColor.value.value,
-        rowHeight: this.formattingSettings.rows.rowHeight.value,
+        wordWrap: true,
+        textOverflow: "ellipsis" as "clip" | "ellipsis" | "wrap",
+        headerAlignment: defaultColumnSettings.headerAlignment as "left" | "center" | "right",
+        headerPadding: defaultColumnSettings.headerPadding,
+        headerBold: defaultColumnSettings.headerBold,
+        stickyHeader: false,
+        headerFontColor: defaultColumnSettings.headerFontColor,
+        headerFontSize: defaultColumnSettings.headerFontSize,
+        headerBackgroundColor: defaultColumnSettings.headerBackgroundColor,
+        rowHeight: this.formattingSettings.rows.rowDimensionsGroup.rowHeight.value,
         alternatingRowColor:
-          this.formattingSettings.rows.alternatingRowColor.value.value,
+          this.formattingSettings.rows.rowColorsGroup.alternatingRowColor.value.value,
         hoverBackgroundColor:
-          this.formattingSettings.rows.hoverBackgroundColor.value.value,
-        rowPadding: this.formattingSettings.rows.rowPadding.value,
-        categoryColumnAlignment: this.formattingSettings.categoryColumn
-          .alignment.value.value as "left" | "center" | "right",
-        categoryCellAlignment: this.formattingSettings.categoryCell.alignment
-          .value.value as "left" | "center" | "right",
-        categoryCellPadding: this.formattingSettings.categoryCell.padding.value,
-        categoryCellFontColor:
-          this.formattingSettings.categoryCell.fontColor.value.value,
-        categoryCellFontSize:
-          this.formattingSettings.categoryCell.fontSize.value,
-        categoryCellBackgroundColor:
-          this.formattingSettings.categoryCell.backgroundColor.value.value,
-        measureCellAlignment: this.formattingSettings.measureCell.alignment
-          .value.value as "left" | "center" | "right",
-        measureCellPadding: this.formattingSettings.measureCell.padding.value,
-        measureCellFontColor:
-          this.formattingSettings.measureCell.fontColor.value.value,
-        measureCellFontSize: this.formattingSettings.measureCell.fontSize.value,
-        measureCellBackgroundColor:
-          this.formattingSettings.measureCell.backgroundColor.value.value,
-        decimalPlaces:
-          this.formattingSettings.cellFormatting.decimalPlaces.value,
-        thousandsSeparator:
-          this.formattingSettings.cellFormatting.thousandsSeparator.value,
-        currencySymbol: this.formattingSettings.numberFormatting.currencySymbol
-          .value.value as string,
-        currencyPosition: this.formattingSettings.numberFormatting
-          .currencyPosition.value.value as "before" | "after",
-        negativeNumberFormat: this.formattingSettings.numberFormatting
-          .negativeNumberFormat.value.value as
-          | "minus"
-          | "parentheses"
-          | "minusred"
-          | "parenthesesred",
-        customNegativeColor:
-          this.formattingSettings.numberFormatting.customNegativeColor.value
-            .value,
+          this.formattingSettings.rows.rowEffectsGroup.hoverBackgroundColor.value.value,
+        rowPadding: this.formattingSettings.rows.rowDimensionsGroup.rowPadding.value,
+        categoryColumnAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
+        categoryCellAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
+        categoryCellPadding: defaultColumnSettings.cellPadding,
+        categoryCellFontColor: defaultColumnSettings.cellFontColor,
+        categoryCellFontSize: defaultColumnSettings.cellFontSize,
+        categoryCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
+        measureCellAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
+        measureCellPadding: defaultColumnSettings.cellPadding,
+        measureCellFontColor: defaultColumnSettings.cellFontColor,
+        measureCellFontSize: defaultColumnSettings.cellFontSize,
+        measureCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
+        decimalPlaces: defaultColumnSettings.decimalPlaces,
+        thousandsSeparator: defaultColumnSettings.thousandsSeparator,
+        currencySymbol: defaultColumnSettings.prefix,
+        currencyPosition: "before" as "before" | "after",
+        negativeNumberFormat: "minus" as "minus" | "parentheses" | "minusred" | "parenthesesred",
+        customNegativeColor: "#FF0000",
         sparklineSettings: this.sparklineSettings,
+        columnSettings: this.columnSettings,
         width: viewport.width,
       })
     );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { TableViewModel } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
 
@@ -57,6 +57,7 @@ interface TableProps {
   negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
   customNegativeColor: string;
   sparklineSettings: Map<string, SparklineColumnSettings>;
+  columnSettings: Map<string, ColumnConfigSettings>;
   width: number;
 }
 
@@ -113,6 +114,7 @@ export const Table: React.FC<TableProps> = ({
   negativeNumberFormat,
   customNegativeColor,
   sparklineSettings,
+  columnSettings,
   width,
 }) => {
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
@@ -254,6 +256,7 @@ export const Table: React.FC<TableProps> = ({
           fontColor={headerFontColor}
           fontSize={headerFontSize}
           backgroundColor={headerBackgroundColor}
+          columnSettings={columnSettings}
         />
         <tbody>
           {pageRows.map((rowData, index) => (
@@ -302,6 +305,7 @@ export const Table: React.FC<TableProps> = ({
               negativeNumberFormat={negativeNumberFormat}
               customNegativeColor={customNegativeColor}
               sparklineSettings={sparklineSettings}
+              columnSettings={columnSettings}
             />
           ))}
         </tbody>

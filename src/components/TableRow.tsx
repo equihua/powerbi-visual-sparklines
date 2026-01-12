@@ -1,6 +1,6 @@
 import React from "react";
 import { TableRowData, SparklineData } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
 import { TableCell } from "./TableCell";
 import { Sparkline } from "./Sparkline";
 
@@ -44,6 +44,7 @@ interface TableRowProps {
   negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
   customNegativeColor: string;
   sparklineSettings: Map<string, SparklineColumnSettings>;
+  columnSettings: Map<string, ColumnConfigSettings>;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -86,6 +87,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   negativeNumberFormat,
   customNegativeColor,
   sparklineSettings,
+  columnSettings,
 }) => {
   let backgroundColor =
     tableStyle === "striped" && index % 2 === 1
@@ -112,37 +114,43 @@ export const TableRow: React.FC<TableRowProps> = ({
       }}
       onClick={onRowClick}
     >
-      {columnNames.map((columnName, cellIndex) => (
-        <TableCell
-          key={cellIndex}
-          value={rowData[columnName]}
-          alignment={
-            cellIndex === 0 ? categoryCellAlignment : measureCellAlignment
-          }
-          padding={cellIndex === 0 ? categoryCellPadding : measureCellPadding}
-          color={cellIndex === 0 ? categoryCellFontColor : measureCellFontColor}
-          fontSize={
-            cellIndex === 0 ? categoryCellFontSize : measureCellFontSize
-          }
-          backgroundColor={
-            cellIndex === 0
-              ? categoryCellBackgroundColor
-              : measureCellBackgroundColor
-          }
-          freezeLeft={freezeCategories && cellIndex === 0}
-          showVerticalLines={showVerticalLines}
-          verticalLineColor={verticalLineColor}
-          verticalLineWidth={verticalLineWidth}
-          wordWrap={wordWrap}
-          textOverflow={textOverflow}
-          decimalPlaces={decimalPlaces}
-          thousandsSeparator={thousandsSeparator}
-          currencySymbol={currencySymbol}
-          currencyPosition={currencyPosition}
-          negativeNumberFormat={negativeNumberFormat}
-          customNegativeColor={customNegativeColor}
-        />
-      ))}
+      {columnNames.map((columnName, cellIndex) => {
+        const colSettings = columnSettings.get(columnName);
+        const isCategory = cellIndex === 0;
+
+        const cellAlignment = colSettings?.cellAlignment || (isCategory ? categoryCellAlignment : measureCellAlignment);
+        const cellPadding = colSettings?.cellPadding ?? (isCategory ? categoryCellPadding : measureCellPadding);
+        const cellColor = colSettings?.cellFontColor || (isCategory ? categoryCellFontColor : measureCellFontColor);
+        const cellFontSize = colSettings?.cellFontSize ?? (isCategory ? categoryCellFontSize : measureCellFontSize);
+        const cellBgColor = colSettings?.cellBackgroundColor || (isCategory ? categoryCellBackgroundColor : measureCellBackgroundColor);
+        const cellDecimalPlaces = colSettings?.decimalPlaces ?? decimalPlaces;
+        const cellThousandsSeparator = colSettings?.thousandsSeparator ?? thousandsSeparator;
+        const cellPrefix = colSettings?.prefix || currencySymbol;
+
+        return (
+          <TableCell
+            key={cellIndex}
+            value={rowData[columnName]}
+            alignment={cellAlignment as "left" | "center" | "right"}
+            padding={cellPadding}
+            color={cellColor}
+            fontSize={cellFontSize}
+            backgroundColor={cellBgColor}
+            freezeLeft={freezeCategories && cellIndex === 0}
+            showVerticalLines={showVerticalLines}
+            verticalLineColor={verticalLineColor}
+            verticalLineWidth={verticalLineWidth}
+            wordWrap={wordWrap}
+            textOverflow={textOverflow}
+            decimalPlaces={cellDecimalPlaces}
+            thousandsSeparator={cellThousandsSeparator}
+            currencySymbol={cellPrefix}
+            currencyPosition={currencyPosition}
+            negativeNumberFormat={negativeNumberFormat}
+            customNegativeColor={customNegativeColor}
+          />
+        );
+      })}
       {sparklineColumnNames.map((columnName, sparklineIndex) => {
         const sparklineData = rowData[columnName] as SparklineData;
         const settings = sparklineSettings.get(columnName) || {

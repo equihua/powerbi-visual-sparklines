@@ -12,6 +12,7 @@ export class GeneralSettings extends formattingSettings.SimpleCard {
     items: [
       { value: "default", displayName: "Predeterminado" },
       { value: "striped", displayName: "A rayas" },
+      { value: "bordered", displayName: "Con bordes" },
     ],
     value: { value: "default", displayName: "Predeterminado" },
   });
