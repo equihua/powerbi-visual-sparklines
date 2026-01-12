@@ -1,5 +1,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
-import powerbi from "powerbi-visuals-api";
+import {
+  SPARKLINE_CHART_TYPE_OPTIONS,
+  SPARKLINE_DEFAULTS,
+  VALIDATORS,
+} from "../constants/visualDefaults";
 
 /**
  * Interface para configuraciones de columna sparkline.
@@ -15,29 +19,23 @@ class SparklineColumnGroup extends formattingSettings.Group {
   chartType = new formattingSettings.ItemDropdown({
     name: "chartType",
     displayName: "Tipo de gráfico",
-    items: [
-      { value: "line", displayName: "Línea" },
-      { value: "bar", displayName: "Barras" },
-      { value: "area", displayName: "Área" },
-      { value: "pie", displayName: "Circular" },
-      { value: "donut", displayName: "Anillo" },
-    ],
-    value: { value: "line", displayName: "Línea" },
+    items: [...SPARKLINE_CHART_TYPE_OPTIONS],
+    value: SPARKLINE_CHART_TYPE_OPTIONS[0],
   });
 
   color = new formattingSettings.ColorPicker({
     name: "color",
     displayName: "Color",
-    value: { value: "#0078D4" },
+    value: { value: SPARKLINE_DEFAULTS.color },
   });
 
   lineWidth = new formattingSettings.NumUpDown({
     name: "lineWidth",
     displayName: "Grosor de línea",
-    value: 1.5,
+    value: SPARKLINE_DEFAULTS.lineWidth,
     options: {
-      minValue: { value: 0.5, type: powerbi.visuals.ValidatorType.Min },
-      maxValue: { value: 10, type: powerbi.visuals.ValidatorType.Max },
+      minValue: VALIDATORS.lineWidth.min,
+      maxValue: VALIDATORS.lineWidth.max,
     },
   });
 
@@ -78,9 +76,9 @@ export class SparklineCompositeCard extends formattingSettings.CompositeCard {
       };
     }
     return {
-      chartType: "line",
-      color: "#0078D4",
-      lineWidth: 1.5,
+      chartType: SPARKLINE_DEFAULTS.chartType,
+      color: SPARKLINE_DEFAULTS.color,
+      lineWidth: SPARKLINE_DEFAULTS.lineWidth,
     };
   }
 

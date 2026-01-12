@@ -1,4 +1,8 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import {
+  TEXT_ALIGNMENT_OPTIONS,
+  COLUMN_DEFAULTS,
+} from "../constants/visualDefaults";
 
 export interface ColumnConfigSettings {
   headerFontColor: string;
@@ -25,121 +29,113 @@ class ColumnConfigGroup extends formattingSettings.Group {
   headerFontColor = new formattingSettings.ColorPicker({
     name: "headerFontColor",
     displayName: "Color de fuente encabezado",
-    value: { value: "#000000" },
+    value: { value: COLUMN_DEFAULTS.headerFontColor },
   });
 
   headerFontSize = new formattingSettings.NumUpDown({
     name: "headerFontSize",
     displayName: "Tamaño fuente encabezado",
-    value: 12,
+    value: COLUMN_DEFAULTS.headerFontSize,
   });
 
   headerAlignment = new formattingSettings.ItemDropdown({
     name: "headerAlignment",
     displayName: "Alineación encabezado",
-    items: [
-      { value: "left", displayName: "Izquierda" },
-      { value: "center", displayName: "Centro" },
-      { value: "right", displayName: "Derecha" },
-    ],
-    value: { value: "center", displayName: "Centro" },
+    items: [...TEXT_ALIGNMENT_OPTIONS],
+    value: TEXT_ALIGNMENT_OPTIONS[1], // Centro
   });
 
   headerBold = new formattingSettings.ToggleSwitch({
     name: "headerBold",
     displayName: "Negrita encabezado",
-    value: true,
+    value: COLUMN_DEFAULTS.headerBold,
   });
 
   headerBackgroundColor = new formattingSettings.ColorPicker({
     name: "headerBackgroundColor",
     displayName: "Color fondo encabezado",
-    value: { value: "#F5F5F5" },
+    value: { value: COLUMN_DEFAULTS.headerBackgroundColor },
   });
 
   headerPadding = new formattingSettings.NumUpDown({
     name: "headerPadding",
     displayName: "Espaciado encabezado",
-    value: 8,
+    value: COLUMN_DEFAULTS.headerPadding,
   });
 
   cellFontColor = new formattingSettings.ColorPicker({
     name: "cellFontColor",
     displayName: "Color de fuente celda",
-    value: { value: "#000000" },
+    value: { value: COLUMN_DEFAULTS.cellFontColor },
   });
 
   cellFontSize = new formattingSettings.NumUpDown({
     name: "cellFontSize",
     displayName: "Tamaño fuente celda",
-    value: 11,
+    value: COLUMN_DEFAULTS.cellFontSize,
   });
 
   cellAlignment = new formattingSettings.ItemDropdown({
     name: "cellAlignment",
     displayName: "Alineación celda",
-    items: [
-      { value: "left", displayName: "Izquierda" },
-      { value: "center", displayName: "Centro" },
-      { value: "right", displayName: "Derecha" },
-    ],
-    value: { value: "left", displayName: "Izquierda" },
+    items: [...TEXT_ALIGNMENT_OPTIONS],
+    value: TEXT_ALIGNMENT_OPTIONS[0], // Izquierda
   });
 
   cellBackgroundColor = new formattingSettings.ColorPicker({
     name: "cellBackgroundColor",
     displayName: "Color fondo celda",
-    value: { value: "#FFFFFF" },
+    value: { value: COLUMN_DEFAULTS.cellBackgroundColor },
   });
 
   cellPadding = new formattingSettings.NumUpDown({
     name: "cellPadding",
     displayName: "Espaciado celda",
-    value: 6,
+    value: COLUMN_DEFAULTS.cellPadding,
   });
 
   decimalPlaces = new formattingSettings.NumUpDown({
     name: "decimalPlaces",
     displayName: "Decimales",
-    value: 2,
+    value: COLUMN_DEFAULTS.decimalPlaces,
   });
 
   thousandsSeparator = new formattingSettings.ToggleSwitch({
     name: "thousandsSeparator",
     displayName: "Separador de miles",
-    value: true,
+    value: COLUMN_DEFAULTS.thousandsSeparator,
   });
 
   prefix = new formattingSettings.TextInput({
     name: "prefix",
     displayName: "Prefijo",
-    value: "",
+    value: COLUMN_DEFAULTS.prefix,
     placeholder: "$",
   });
 
   suffix = new formattingSettings.TextInput({
     name: "suffix",
     displayName: "Sufijo",
-    value: "",
+    value: COLUMN_DEFAULTS.suffix,
     placeholder: "%",
   });
 
   columnWidth = new formattingSettings.NumUpDown({
     name: "columnWidth",
     displayName: "Ancho de columna",
-    value: 120,
+    value: COLUMN_DEFAULTS.columnWidth,
   });
 
   sortable = new formattingSettings.ToggleSwitch({
     name: "sortable",
     displayName: "Ordenable",
-    value: true,
+    value: COLUMN_DEFAULTS.sortable,
   });
 
   columnVisible = new formattingSettings.ToggleSwitch({
     name: "columnVisible",
     displayName: "Visible",
-    value: true,
+    value: COLUMN_DEFAULTS.columnVisible,
   });
 
   constructor(name: string, displayName: string) {
@@ -244,7 +240,9 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
     return this.getDefaultSettings();
   }
 
-  private extractSettingsFromGroup(group: ColumnConfigGroup): ColumnConfigSettings {
+  private extractSettingsFromGroup(
+    group: ColumnConfigGroup
+  ): ColumnConfigSettings {
     return {
       headerFontColor: group.headerFontColor.value.value,
       headerFontSize: group.headerFontSize.value,
@@ -297,10 +295,7 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
     };
   }
 
-  public setSettings(
-    columnName: string,
-    settings: ColumnConfigSettings
-  ): void {
+  public setSettings(columnName: string, settings: ColumnConfigSettings): void {
     const group = this.allGroups.get(columnName);
     if (group) {
       group.headerFontColor.value = { value: settings.headerFontColor };
@@ -312,7 +307,9 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
         group.headerAlignment.value = headerAlignmentItem;
       }
       group.headerBold.value = settings.headerBold;
-      group.headerBackgroundColor.value = { value: settings.headerBackgroundColor };
+      group.headerBackgroundColor.value = {
+        value: settings.headerBackgroundColor,
+      };
       group.headerPadding.value = settings.headerPadding;
       group.cellFontColor.value = { value: settings.cellFontColor };
       group.cellFontSize.value = settings.cellFontSize;

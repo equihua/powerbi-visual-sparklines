@@ -1,15 +1,16 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
-import { GeneralSettings } from "./settings/general";
-import { GridSettings } from "./settings/grid";
-import { RowsSettings } from "./settings/rows";
-import { InteractivitySettings } from "./settings/interactivity";
-import { ColumnSettings, type ColumnConfigSettings } from "./settings/columns";
-import { TypographySettings } from "./settings/typography";
-import { TotalSettings } from "./settings/totals";
 import {
+  GeneralSettings,
+  GridSettings,
+  RowsSettings,
+  InteractivitySettings,
+  ColumnSettings,
+  TypographySettings,
+  TotalSettings,
   SparklineCompositeCard,
+  type ColumnConfigSettings,
   type SparklineColumnSettings,
-} from "./settings/sparkline";
+} from "./settings/index";
 
 export type { SparklineColumnSettings, ColumnConfigSettings };
 

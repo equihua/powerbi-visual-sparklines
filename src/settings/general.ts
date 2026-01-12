@@ -1,5 +1,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
-import powerbi from "powerbi-visuals-api";
+import {
+  TABLE_STYLE_OPTIONS,
+  GENERAL_DEFAULTS,
+  VALIDATORS,
+} from "../constants/visualDefaults";
 
 /**
  * Configuraciones generales del visual.
@@ -9,21 +13,17 @@ export class GeneralSettings extends formattingSettings.SimpleCard {
   tableStyle = new formattingSettings.ItemDropdown({
     name: "tableStyle",
     displayName: "Estilo",
-    items: [
-      { value: "default", displayName: "Predeterminado" },
-      { value: "striped", displayName: "A rayas" },
-      { value: "bordered", displayName: "Con bordes" },
-    ],
-    value: { value: "default", displayName: "Predeterminado" },
+    items: [...TABLE_STYLE_OPTIONS],
+    value: TABLE_STYLE_OPTIONS[0],
   });
 
   textSize = new formattingSettings.NumUpDown({
     name: "textSize",
     displayName: "Tamaño de texto",
-    value: 12,
+    value: GENERAL_DEFAULTS.textSize,
     options: {
-      minValue: { value: 8, type: powerbi.visuals.ValidatorType.Min },
-      maxValue: { value: 40, type: powerbi.visuals.ValidatorType.Max },
+      minValue: VALIDATORS.textSize.min,
+      maxValue: VALIDATORS.textSize.max,
     },
   });
 

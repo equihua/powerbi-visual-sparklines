@@ -1,22 +1,27 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import {
+  BORDER_STYLE_OPTIONS,
+  BORDER_SECTION_OPTIONS,
+  GRID_DEFAULTS,
+} from "../constants/visualDefaults";
 
 class HorizontalLinesGroup extends formattingSettings.SimpleCard {
   showHorizontalLines = new formattingSettings.ToggleSwitch({
     name: "showHorizontalLines",
     displayName: "Mostrar líneas horizontales",
-    value: true,
+    value: GRID_DEFAULTS.showHorizontalLines,
   });
 
   horizontalLineColor = new formattingSettings.ColorPicker({
     name: "horizontalLineColor",
     displayName: "Color",
-    value: { value: "#E0E0E0" },
+    value: { value: GRID_DEFAULTS.horizontalLineColor },
   });
 
   horizontalLineWidth = new formattingSettings.NumUpDown({
     name: "horizontalLineWidth",
     displayName: "Ancho",
-    value: 1,
+    value: GRID_DEFAULTS.horizontalLineWidth,
   });
 
   name: string = "horizontalLines";
@@ -32,19 +37,19 @@ class VerticalLinesGroup extends formattingSettings.SimpleCard {
   showVerticalLines = new formattingSettings.ToggleSwitch({
     name: "showVerticalLines",
     displayName: "Mostrar líneas verticales",
-    value: false,
+    value: GRID_DEFAULTS.showVerticalLines,
   });
 
   verticalLineColor = new formattingSettings.ColorPicker({
     name: "verticalLineColor",
     displayName: "Color",
-    value: { value: "#E0E0E0" },
+    value: { value: GRID_DEFAULTS.verticalLineColor },
   });
 
   verticalLineWidth = new formattingSettings.NumUpDown({
     name: "verticalLineWidth",
     displayName: "Ancho",
-    value: 1,
+    value: GRID_DEFAULTS.verticalLineWidth,
   });
 
   name: string = "verticalLines";
@@ -60,78 +65,69 @@ class BordersGroup extends formattingSettings.SimpleCard {
   borderSection = new formattingSettings.ItemDropdown({
     name: "borderSection",
     displayName: "Aplicar a",
-    items: [
-      { value: "all", displayName: "Todas" },
-      { value: "header", displayName: "Encabezado" },
-      { value: "rows", displayName: "Filas" },
-    ],
-    value: { value: "all", displayName: "Todas" },
+    items: [...BORDER_SECTION_OPTIONS],
+    value: BORDER_SECTION_OPTIONS[0],
   });
 
   borderTop = new formattingSettings.ToggleSwitch({
     name: "borderTop",
     displayName: "Superior",
-    value: false,
+    value: GRID_DEFAULTS.borderTop,
   });
 
   borderBottom = new formattingSettings.ToggleSwitch({
     name: "borderBottom",
     displayName: "Inferior",
-    value: true,
+    value: GRID_DEFAULTS.borderBottom,
   });
 
   borderLeft = new formattingSettings.ToggleSwitch({
     name: "borderLeft",
     displayName: "Izquierda",
-    value: false,
+    value: GRID_DEFAULTS.borderLeft,
   });
 
   borderRight = new formattingSettings.ToggleSwitch({
     name: "borderRight",
     displayName: "Derecha",
-    value: false,
+    value: GRID_DEFAULTS.borderRight,
   });
 
   borderColor = new formattingSettings.ColorPicker({
     name: "borderColor",
     displayName: "Color",
-    value: { value: "#E0E0E0" },
+    value: { value: GRID_DEFAULTS.borderColor },
   });
 
   borderWidth = new formattingSettings.NumUpDown({
     name: "borderWidth",
     displayName: "Ancho",
-    value: 1,
+    value: GRID_DEFAULTS.borderWidth,
   });
 
   borderStyle = new formattingSettings.ItemDropdown({
     name: "borderStyle",
     displayName: "Estilo",
-    items: [
-      { value: "solid", displayName: "Sólido" },
-      { value: "dashed", displayName: "Guionado" },
-      { value: "dotted", displayName: "Punteado" },
-      { value: "double", displayName: "Doble" },
-    ],
-    value: { value: "solid", displayName: "Sólido" },
+    items: [...BORDER_STYLE_OPTIONS],
+    value: BORDER_STYLE_OPTIONS[0],
   });
 
   borderRadius = new formattingSettings.NumUpDown({
     name: "borderRadius",
     displayName: "Radio de esquina",
-    value: 0,
+    value: GRID_DEFAULTS.borderRadius,
   });
 
   shadowBorder = new formattingSettings.ToggleSwitch({
     name: "shadowBorder",
     displayName: "Sombra",
-    value: false,
+    value: GRID_DEFAULTS.shadowBorder,
   });
 
   shadowColor = new formattingSettings.ColorPicker({
     name: "shadowColor",
     displayName: "Color de sombra",
-    value: { value: "#000000" },
+    value: { value: GRID_DEFAULTS.shadowColor },
   });
 
   name: string = "borders";
@@ -155,14 +151,12 @@ class SpacingGroup extends formattingSettings.SimpleCard {
   rowSpacing = new formattingSettings.NumUpDown({
     name: "rowSpacing",
     displayName: "Espaciado interno filas",
-    value: 4,
+    value: GRID_DEFAULTS.rowSpacing,
   });
 
   name: string = "spacing";
   displayName: string = "Espaciado";
-  slices: formattingSettings.Slice[] = [
-    this.rowSpacing,
-  ];
+  slices: formattingSettings.Slice[] = [this.rowSpacing];
 }
 
 export class GridSettings extends formattingSettings.CompositeCard {

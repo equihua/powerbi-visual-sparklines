@@ -45,7 +45,8 @@ import {
 } from "./settings";
 import { visualTransform } from "./visualTransform";
 import { TableViewModel } from "./visualViewModel";
-import { Table } from "./components/Table";
+import { TableContainer } from "./components/TableContainer";
+import { generateHash } from "./utils/memoization";
 
 export class Visual implements IVisual {
   private readonly target: HTMLElement;
@@ -55,6 +56,11 @@ export class Visual implements IVisual {
   private columnSettings: Map<string, ColumnConfigSettings> = new Map();
   private formattingSettings: VisualFormattingSettingsModel;
   private formattingSettingsService: FormattingSettingsService;
+
+  // Caches para detectar cambios en configuraciones
+  private previousSparklineHash: string = "";
+  private previousColumnHash: string = "";
+  private previousViewModelHash: string = "";
 
   constructor(options: VisualConstructorOptions) {
     this.target = options.element;
@@ -118,17 +124,41 @@ export class Visual implements IVisual {
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
     this.formattingSettings.updateColumnCards(measureColumnNames);
 
-    if (this.formattingSettings.columns) {
-      const selectedColumn = this.formattingSettings.columns.columnSelector.value.value as string;
-      this.formattingSettings.handleColumnSelectorChange(selectedColumn);
-    }
-
-    this.sparklineSettings.clear();
-    sparklineColumnNames.forEach((columnName) => {
-      const settings = this.formattingSettings.getSparklineSettings(columnName);
-      this.sparklineSettings.set(columnName, settings);
+    // Calcular hash de configuraciones para detectar cambios reales
+    const newSparklineHash = generateHash({
+      columns: sparklineColumnNames.sort(),
+      settings: sparklineColumnNames.map((col) =>
+        this.formattingSettings.getSparklineSettings(col)
+      ),
     });
 
+    const newColumnHash = generateHash({
+      columns: measureColumnNames.sort(),
+      settings: measureColumnNames.map((col) =>
+        this.formattingSettings.getColumnSettings(col)
+      ),
+    });
+
+    // Solo actualizar sparklineSettings si realmente cambió
+    if (newSparklineHash !== this.previousSparklineHash) {
+      this.sparklineSettings.clear();
+      sparklineColumnNames.forEach((columnName) => {
+        const settings =
+          this.formattingSettings.getSparklineSettings(columnName);
+        this.sparklineSettings.set(columnName, settings);
+      });
+      this.previousSparklineHash = newSparklineHash;
+    }
+
+    // Solo actualizar columnSettings si realmente cambió
+    if (newColumnHash !== this.previousColumnHash) {
+      this.columnSettings.clear();
+      measureColumnNames.forEach((columnName) => {
+        const settings = this.formattingSettings.getColumnSettings(columnName);
+        this.columnSettings.set(columnName, settings);
+      });
+      this.previousColumnHash = newColumnHash;
+    }
     this.columnSettings.clear();
     measureColumnNames.forEach((columnName) => {
       const settings = this.formattingSettings.getColumnSettings(columnName);
@@ -150,76 +180,14 @@ export class Visual implements IVisual {
       this.root = createRoot(this.reactRoot);
     }
 
-    const defaultColumnSettings = this.formattingSettings.getColumnSettings("");
-
+    // Renderizado simplificado: solo pasamos los datos necesarios al contenedor
     this.root.render(
-      React.createElement(Table, {
-        viewModel: viewModel,
-        textSize: this.formattingSettings.general.textSize.value,
-        tableStyle: this.formattingSettings.general.tableStyle.value
-          .value as string,
-        showHorizontalLines:
-          this.formattingSettings.grid.horizontalLinesGroup.showHorizontalLines.value,
-        horizontalLineColor:
-          this.formattingSettings.grid.horizontalLinesGroup.horizontalLineColor.value.value,
-        horizontalLineWidth:
-          this.formattingSettings.grid.horizontalLinesGroup.horizontalLineWidth.value,
-        showVerticalLines: this.formattingSettings.grid.verticalLinesGroup.showVerticalLines.value,
-        verticalLineColor:
-          this.formattingSettings.grid.verticalLinesGroup.verticalLineColor.value.value,
-        verticalLineWidth: this.formattingSettings.grid.verticalLinesGroup.verticalLineWidth.value,
-        borderStyle: this.formattingSettings.grid.bordersGroup.borderStyle.value
-          .value as string,
-        borderColor: this.formattingSettings.grid.bordersGroup.borderColor.value.value,
-        borderWidth: this.formattingSettings.grid.bordersGroup.borderWidth.value,
-        borderSection: this.formattingSettings.grid.bordersGroup.borderSection.value
-          .value as "all" | "header" | "rows",
-        rowSelection: this.formattingSettings.interactivity.selectionGroup.rowSelection.value,
-        rowSelectionColor:
-          this.formattingSettings.interactivity.selectionGroup.rowSelectionColor.value.value,
-        sortable: this.formattingSettings.interactivity.featuresGroup.sortable.value,
-        freezeCategories:
-          this.formattingSettings.interactivity.navigationGroup.freezeCategories.value,
-        searchable: this.formattingSettings.interactivity.featuresGroup.searchable.value,
-        pagination: this.formattingSettings.interactivity.navigationGroup.pagination.value,
-        rowsPerPage: this.formattingSettings.interactivity.navigationGroup.rowsPerPage.value,
-        fontFamily: this.formattingSettings.typography.fontFamily.value
-          .value as string,
-        wordWrap: true,
-        textOverflow: "ellipsis" as "clip" | "ellipsis" | "wrap",
-        headerAlignment: defaultColumnSettings.headerAlignment as "left" | "center" | "right",
-        headerPadding: defaultColumnSettings.headerPadding,
-        headerBold: defaultColumnSettings.headerBold,
-        stickyHeader: false,
-        headerFontColor: defaultColumnSettings.headerFontColor,
-        headerFontSize: defaultColumnSettings.headerFontSize,
-        headerBackgroundColor: defaultColumnSettings.headerBackgroundColor,
-        rowHeight: this.formattingSettings.rows.rowDimensionsGroup.rowHeight.value,
-        alternatingRowColor:
-          this.formattingSettings.rows.rowColorsGroup.alternatingRowColor.value.value,
-        hoverBackgroundColor:
-          this.formattingSettings.rows.rowEffectsGroup.hoverBackgroundColor.value.value,
-        rowPadding: this.formattingSettings.rows.rowDimensionsGroup.rowPadding.value,
-        categoryColumnAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
-        categoryCellAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
-        categoryCellPadding: defaultColumnSettings.cellPadding,
-        categoryCellFontColor: defaultColumnSettings.cellFontColor,
-        categoryCellFontSize: defaultColumnSettings.cellFontSize,
-        categoryCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
-        measureCellAlignment: defaultColumnSettings.cellAlignment as "left" | "center" | "right",
-        measureCellPadding: defaultColumnSettings.cellPadding,
-        measureCellFontColor: defaultColumnSettings.cellFontColor,
-        measureCellFontSize: defaultColumnSettings.cellFontSize,
-        measureCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
-        decimalPlaces: defaultColumnSettings.decimalPlaces,
-        thousandsSeparator: defaultColumnSettings.thousandsSeparator,
-        currencySymbol: defaultColumnSettings.prefix,
-        currencyPosition: "before" as "before" | "after",
-        negativeNumberFormat: "minus" as "minus" | "parentheses" | "minusred" | "parenthesesred",
-        customNegativeColor: "#FF0000",
+      React.createElement(TableContainer, {
+        viewModel,
+        formattingSettings: this.formattingSettings,
         sparklineSettings: this.sparklineSettings,
         columnSettings: this.columnSettings,
-        width: viewport.width,
+        viewport,
       })
     );
   }
