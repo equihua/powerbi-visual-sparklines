@@ -1,6 +1,29 @@
 import React from "react";
 import { ColumnConfigSettings } from "../settings";
 
+interface CssTypographyStyle {
+  fontFamily: string;
+  fontSize: string;
+  fontColor: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: number;
+  letterSpacing: string;
+  alignment: "left" | "center" | "right";
+}
+
+interface TypographyStyle {
+  fontFamily: string;
+  fontSize: string;
+  fontColor: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: number;
+  letterSpacing: string;
+}
+
 interface TableHeaderProps {
   columnNames: string[];
   sparklineColumnNames: string[];
@@ -20,6 +43,8 @@ interface TableHeaderProps {
   fontSize: number;
   backgroundColor: string;
   columnSettings: Map<string, ColumnConfigSettings>;
+  typographyByColumn: Map<string, CssTypographyStyle>;
+  defaultTypography: CssTypographyStyle;
 }
 
 export const TableHeader: React.FC<TableHeaderProps> = ({
@@ -41,6 +66,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   fontSize,
   backgroundColor,
   columnSettings,
+  typographyByColumn,
+  defaultTypography,
 }) => {
   const getSortIndicator = (columnName: string) => {
     if (!sortable || sortColumn !== columnName) return null;
@@ -52,12 +79,16 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
       <tr style={{ borderBottom }}>
         {columnNames.map((columnName, index) => {
           const colSettings = columnSettings.get(columnName);
-          const colAlignment = colSettings?.headerAlignment || alignment;
+          const colAlignment = alignment;
           const colPadding = colSettings?.headerPadding ?? padding;
-          const colBold = colSettings?.headerBold ?? bold;
-          const colFontColor = colSettings?.headerFontColor || fontColor;
-          const colFontSize = colSettings?.headerFontSize ?? fontSize;
-          const colBackgroundColor = colSettings?.headerBackgroundColor || backgroundColor;
+          const colBold = bold;
+          const colFontColor = fontColor;
+          const colFontSize = fontSize;
+          const colBackgroundColor =
+            colSettings?.headerBackgroundColor || backgroundColor;
+
+          const columnTypography =
+            typographyByColumn.get(columnName) || defaultTypography;
 
           return (
             <th
@@ -69,9 +100,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
                 textAlign: colAlignment as "left" | "center" | "right",
                 padding: colPadding,
                 fontWeight: colBold ? 700 : 400,
-                color: colFontColor,
-                fontSize: colFontSize,
-                position: sticky && index === 0 ? ("sticky" as const) : undefined,
+                fontFamily: columnTypography.fontFamily,
+                fontSize: colFontSize
+                  ? `${colFontSize}px`
+                  : columnTypography.fontSize,
+                color: colFontColor || columnTypography.fontColor,
+                fontStyle: columnTypography.fontStyle,
+                textDecoration: columnTypography.textDecoration,
+                letterSpacing: columnTypography.letterSpacing,
+                lineHeight: columnTypography.lineHeight,
+                position:
+                  sticky && index === 0 ? ("sticky" as const) : undefined,
                 left: sticky && index === 0 ? 0 : undefined,
                 background:
                   sticky && index === 0
@@ -87,21 +126,31 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             </th>
           );
         })}
-        {sparklineColumnNames.map((columnName, index) => (
-          <th
-            key={`sparkline-${index}`}
-            style={{
-              textAlign: alignment,
-              padding,
-              fontWeight: bold ? 700 : 400,
-              color: fontColor,
-              fontSize,
-              backgroundColor,
-            }}
-          >
-            {columnName}
-          </th>
-        ))}
+        {sparklineColumnNames.map((columnName, index) => {
+          const columnTypography =
+            typographyByColumn.get(columnName) || defaultTypography;
+
+          return (
+            <th
+              key={`sparkline-${index}`}
+              style={{
+                textAlign: alignment,
+                padding,
+                fontWeight: bold ? 700 : 400,
+                fontFamily: columnTypography.fontFamily,
+                fontSize: `${fontSize}px`,
+                color: fontColor,
+                fontStyle: columnTypography.fontStyle,
+                textDecoration: columnTypography.textDecoration,
+                letterSpacing: columnTypography.letterSpacing,
+                lineHeight: columnTypography.lineHeight,
+                backgroundColor,
+              }}
+            >
+              {columnName}
+            </th>
+          );
+        })}
       </tr>
     </thead>
   );

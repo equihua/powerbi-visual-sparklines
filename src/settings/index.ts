@@ -5,7 +5,7 @@
 
 // Importaciones de clases principales de configuración
 export { GeneralCompositeCard } from "./general";
-export { TypographySettings } from "./typography";
+export { TypographyCard } from "./typography";
 export { InteractivitySettings } from "./interactivity";
 export { GridSettings } from "./grid";
 export { RowsSettings } from "./rows";
@@ -19,3 +19,4 @@ export { NumberFormattingSettings } from "./numbers";
 // Importaciones de tipos
 export type { SparklineColumnSettings } from "./sparkline";
 export type { ColumnConfigSettings } from "./columns";
+export type { TypographyStyle } from "./typography";

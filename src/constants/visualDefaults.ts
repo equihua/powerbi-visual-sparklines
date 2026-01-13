@@ -190,6 +190,10 @@ export const TYPOGRAPHY_DEFAULTS = {
   letterSpacing: 0,
   bold: false,
   italic: false,
+  underline: false,
+  alignment: TextAlignment.Left,
+  applyTo: "all" as const,
+  targetColumn: "",
 } as const;
 
 // ============================================================================

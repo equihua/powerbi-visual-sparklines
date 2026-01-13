@@ -1,5 +1,17 @@
 import React from "react";
 
+interface CssTypographyStyle {
+  fontFamily: string;
+  fontSize: string;
+  fontColor: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: number;
+  letterSpacing: string;
+  alignment: "left" | "center" | "right";
+}
+
 interface TableCellProps {
   value: any;
   alignment: "left" | "center" | "right";
@@ -19,6 +31,7 @@ interface TableCellProps {
   currencyPosition: "before" | "after";
   negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
   customNegativeColor: string;
+  typographyStyle: CssTypographyStyle;
 }
 
 const formatValue = (
@@ -55,8 +68,6 @@ const formatValue = (
         negativeNumberFormat === "parenthesesred"
       ) {
         text = `(${text})`;
-      } else {
-        text = `-${text}`;
       }
       if (
         negativeNumberFormat === "minusred" ||
@@ -94,6 +105,7 @@ export const TableCell: React.FC<TableCellProps> = ({
   currencyPosition,
   negativeNumberFormat,
   customNegativeColor,
+  typographyStyle,
 }) => {
   const formatted = formatValue(
     value,
@@ -117,6 +129,14 @@ export const TableCell: React.FC<TableCellProps> = ({
       style={{
         textAlign: alignment,
         padding,
+        fontFamily: typographyStyle.fontFamily,
+        fontSize: fontSize ? `${fontSize}px` : typographyStyle.fontSize,
+        color: formatted.color || color || typographyStyle.fontColor,
+        fontWeight: typographyStyle.fontWeight,
+        fontStyle: typographyStyle.fontStyle,
+        textDecoration: typographyStyle.textDecoration,
+        letterSpacing: typographyStyle.letterSpacing,
+        lineHeight: typographyStyle.lineHeight,
         position: freezeLeft ? ("sticky" as const) : undefined,
         left: freezeLeft ? 0 : undefined,
         background: freezeLeft ? backgroundColor || "#fff" : backgroundColor,
@@ -126,8 +146,6 @@ export const TableCell: React.FC<TableCellProps> = ({
         whiteSpace,
         overflow,
         textOverflow: textOverflowCSS,
-        color: formatted.color || color,
-        fontSize,
       }}
     >
       {formatted.text}

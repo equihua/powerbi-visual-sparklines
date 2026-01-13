@@ -1,10 +1,11 @@
 import React from "react";
 import { Table } from "./Table";
 import { TableViewModel } from "../visualViewModel";
-import { VisualFormattingSettingsModel } from "../settings";
-import type {
-  SparklineColumnSettings,
-  ColumnConfigSettings,
+import {
+  VisualFormattingSettingsModel,
+  type SparklineColumnSettings,
+  type ColumnConfigSettings,
+  type TypographyStyle,
 } from "../settings";
 import powerbi from "powerbi-visuals-api";
 import IViewport = powerbi.IViewport;
@@ -18,6 +19,7 @@ export interface TableContainerProps {
   formattingSettings: VisualFormattingSettingsModel;
   sparklineSettings: Map<string, SparklineColumnSettings>;
   columnSettings: Map<string, ColumnConfigSettings>;
+  typographyStyle: TypographyStyle;
   viewport: IViewport;
 }
 
@@ -38,10 +40,13 @@ export const TableContainer: React.FC<TableContainerProps> = ({
   formattingSettings,
   sparklineSettings,
   columnSettings,
+  typographyStyle, // ← NUEVO: Estilos tipográficos reactivos
   viewport,
 }) => {
   // Obtener configuración por defecto de columnas
   const defaultColumnSettings = formattingSettings.getColumnSettings("");
+
+  const typography = typographyStyle;
 
   // Mapear las propiedades del modelo de formateo a las props del componente Table
   const tableProps = {
@@ -53,8 +58,7 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     textSize: formattingSettings.general.styleGroup.textSize.value,
     tableStyle: formattingSettings.general.styleGroup.tableStyle.value
       .value as string,
-    fontFamily: formattingSettings.general.typographyGroup.fontFamily.value
-      .value as string,
+    fontFamily: formattingSettings.typography.font.fontFamily.value as string,
 
     // Configuración de grilla
     showHorizontalLines:
@@ -99,38 +103,29 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     rowPadding: formattingSettings.rows.rowDimensionsGroup.rowPadding.value,
 
     // Configuración de encabezados (desde defaultColumnSettings)
-    headerAlignment: defaultColumnSettings.headerAlignment as
-      | "left"
-      | "center"
-      | "right",
+    headerAlignment: typography.alignment as "left" | "center" | "right",
     headerPadding: defaultColumnSettings.headerPadding,
-    headerBold: defaultColumnSettings.headerBold,
-    headerFontColor: defaultColumnSettings.headerFontColor,
-    headerFontSize: defaultColumnSettings.headerFontSize,
+    headerBold: typography.fontWeight === "bold",
+    headerFontColor: typography.fontColor,
+    headerFontSize: typography.fontSize,
     headerBackgroundColor: defaultColumnSettings.headerBackgroundColor,
 
     // Configuración de celdas de categoría
-    categoryColumnAlignment: defaultColumnSettings.cellAlignment as
+    categoryColumnAlignment: typography.alignment as
       | "left"
       | "center"
       | "right",
-    categoryCellAlignment: defaultColumnSettings.cellAlignment as
-      | "left"
-      | "center"
-      | "right",
+    categoryCellAlignment: typography.alignment as "left" | "center" | "right",
     categoryCellPadding: defaultColumnSettings.cellPadding,
-    categoryCellFontColor: defaultColumnSettings.cellFontColor,
-    categoryCellFontSize: defaultColumnSettings.cellFontSize,
+    categoryCellFontColor: typography.fontColor,
+    categoryCellFontSize: typography.fontSize,
     categoryCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
 
     // Configuración de celdas de medidas
-    measureCellAlignment: defaultColumnSettings.cellAlignment as
-      | "left"
-      | "center"
-      | "right",
+    measureCellAlignment: typography.alignment as "left" | "center" | "right",
     measureCellPadding: defaultColumnSettings.cellPadding,
-    measureCellFontColor: defaultColumnSettings.cellFontColor,
-    measureCellFontSize: defaultColumnSettings.cellFontSize,
+    measureCellFontColor: typography.fontColor,
+    measureCellFontSize: typography.fontSize,
     measureCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
 
     // Formato de números
@@ -153,6 +148,7 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     // Settings mapeados
     sparklineSettings,
     columnSettings,
+    typographyStyle,
   };
 
   return React.createElement(Table, tableProps);

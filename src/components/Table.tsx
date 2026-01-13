@@ -1,9 +1,29 @@
 import React, { useState, useMemo, memo } from "react";
 import { TableViewModel } from "../visualViewModel";
-import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
+import {
+  SparklineColumnSettings,
+  ColumnConfigSettings,
+  TypographyStyle,
+} from "../settings";
+import {
+  TYPOGRAPHY_DEFAULTS,
+  TextAlignment,
+} from "../constants/visualDefaults";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
 import { areMapsEqual } from "../utils/memoization";
+
+interface CssTypographyStyle {
+  fontFamily: string;
+  fontSize: string;
+  fontColor: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: number;
+  letterSpacing: string;
+  alignment: "left" | "center" | "right";
+}
 
 interface TableProps {
   viewModel: TableViewModel;
@@ -60,6 +80,7 @@ interface TableProps {
   sparklineSettings: Map<string, SparklineColumnSettings>;
   columnSettings: Map<string, ColumnConfigSettings>;
   width: number;
+  typographyStyle: TypographyStyle;
 }
 
 /**
@@ -83,6 +104,9 @@ function arePropsEqual(prevProps: TableProps, nextProps: TableProps): boolean {
     return false;
   if (!areMapsEqual(prevProps.columnSettings, nextProps.columnSettings))
     return false;
+
+  // Tipografía base (aplicación global/columna)
+  if (prevProps.typographyStyle !== nextProps.typographyStyle) return false;
 
   // Para props de estilo, solo comparar si realmente cambiaron
   // (esto es más rápido que re-renderizar todo el componente)
@@ -196,6 +220,7 @@ const TableComponent: React.FC<TableProps> = ({
   sparklineSettings,
   columnSettings,
   width,
+  typographyStyle,
 }) => {
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -301,6 +326,60 @@ const TableComponent: React.FC<TableProps> = ({
     tableStyle === "striped" ? "striped" : ""
   }`;
 
+  const neutralTypography: TypographyStyle = {
+    fontFamily: TYPOGRAPHY_DEFAULTS.fontFamily,
+    fontSize: TYPOGRAPHY_DEFAULTS.fontSize,
+    fontColor: TYPOGRAPHY_DEFAULTS.fontColor,
+    fontWeight: TYPOGRAPHY_DEFAULTS.bold ? "bold" : "normal",
+    fontStyle: TYPOGRAPHY_DEFAULTS.italic ? "italic" : "normal",
+    textDecoration: TYPOGRAPHY_DEFAULTS.underline ? "underline" : "none",
+    lineHeight: TYPOGRAPHY_DEFAULTS.lineHeight,
+    letterSpacing: TYPOGRAPHY_DEFAULTS.letterSpacing,
+    alignment: TextAlignment.Left,
+    applyTo: "all",
+    targetColumn: "",
+  };
+
+  const toCssTypography = (style: TypographyStyle): CssTypographyStyle => ({
+    fontFamily: style.fontFamily,
+    fontSize: `${style.fontSize}px`,
+    fontColor: style.fontColor,
+    fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle,
+    textDecoration: style.textDecoration,
+    lineHeight: style.lineHeight,
+    letterSpacing:
+      style.letterSpacing === 0 ? "normal" : `${style.letterSpacing}px`,
+    alignment: style.alignment,
+  });
+
+  const resolveTypography = (columnName?: string): CssTypographyStyle => {
+    if (typographyStyle.applyTo === "column" && columnName) {
+      if (columnName === typographyStyle.targetColumn) {
+        return toCssTypography(typographyStyle);
+      }
+      return toCssTypography(neutralTypography);
+    }
+    return toCssTypography(typographyStyle);
+  };
+
+  const typographyByColumn = useMemo(() => {
+    const map = new Map<string, CssTypographyStyle>();
+    columnNames.forEach((name) => {
+      map.set(name, resolveTypography(name));
+    });
+    sparklineColumnNames.forEach((name) => {
+      map.set(name, resolveTypography(name));
+    });
+    return map;
+  }, [columnNames, sparklineColumnNames, typographyStyle]);
+
+  const defaultTypographyCss = resolveTypography();
+  const tableFontFamily =
+    typographyStyle.applyTo === "column"
+      ? defaultTypographyCss.fontFamily
+      : typographyStyle.fontFamily;
+
   const commonBorder = `${borderWidth}px ${borderStyle} ${borderColor}`;
   const tableBorderStyles =
     borderSection === "all"
@@ -329,6 +408,7 @@ const TableComponent: React.FC<TableProps> = ({
         className={tableClassName}
         style={{
           fontSize: `${textSize}px`,
+          fontFamily: tableFontFamily,
           width: `100%`,
           borderCollapse: "collapse",
           ...tableBorderStyles,
@@ -357,6 +437,8 @@ const TableComponent: React.FC<TableProps> = ({
           fontSize={headerFontSize}
           backgroundColor={headerBackgroundColor}
           columnSettings={columnSettings}
+          typographyByColumn={typographyByColumn}
+          defaultTypography={defaultTypographyCss}
         />
         <tbody>
           {pageRows.map((rowData, index) => (
@@ -406,6 +488,8 @@ const TableComponent: React.FC<TableProps> = ({
               customNegativeColor={customNegativeColor}
               sparklineSettings={sparklineSettings}
               columnSettings={columnSettings}
+              typographyByColumn={typographyByColumn}
+              defaultTypography={defaultTypographyCss}
             />
           ))}
         </tbody>

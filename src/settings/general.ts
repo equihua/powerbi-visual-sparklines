@@ -3,8 +3,6 @@ import {
   TABLE_STYLE_OPTIONS,
   GENERAL_DEFAULTS,
   VALIDATORS,
-  FONT_FAMILY_OPTIONS,
-  TYPOGRAPHY_DEFAULTS,
 } from "../constants/visualDefaults";
 
 /**
@@ -31,66 +29,6 @@ class StyleGroup extends formattingSettings.SimpleCard {
   name: string = "styleSection";
   displayName: string = "Estilo";
   slices: formattingSettings.Slice[] = [this.tableStyle, this.textSize];
-}
-
-/**
- * Grupo Tipografía - Configuraciones de tipografía global
- */
-class TypographyGroup extends formattingSettings.SimpleCard {
-  fontFamily = new formattingSettings.ItemDropdown({
-    name: "fontFamily",
-    displayName: "Familia de fuente",
-    items: [...FONT_FAMILY_OPTIONS],
-    value: FONT_FAMILY_OPTIONS[4],
-  });
-
-  fontSize = new formattingSettings.NumUpDown({
-    name: "fontSize",
-    displayName: "Tamaño de fuente base",
-    value: TYPOGRAPHY_DEFAULTS.fontSize,
-  });
-
-  fontColor = new formattingSettings.ColorPicker({
-    name: "fontColor",
-    displayName: "Color de fuente base",
-    value: { value: TYPOGRAPHY_DEFAULTS.fontColor },
-  });
-
-  lineHeight = new formattingSettings.NumUpDown({
-    name: "lineHeight",
-    displayName: "Alto de línea",
-    value: TYPOGRAPHY_DEFAULTS.lineHeight,
-  });
-
-  letterSpacing = new formattingSettings.NumUpDown({
-    name: "letterSpacing",
-    displayName: "Espaciado entre letras",
-    value: TYPOGRAPHY_DEFAULTS.letterSpacing,
-  });
-
-  bold = new formattingSettings.ToggleSwitch({
-    name: "bold",
-    displayName: "Negrita",
-    value: TYPOGRAPHY_DEFAULTS.bold,
-  });
-
-  italic = new formattingSettings.ToggleSwitch({
-    name: "italic",
-    displayName: "Cursiva",
-    value: TYPOGRAPHY_DEFAULTS.italic,
-  });
-
-  name: string = "typographySection";
-  displayName: string = "Tipografía";
-  slices: formattingSettings.Slice[] = [
-    this.fontFamily,
-    this.fontSize,
-    this.fontColor,
-    this.lineHeight,
-    this.letterSpacing,
-    this.bold,
-    this.italic,
-  ];
 }
 
 /**
@@ -182,12 +120,13 @@ class FeaturesGroup extends formattingSettings.SimpleCard {
 
 /**
  * GeneralCompositeCard - Tarjeta compuesta principal
- * Contiene cinco secciones expandibles: Estilo, Tipografía, Selección, Navegación y Funcionalidades
- * Todas las propiedades mapean al objeto "general" en capabilities.json
+ * Contiene cuatro secciones expandibles: Estilo, Selección, Navegación y Funcionalidades
+ * 
+ * NOTA: La tipografía ha sido movida a una tarjeta separada (TypographyCard)
+ * para mejorar la organización y usar FontControl de manera moderna.
  */
 export class GeneralCompositeCard extends formattingSettings.CompositeCard {
   styleGroup = new StyleGroup();
-  typographyGroup = new TypographyGroup();
   selectionGroup = new SelectionGroup();
   navigationGroup = new NavigationGroup();
   featuresGroup = new FeaturesGroup();
@@ -196,9 +135,9 @@ export class GeneralCompositeCard extends formattingSettings.CompositeCard {
   displayName: string = "General";
   groups: formattingSettings.Group[] = [
     this.styleGroup,
-    this.typographyGroup,
     this.selectionGroup,
     this.navigationGroup,
     this.featuresGroup,
   ];
 }
+

@@ -4,6 +4,18 @@ import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
 import { TableCell } from "./TableCell";
 import { Sparkline } from "./Sparkline";
 
+interface CssTypographyStyle {
+  fontFamily: string;
+  fontSize: string;
+  fontColor: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: number;
+  letterSpacing: string;
+  alignment: "left" | "center" | "right";
+}
+
 interface TableRowProps {
   rowData: TableRowData;
   columnNames: string[];
@@ -45,6 +57,8 @@ interface TableRowProps {
   customNegativeColor: string;
   sparklineSettings: Map<string, SparklineColumnSettings>;
   columnSettings: Map<string, ColumnConfigSettings>;
+  typographyByColumn: Map<string, CssTypographyStyle>;
+  defaultTypography: CssTypographyStyle;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -88,6 +102,8 @@ export const TableRow: React.FC<TableRowProps> = ({
   customNegativeColor,
   sparklineSettings,
   columnSettings,
+  typographyByColumn,
+  defaultTypography,
 }) => {
   let backgroundColor =
     tableStyle === "striped" && index % 2 === 1
@@ -118,13 +134,29 @@ export const TableRow: React.FC<TableRowProps> = ({
         const colSettings = columnSettings.get(columnName);
         const isCategory = cellIndex === 0;
 
-        const cellAlignment = colSettings?.cellAlignment || (isCategory ? categoryCellAlignment : measureCellAlignment);
-        const cellPadding = colSettings?.cellPadding ?? (isCategory ? categoryCellPadding : measureCellPadding);
-        const cellColor = colSettings?.cellFontColor || (isCategory ? categoryCellFontColor : measureCellFontColor);
-        const cellFontSize = colSettings?.cellFontSize ?? (isCategory ? categoryCellFontSize : measureCellFontSize);
-        const cellBgColor = colSettings?.cellBackgroundColor || (isCategory ? categoryCellBackgroundColor : measureCellBackgroundColor);
+        const cellAlignment = isCategory
+          ? categoryCellAlignment
+          : measureCellAlignment;
+        const cellPadding =
+          colSettings?.cellPadding ??
+          (isCategory ? categoryCellPadding : measureCellPadding);
+        const columnTypography =
+          typographyByColumn.get(columnName) || defaultTypography;
+
+        const cellColor = columnTypography.fontColor;
+        const cellFontSize = columnTypography.fontSize
+          ? parseInt(columnTypography.fontSize, 10)
+          : isCategory
+          ? categoryCellFontSize
+          : measureCellFontSize;
+        const cellBgColor =
+          colSettings?.cellBackgroundColor ||
+          (isCategory
+            ? categoryCellBackgroundColor
+            : measureCellBackgroundColor);
         const cellDecimalPlaces = colSettings?.decimalPlaces ?? decimalPlaces;
-        const cellThousandsSeparator = colSettings?.thousandsSeparator ?? thousandsSeparator;
+        const cellThousandsSeparator =
+          colSettings?.thousandsSeparator ?? thousandsSeparator;
         const cellPrefix = colSettings?.prefix || currencySymbol;
 
         return (
@@ -148,6 +180,7 @@ export const TableRow: React.FC<TableRowProps> = ({
             currencyPosition={currencyPosition}
             negativeNumberFormat={negativeNumberFormat}
             customNegativeColor={customNegativeColor}
+            typographyStyle={columnTypography}
           />
         );
       })}
@@ -159,6 +192,9 @@ export const TableRow: React.FC<TableRowProps> = ({
           lineWidth: 1.5,
         };
 
+        const columnTypography =
+          typographyByColumn.get(columnName) || defaultTypography;
+
         return (
           <td
             key={`sparkline-${sparklineIndex}`}
@@ -167,6 +203,13 @@ export const TableRow: React.FC<TableRowProps> = ({
               borderRight: showVerticalLines
                 ? `${verticalLineWidth}px solid ${verticalLineColor}`
                 : undefined,
+              fontFamily: columnTypography.fontFamily,
+              fontSize: columnTypography.fontSize,
+              color: columnTypography.fontColor,
+              fontStyle: columnTypography.fontStyle,
+              textDecoration: columnTypography.textDecoration,
+              letterSpacing: columnTypography.letterSpacing,
+              lineHeight: columnTypography.lineHeight,
             }}
           >
             {sparklineData &&

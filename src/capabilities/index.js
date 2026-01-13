@@ -1,3 +1,4 @@
+/* eslint-disable powerbi-visuals/non-literal-fs-path */
 const fs = require("fs");
 const path = require("path");
 

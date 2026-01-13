@@ -41,6 +41,7 @@ import IViewport = powerbi.IViewport;
 import {
   type SparklineColumnSettings,
   type ColumnConfigSettings,
+  type TypographyStyle,
   VisualFormattingSettingsModel,
 } from "./settings";
 import { visualTransform } from "./visualTransform";
@@ -135,6 +136,7 @@ export class Visual implements IVisual {
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
     this.formattingSettings.updateColumnCards(measureColumnNames);
+    this.formattingSettings.updateTypographyTargetColumns(measureColumnNames);
 
     // Calcular hash de configuraciones para detectar cambios reales
     const newSparklineHash = generateHash({
@@ -182,21 +184,76 @@ export class Visual implements IVisual {
     }
   }
 
+  /**
+   * Renderiza la tabla con estilos tipográficos aplicados.
+   * Los estilos se pasan como props a TableContainer para reactividad.
+   * @param viewModel Datos de la tabla
+   * @param viewport Dimensiones del viewport
+   */
   private renderTable(viewModel: TableViewModel, viewport: IViewport): void {
     if (!this.root) {
       this.root = createRoot(this.reactRoot);
     }
 
-    // Renderizado simplificado: solo pasamos los datos necesarios al contenedor
+    // Obtener estilos tipográficos para aplicar reactivamente
+    const typographyStyle = this.getTypographyStyle();
+
+    // Renderizado simplificado: pasar datos, configuración y estilos al contenedor
     this.root.render(
       React.createElement(TableContainer, {
         viewModel,
         formattingSettings: this.formattingSettings,
         sparklineSettings: this.sparklineSettings,
         columnSettings: this.columnSettings,
+        typographyStyle, // ← NUEVO: Pasar estilos para aplicar reactivamente
         viewport,
       })
     );
+  }
+
+  /**
+   * Obtiene estilos de tipografía desde las configuraciones de formato.
+   * Este es el único punto de acceso para leer estilos tipográficos.
+   *
+   * @returns Objeto con propiedades CSS de tipografía
+   */
+  public getTypographyStyle(): TypographyStyle {
+    const typography: any = this.formattingSettings.typography;
+    const font = typography?.font || typography;
+
+    const applyTo = (typography?.applyTo?.value as "all" | "column") || "all";
+    const targetColumn = typography?.targetColumn?.value || "";
+
+    const fontFamily =
+      font?.fontFamily?.value ||
+      typography?.fontFamily?.value ||
+      "Segoe UI, sans-serif";
+    const fontSize = font?.fontSize?.value || typography?.fontSize?.value || 11;
+    const fontColor =
+      typography?.fontColor?.value?.value ||
+      typography?.fontColor?.value ||
+      "#000000";
+    const bold = font?.bold?.value || typography?.bold?.value || false;
+    const italic = font?.italic?.value || typography?.italic?.value || false;
+    const underline =
+      font?.underline?.value || typography?.underline?.value || false;
+    const lineHeight = typography?.lineHeight?.value || 1.4;
+    const letterSpacing = typography?.letterSpacing?.value || 0;
+    const alignment = typography?.alignment?.value || "left";
+
+    return {
+      fontFamily,
+      fontSize,
+      fontColor,
+      fontWeight: bold ? "bold" : "normal",
+      fontStyle: italic ? "italic" : "normal",
+      textDecoration: underline ? "underline" : "none",
+      lineHeight,
+      letterSpacing,
+      alignment,
+      applyTo,
+      targetColumn,
+    };
   }
 
   public getFormattingModel(): powerbi.visuals.FormattingModel {

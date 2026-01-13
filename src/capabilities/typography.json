@@ -2,6 +2,27 @@
   "typography": {
     "displayName": "Tipografía",
     "properties": {
+      "applyTo": {
+        "displayName": "Aplicar a",
+        "type": {
+          "enumeration": [
+            {
+              "value": "all",
+              "displayName": "Toda la tabla"
+            },
+            {
+              "value": "column",
+              "displayName": "Columna específica"
+            }
+          ]
+        }
+      },
+      "targetColumn": {
+        "displayName": "Columna objetivo",
+        "type": {
+          "enumeration": []
+        }
+      },
       "fontFamily": {
         "displayName": "Familia de fuente",
         "type": {
@@ -38,19 +59,56 @@
         }
       },
       "fontSize": {
-        "displayName": "Tamaño de fuente base",
+        "displayName": "Tamaño",
         "type": {
           "numeric": true
         }
       },
+      "bold": {
+        "displayName": "Negrita",
+        "type": {
+          "bool": true
+        }
+      },
+      "italic": {
+        "displayName": "Cursiva",
+        "type": {
+          "bool": true
+        }
+      },
+      "underline": {
+        "displayName": "Subrayado",
+        "type": {
+          "bool": true
+        }
+      },
       "fontColor": {
-        "displayName": "Color de fuente base",
+        "displayName": "Color de texto",
         "type": {
           "fill": {
             "solid": {
               "color": true
             }
           }
+        }
+      },
+      "alignment": {
+        "displayName": "Alineación",
+        "type": {
+          "enumeration": [
+            {
+              "value": "left",
+              "displayName": "Izquierda"
+            },
+            {
+              "value": "center",
+              "displayName": "Centro"
+            },
+            {
+              "value": "right",
+              "displayName": "Derecha"
+            }
+          ]
         }
       },
       "lineHeight": {
@@ -63,18 +121,6 @@
         "displayName": "Espaciado entre letras",
         "type": {
           "numeric": true
-        }
-      },
-      "bold": {
-        "displayName": "Negrita global",
-        "type": {
-          "bool": true
-        }
-      },
-      "italic": {
-        "displayName": "Cursiva global",
-        "type": {
-          "bool": true
         }
       }
     }

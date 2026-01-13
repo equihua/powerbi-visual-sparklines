@@ -1,19 +1,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
-import {
-  TEXT_ALIGNMENT_OPTIONS,
-  COLUMN_DEFAULTS,
-} from "../constants/visualDefaults";
+import { COLUMN_DEFAULTS } from "../constants/visualDefaults";
 
 export interface ColumnConfigSettings {
-  headerFontColor: string;
-  headerFontSize: number;
-  headerAlignment: string;
-  headerBold: boolean;
   headerBackgroundColor: string;
   headerPadding: number;
-  cellFontColor: string;
-  cellFontSize: number;
-  cellAlignment: string;
   cellBackgroundColor: string;
   cellPadding: number;
   decimalPlaces: number;
@@ -26,31 +16,6 @@ export interface ColumnConfigSettings {
 }
 
 class ColumnConfigGroup extends formattingSettings.Group {
-  headerFontColor = new formattingSettings.ColorPicker({
-    name: "headerFontColor",
-    displayName: "Color de fuente encabezado",
-    value: { value: COLUMN_DEFAULTS.headerFontColor },
-  });
-
-  headerFontSize = new formattingSettings.NumUpDown({
-    name: "headerFontSize",
-    displayName: "Tamaño fuente encabezado",
-    value: COLUMN_DEFAULTS.headerFontSize,
-  });
-
-  headerAlignment = new formattingSettings.ItemDropdown({
-    name: "headerAlignment",
-    displayName: "Alineación encabezado",
-    items: [...TEXT_ALIGNMENT_OPTIONS],
-    value: TEXT_ALIGNMENT_OPTIONS[1], // Centro
-  });
-
-  headerBold = new formattingSettings.ToggleSwitch({
-    name: "headerBold",
-    displayName: "Negrita encabezado",
-    value: COLUMN_DEFAULTS.headerBold,
-  });
-
   headerBackgroundColor = new formattingSettings.ColorPicker({
     name: "headerBackgroundColor",
     displayName: "Color fondo encabezado",
@@ -61,25 +26,6 @@ class ColumnConfigGroup extends formattingSettings.Group {
     name: "headerPadding",
     displayName: "Espaciado encabezado",
     value: COLUMN_DEFAULTS.headerPadding,
-  });
-
-  cellFontColor = new formattingSettings.ColorPicker({
-    name: "cellFontColor",
-    displayName: "Color de fuente celda",
-    value: { value: COLUMN_DEFAULTS.cellFontColor },
-  });
-
-  cellFontSize = new formattingSettings.NumUpDown({
-    name: "cellFontSize",
-    displayName: "Tamaño fuente celda",
-    value: COLUMN_DEFAULTS.cellFontSize,
-  });
-
-  cellAlignment = new formattingSettings.ItemDropdown({
-    name: "cellAlignment",
-    displayName: "Alineación celda",
-    items: [...TEXT_ALIGNMENT_OPTIONS],
-    value: TEXT_ALIGNMENT_OPTIONS[0], // Izquierda
   });
 
   cellBackgroundColor = new formattingSettings.ColorPicker({
@@ -145,15 +91,8 @@ class ColumnConfigGroup extends formattingSettings.Group {
       slices: [],
     });
     this.slices = [
-      this.headerFontColor,
-      this.headerFontSize,
-      this.headerAlignment,
-      this.headerBold,
       this.headerBackgroundColor,
       this.headerPadding,
-      this.cellFontColor,
-      this.cellFontSize,
-      this.cellAlignment,
       this.cellBackgroundColor,
       this.cellPadding,
       this.decimalPlaces,
@@ -244,15 +183,8 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
     group: ColumnConfigGroup
   ): ColumnConfigSettings {
     return {
-      headerFontColor: group.headerFontColor.value.value,
-      headerFontSize: group.headerFontSize.value,
-      headerAlignment: group.headerAlignment.value.value as string,
-      headerBold: group.headerBold.value,
       headerBackgroundColor: group.headerBackgroundColor.value.value,
       headerPadding: group.headerPadding.value,
-      cellFontColor: group.cellFontColor.value.value,
-      cellFontSize: group.cellFontSize.value,
-      cellAlignment: group.cellAlignment.value.value as string,
       cellBackgroundColor: group.cellBackgroundColor.value.value,
       cellPadding: group.cellPadding.value,
       decimalPlaces: group.decimalPlaces.value,
@@ -274,15 +206,8 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
 
   private getDefaultSettings(): ColumnConfigSettings {
     return {
-      headerFontColor: "#000000",
-      headerFontSize: 12,
-      headerAlignment: "center",
-      headerBold: true,
       headerBackgroundColor: "#F5F5F5",
       headerPadding: 8,
-      cellFontColor: "#000000",
-      cellFontSize: 11,
-      cellAlignment: "left",
       cellBackgroundColor: "#FFFFFF",
       cellPadding: 6,
       decimalPlaces: 2,
@@ -298,27 +223,10 @@ export class ColumnSettings extends formattingSettings.CompositeCard {
   public setSettings(columnName: string, settings: ColumnConfigSettings): void {
     const group = this.allGroups.get(columnName);
     if (group) {
-      group.headerFontColor.value = { value: settings.headerFontColor };
-      group.headerFontSize.value = settings.headerFontSize;
-      const headerAlignmentItem = group.headerAlignment.items.find(
-        (item) => item.value === settings.headerAlignment
-      );
-      if (headerAlignmentItem) {
-        group.headerAlignment.value = headerAlignmentItem;
-      }
-      group.headerBold.value = settings.headerBold;
       group.headerBackgroundColor.value = {
         value: settings.headerBackgroundColor,
       };
       group.headerPadding.value = settings.headerPadding;
-      group.cellFontColor.value = { value: settings.cellFontColor };
-      group.cellFontSize.value = settings.cellFontSize;
-      const cellAlignmentItem = group.cellAlignment.items.find(
-        (item) => item.value === settings.cellAlignment
-      );
-      if (cellAlignmentItem) {
-        group.cellAlignment.value = cellAlignmentItem;
-      }
       group.cellBackgroundColor.value = { value: settings.cellBackgroundColor };
       group.cellPadding.value = settings.cellPadding;
       group.decimalPlaces.value = settings.decimalPlaces;

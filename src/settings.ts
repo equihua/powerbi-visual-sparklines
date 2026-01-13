@@ -1,6 +1,8 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import {
   GeneralCompositeCard,
+  TypographyCard,
+  type TypographyStyle,
   GridSettings,
   RowsSettings,
   ColumnSettings,
@@ -11,10 +13,14 @@ import {
 } from "./settings/index";
 
 export type { SparklineColumnSettings, ColumnConfigSettings };
+export type { TypographyStyle };
 
 export class VisualFormattingSettingsModel extends formattingSettings.Model {
-  // Tarjeta General Unificada - Contiene Estilo, Tipografía e Interactividad
+  // Tarjeta General Unificada - Contiene Estilo, Selección, Navegación y Funcionalidades
   general: GeneralCompositeCard = new GeneralCompositeCard();
+
+  // Tarjeta de Tipografía - Moderna con FontControl
+  typography: TypographyCard = new TypographyCard();
 
   grid: GridSettings = new GridSettings();
   rows: RowsSettings = new RowsSettings();
@@ -23,7 +29,15 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   sparklineCard: SparklineCompositeCard | null = null;
 
   cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] =
-    [this.general, this.rows, this.grid, this.total];
+    [this.general, this.typography, this.rows, this.grid, this.total];
+
+  public updateTypographyTargetColumns(measureColumnNames: string[]): void {
+    if (measureColumnNames && measureColumnNames.length > 0) {
+      this.typography.setTargetColumns(measureColumnNames);
+    } else {
+      this.typography.setTargetColumns([]);
+    }
+  }
 
   public updateColumnCards(measureColumnNames: string[]): void {
     if (measureColumnNames && measureColumnNames.length > 0) {
@@ -45,6 +59,9 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
       this.columns = null;
       this.rebuildCards();
     }
+
+    // Mantener la lista dinámica de columnas también en tipografía
+    this.updateTypographyTargetColumns(measureColumnNames);
   }
 
   public handleColumnSelectorChange(selectedColumn: string): void {
@@ -70,6 +87,7 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   private rebuildCards(): void {
     this.cards = [
       this.general,
+      this.typography,
       ...(this.columns ? [this.columns] : []),
       this.rows,
       this.grid,
@@ -83,15 +101,8 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
       return this.columns.getSettings(columnName);
     }
     return {
-      headerFontColor: "#000000",
-      headerFontSize: 12,
-      headerAlignment: "center",
-      headerBold: true,
       headerBackgroundColor: "#F5F5F5",
       headerPadding: 8,
-      cellFontColor: "#000000",
-      cellFontSize: 11,
-      cellAlignment: "left",
       cellBackgroundColor: "#FFFFFF",
       cellPadding: 6,
       decimalPlaces: 2,

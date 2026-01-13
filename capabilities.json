@@ -163,6 +163,27 @@
         "typography": {
             "displayName": "Tipografía",
             "properties": {
+                "applyTo": {
+                    "displayName": "Aplicar a",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "all",
+                                "displayName": "Toda la tabla"
+                            },
+                            {
+                                "value": "column",
+                                "displayName": "Columna específica"
+                            }
+                        ]
+                    }
+                },
+                "targetColumn": {
+                    "displayName": "Columna objetivo",
+                    "type": {
+                        "enumeration": []
+                    }
+                },
                 "fontFamily": {
                     "displayName": "Familia de fuente",
                     "type": {
@@ -199,58 +220,31 @@
                     }
                 },
                 "fontSize": {
-                    "displayName": "Tamaño de fuente base",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "fontColor": {
-                    "displayName": "Color de fuente base",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "lineHeight": {
-                    "displayName": "Alto de línea",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "letterSpacing": {
-                    "displayName": "Espaciado entre letras",
+                    "displayName": "Tamaño",
                     "type": {
                         "numeric": true
                     }
                 },
                 "bold": {
-                    "displayName": "Negrita global",
+                    "displayName": "Negrita",
                     "type": {
                         "bool": true
                     }
                 },
                 "italic": {
-                    "displayName": "Cursiva global",
+                    "displayName": "Cursiva",
                     "type": {
                         "bool": true
                     }
-                }
-            }
-        },
-        "columns": {
-            "displayName": "Columnas",
-            "properties": {
-                "columnSelector": {
-                    "displayName": "Seleccionar columna",
+                },
+                "underline": {
+                    "displayName": "Subrayado",
                     "type": {
-                        "enumeration": []
+                        "bool": true
                     }
                 },
-                "headerFontColor": {
-                    "displayName": "Color fuente encabezado",
+                "fontColor": {
+                    "displayName": "Color de texto",
                     "type": {
                         "fill": {
                             "solid": {
@@ -259,14 +253,8 @@
                         }
                     }
                 },
-                "headerFontSize": {
-                    "displayName": "Tamaño fuente encabezado",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "headerAlignment": {
-                    "displayName": "Alineación encabezado",
+                "alignment": {
+                    "displayName": "Alineación",
                     "type": {
                         "enumeration": [
                             {
@@ -284,10 +272,27 @@
                         ]
                     }
                 },
-                "headerBold": {
-                    "displayName": "Negrita encabezado",
+                "lineHeight": {
+                    "displayName": "Alto de línea",
                     "type": {
-                        "bool": true
+                        "numeric": true
+                    }
+                },
+                "letterSpacing": {
+                    "displayName": "Espaciado entre letras",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "columns": {
+            "displayName": "Columnas",
+            "properties": {
+                "columnSelector": {
+                    "displayName": "Seleccionar columna",
+                    "type": {
+                        "enumeration": []
                     }
                 },
                 "headerBackgroundColor": {
@@ -304,41 +309,6 @@
                     "displayName": "Espaciado encabezado",
                     "type": {
                         "numeric": true
-                    }
-                },
-                "cellFontColor": {
-                    "displayName": "Color fuente celda",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "cellFontSize": {
-                    "displayName": "Tamaño fuente celda",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "cellAlignment": {
-                    "displayName": "Alineación celda",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "left",
-                                "displayName": "Izquierda"
-                            },
-                            {
-                                "value": "center",
-                                "displayName": "Centro"
-                            },
-                            {
-                                "value": "right",
-                                "displayName": "Derecha"
-                            }
-                        ]
                     }
                 },
                 "cellBackgroundColor": {
