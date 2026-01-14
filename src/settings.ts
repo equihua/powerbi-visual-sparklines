@@ -1,78 +1,37 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import {
   GeneralCompositeCard,
-  TypographyCard,
-  type TypographyStyle,
+  ColumnHeadersSettings,
+  ValuesSettings,
+  TotalsSettings,
+  SpecificColumnSettings,
+  CellElementsSettings,
   GridSettings,
-  RowsSettings,
-  ColumnSettings,
-  TotalSettings,
   SparklineCompositeCard,
-  type ColumnConfigSettings,
   type SparklineColumnSettings,
 } from "./settings/index";
 
-export type { SparklineColumnSettings, ColumnConfigSettings };
-export type { TypographyStyle };
+export type { SparklineColumnSettings };
 
 export class VisualFormattingSettingsModel extends formattingSettings.Model {
-  // Tarjeta General Unificada - Contiene Estilo, Selección, Navegación y Funcionalidades
   general: GeneralCompositeCard = new GeneralCompositeCard();
-
-  // Tarjeta de Tipografía - Moderna con FontControl
-  typography: TypographyCard = new TypographyCard();
-
+  columnHeaders: ColumnHeadersSettings = new ColumnHeadersSettings();
+  values: ValuesSettings = new ValuesSettings();
+  totals: TotalsSettings = new TotalsSettings();
+  specificColumn: SpecificColumnSettings = new SpecificColumnSettings();
+  cellElements: CellElementsSettings = new CellElementsSettings();
   grid: GridSettings = new GridSettings();
-  rows: RowsSettings = new RowsSettings();
-  columns: ColumnSettings | null = null;
-  total: TotalSettings = new TotalSettings();
   sparklineCard: SparklineCompositeCard | null = null;
 
-  cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] =
-    [this.general, this.typography, this.rows, this.grid, this.total];
-
-  public updateTypographyTargetColumns(measureColumnNames: string[]): void {
-    if (measureColumnNames && measureColumnNames.length > 0) {
-      this.typography.setTargetColumns(measureColumnNames);
-    } else {
-      this.typography.setTargetColumns([]);
-    }
-  }
-
-  public updateColumnCards(measureColumnNames: string[]): void {
-    if (measureColumnNames && measureColumnNames.length > 0) {
-      if (!this.columns) {
-        this.columns = new ColumnSettings(measureColumnNames);
-        this.rebuildCards();
-      } else {
-        const existingColumns = this.columns.getAllMeasureColumnNames();
-        const columnsChanged =
-          existingColumns.length !== measureColumnNames.length ||
-          existingColumns.some((col, idx) => col !== measureColumnNames[idx]);
-
-        if (columnsChanged) {
-          this.columns = new ColumnSettings(measureColumnNames);
-          this.rebuildCards();
-        }
-      }
-    } else {
-      this.columns = null;
-      this.rebuildCards();
-    }
-
-    // Mantener la lista dinámica de columnas también en tipografía
-    this.updateTypographyTargetColumns(measureColumnNames);
-  }
-
-  public handleColumnSelectorChange(selectedColumn: string): void {
-    if (this.columns) {
-      this.columns.switchToColumn(selectedColumn);
-    }
-  }
-
-  public getCurrentSelectedColumn(): string {
-    return this.columns?.getCurrentSelectedColumn() || "__ALL__";
-  }
+  cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] = [
+    this.general,
+    this.columnHeaders,
+    this.values,
+    this.totals,
+    this.specificColumn,
+    this.cellElements,
+    this.grid,
+  ];
 
   public updateSparklineCards(sparklineColumnNames: string[]): void {
     if (sparklineColumnNames && sparklineColumnNames.length > 0) {
@@ -87,56 +46,14 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   private rebuildCards(): void {
     this.cards = [
       this.general,
-      this.typography,
-      ...(this.columns ? [this.columns] : []),
-      this.rows,
+      this.columnHeaders,
+      this.values,
+      this.totals,
+      this.specificColumn,
+      this.cellElements,
       this.grid,
-      this.total,
       ...(this.sparklineCard ? [this.sparklineCard] : []),
     ];
-  }
-
-  public getColumnSettings(columnName: string): ColumnConfigSettings {
-    if (this.columns) {
-      return this.columns.getSettings(columnName);
-    }
-    return {
-      headerBackgroundColor: "#F5F5F5",
-      headerPadding: 8,
-      cellBackgroundColor: "#FFFFFF",
-      cellPadding: 6,
-      decimalPlaces: 2,
-      thousandsSeparator: true,
-      prefix: "",
-      suffix: "",
-      columnWidth: 120,
-      sortable: true,
-      columnVisible: true,
-    };
-  }
-
-  public getAllColumnsSettings(): ColumnConfigSettings {
-    return this.getColumnSettings("__ALL__");
-  }
-
-  public getColumnSettingsMap(): Map<string, ColumnConfigSettings> {
-    const settingsMap = new Map<string, ColumnConfigSettings>();
-
-    if (this.columns) {
-      const measureColumns = this.columns.getAllMeasureColumnNames();
-      measureColumns.forEach((columnName) => {
-        settingsMap.set(columnName, this.columns.getSettings(columnName));
-      });
-    }
-
-    return settingsMap;
-  }
-
-  public setColumnSettings(
-    columnName: string,
-    settings: ColumnConfigSettings
-  ): void {
-    this.columns?.setSettings(columnName, settings);
   }
 
   public getSparklineSettings(columnName: string): SparklineColumnSettings {

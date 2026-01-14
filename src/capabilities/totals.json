@@ -1,18 +1,32 @@
 {
-  "grid": {
-    "displayName": "Grid",
+  "totals": {
+    "displayName": "Total",
     "properties": {
-      "showHorizontal": {
+      "show": {
         "type": {
           "bool": true
         }
       },
-      "showVertical": {
+      "label": {
         "type": {
-          "bool": true
+          "text": true
         }
       },
-      "gridHorizontalColor": {
+      "fontFamily": {
+        "type": {
+          "formatting": {
+            "fontFamily": true
+          }
+        }
+      },
+      "fontSize": {
+        "type": {
+          "formatting": {
+            "fontSize": true
+          }
+        }
+      },
+      "fontColor": {
         "type": {
           "fill": {
             "solid": {
@@ -21,27 +35,13 @@
           }
         }
       },
-      "gridVerticalColor": {
+      "backgroundColor": {
         "type": {
           "fill": {
             "solid": {
               "color": true
             }
           }
-        }
-      },
-      "borderColor": {
-        "type": {
-          "fill": {
-            "solid": {
-              "color": true
-            }
-          }
-        }
-      },
-      "borderWeight": {
-        "type": {
-          "numeric": true
         }
       }
     }

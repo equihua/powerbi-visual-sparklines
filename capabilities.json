@@ -160,91 +160,48 @@
                 }
             }
         },
-        "typography": {
-            "displayName": "Tipografía",
+        "columnHeaders": {
+            "displayName": "Column headers",
             "properties": {
-                "applyTo": {
-                    "displayName": "Aplicar a",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "all",
-                                "displayName": "Toda la tabla"
-                            },
-                            {
-                                "value": "column",
-                                "displayName": "Columna específica"
-                            }
-                        ]
-                    }
-                },
-                "targetColumn": {
-                    "displayName": "Columna objetivo",
-                    "type": {
-                        "enumeration": []
-                    }
-                },
                 "fontFamily": {
-                    "displayName": "Familia de fuente",
                     "type": {
-                        "enumeration": [
-                            {
-                                "value": "Arial, sans-serif",
-                                "displayName": "Arial"
-                            },
-                            {
-                                "value": "Verdana, sans-serif",
-                                "displayName": "Verdana"
-                            },
-                            {
-                                "value": "Georgia, serif",
-                                "displayName": "Georgia"
-                            },
-                            {
-                                "value": "'Courier New', monospace",
-                                "displayName": "Courier New"
-                            },
-                            {
-                                "value": "'Segoe UI', sans-serif",
-                                "displayName": "Segoe UI"
-                            },
-                            {
-                                "value": "Tahoma, sans-serif",
-                                "displayName": "Tahoma"
-                            },
-                            {
-                                "value": "'Times New Roman', serif",
-                                "displayName": "Times New Roman"
-                            }
-                        ]
+                        "formatting": {
+                            "fontFamily": true
+                        }
                     }
                 },
                 "fontSize": {
-                    "displayName": "Tamaño",
                     "type": {
-                        "numeric": true
+                        "formatting": {
+                            "fontSize": true
+                        }
                     }
                 },
                 "bold": {
-                    "displayName": "Negrita",
                     "type": {
                         "bool": true
                     }
                 },
                 "italic": {
-                    "displayName": "Cursiva",
                     "type": {
                         "bool": true
                     }
                 },
                 "underline": {
-                    "displayName": "Subrayado",
                     "type": {
                         "bool": true
                     }
                 },
                 "fontColor": {
-                    "displayName": "Color de texto",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -254,134 +211,52 @@
                     }
                 },
                 "alignment": {
-                    "displayName": "Alineación",
                     "type": {
-                        "enumeration": [
-                            {
-                                "value": "left",
-                                "displayName": "Izquierda"
-                            },
-                            {
-                                "value": "center",
-                                "displayName": "Centro"
-                            },
-                            {
-                                "value": "right",
-                                "displayName": "Derecha"
-                            }
-                        ]
-                    }
-                },
-                "lineHeight": {
-                    "displayName": "Alto de línea",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "letterSpacing": {
-                    "displayName": "Espaciado entre letras",
-                    "type": {
-                        "numeric": true
-                    }
-                }
-            }
-        },
-        "columns": {
-            "displayName": "Columnas",
-            "properties": {
-                "columnSelector": {
-                    "displayName": "Seleccionar columna",
-                    "type": {
-                        "enumeration": []
-                    }
-                },
-                "headerBackgroundColor": {
-                    "displayName": "Color fondo encabezado",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
+                        "formatting": {
+                            "alignment": true
                         }
                     }
                 },
-                "headerPadding": {
-                    "displayName": "Espaciado encabezado",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "cellBackgroundColor": {
-                    "displayName": "Color fondo celda",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "cellPadding": {
-                    "displayName": "Espaciado celda",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "decimalPlaces": {
-                    "displayName": "Decimales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "thousandsSeparator": {
-                    "displayName": "Separador de miles",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "prefix": {
-                    "displayName": "Prefijo",
-                    "type": {
-                        "text": true
-                    }
-                },
-                "suffix": {
-                    "displayName": "Sufijo",
-                    "type": {
-                        "text": true
-                    }
-                },
-                "columnWidth": {
-                    "displayName": "Ancho de columna",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "sortable": {
-                    "displayName": "Ordenable",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "columnVisible": {
-                    "displayName": "Visible",
+                "wrapText": {
                     "type": {
                         "bool": true
                     }
                 }
             }
         },
-        "rows": {
-            "displayName": "Filas",
+        "values": {
+            "displayName": "Values",
             "properties": {
-                "rowHeight": {
-                    "displayName": "Alto de fila",
+                "fontFamily": {
                     "type": {
-                        "numeric": true
+                        "formatting": {
+                            "fontFamily": true
+                        }
                     }
                 },
-                "alternatingRowColor": {
-                    "displayName": "Color de fila alternada",
+                "fontSize": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "bold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -390,8 +265,7 @@
                         }
                     }
                 },
-                "hoverBackgroundColor": {
-                    "displayName": "Color de fondo al pasar el ratón",
+                "backgroundColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -400,25 +274,148 @@
                         }
                     }
                 },
-                "rowPadding": {
-                    "displayName": "Espaciado interno de filas",
+                "altBackgroundColor": {
                     "type": {
-                        "numeric": true
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "wrapText": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "totals": {
+            "displayName": "Total",
+            "properties": {
+                "show": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "label": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontSize": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "specificColumn": {
+            "displayName": "Specific column",
+            "properties": {
+                "series": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "alignment": {
+                    "type": {
+                        "formatting": {
+                            "alignment": true
+                        }
+                    }
+                }
+            }
+        },
+        "cellElements": {
+            "displayName": "Cell elements",
+            "properties": {
+                "fontColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "alignment": {
+                    "type": {
+                        "formatting": {
+                            "alignment": true
+                        }
                     }
                 }
             }
         },
         "grid": {
-            "displayName": "Cuadrícula y bordes",
+            "displayName": "Grid",
             "properties": {
-                "showHorizontalLines": {
-                    "displayName": "Líneas horizontales",
+                "showHorizontal": {
                     "type": {
                         "bool": true
                     }
                 },
-                "horizontalLineColor": {
-                    "displayName": "Color líneas horizontales",
+                "showVertical": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "gridHorizontalColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -427,79 +424,16 @@
                         }
                     }
                 },
-                "horizontalLineWidth": {
-                    "displayName": "Ancho líneas horizontales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "showVerticalLines": {
-                    "displayName": "Líneas verticales",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "verticalLineColor": {
-                    "displayName": "Color líneas verticales",
+                "gridVerticalColor": {
                     "type": {
                         "fill": {
                             "solid": {
                                 "color": true
                             }
                         }
-                    }
-                },
-                "verticalLineWidth": {
-                    "displayName": "Ancho líneas verticales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "borderSection": {
-                    "displayName": "Aplicar bordes a",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "all",
-                                "displayName": "Todas"
-                            },
-                            {
-                                "value": "header",
-                                "displayName": "Encabezado"
-                            },
-                            {
-                                "value": "rows",
-                                "displayName": "Filas"
-                            }
-                        ]
-                    }
-                },
-                "borderTop": {
-                    "displayName": "Borde superior",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderBottom": {
-                    "displayName": "Borde inferior",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderLeft": {
-                    "displayName": "Borde izquierdo",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderRight": {
-                    "displayName": "Borde derecho",
-                    "type": {
-                        "bool": true
                     }
                 },
                 "borderColor": {
-                    "displayName": "Color de borde",
                     "type": {
                         "fill": {
                             "solid": {
@@ -508,59 +442,7 @@
                         }
                     }
                 },
-                "borderWidth": {
-                    "displayName": "Ancho de borde",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "borderStyle": {
-                    "displayName": "Estilo de borde",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "solid",
-                                "displayName": "Sólido"
-                            },
-                            {
-                                "value": "dashed",
-                                "displayName": "Guionado"
-                            },
-                            {
-                                "value": "dotted",
-                                "displayName": "Punteado"
-                            },
-                            {
-                                "value": "double",
-                                "displayName": "Doble"
-                            }
-                        ]
-                    }
-                },
-                "borderRadius": {
-                    "displayName": "Radio de esquina",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "shadowBorder": {
-                    "displayName": "Sombra de borde",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "shadowColor": {
-                    "displayName": "Color de sombra",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "rowSpacing": {
-                    "displayName": "Espaciado interno de filas",
+                "borderWeight": {
                     "type": {
                         "numeric": true
                     }

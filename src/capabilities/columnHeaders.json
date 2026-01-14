@@ -1,0 +1,66 @@
+{
+  "columnHeaders": {
+    "displayName": "Column headers",
+    "properties": {
+      "fontFamily": {
+        "type": {
+          "formatting": {
+            "fontFamily": true
+          }
+        }
+      },
+      "fontSize": {
+        "type": {
+          "formatting": {
+            "fontSize": true
+          }
+        }
+      },
+      "bold": {
+        "type": {
+          "bool": true
+        }
+      },
+      "italic": {
+        "type": {
+          "bool": true
+        }
+      },
+      "underline": {
+        "type": {
+          "bool": true
+        }
+      },
+      "fontColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "backgroundColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "alignment": {
+        "type": {
+          "formatting": {
+            "alignment": true
+          }
+        }
+      },
+      "wrapText": {
+        "type": {
+          "bool": true
+        }
+      }
+    }
+  }
+}

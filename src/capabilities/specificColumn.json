@@ -1,0 +1,37 @@
+{
+  "specificColumn": {
+    "displayName": "Specific column",
+    "properties": {
+      "series": {
+        "type": {
+          "text": true
+        }
+      },
+      "fontColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "backgroundColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "alignment": {
+        "type": {
+          "formatting": {
+            "alignment": true
+          }
+        }
+      }
+    }
+  }
+}

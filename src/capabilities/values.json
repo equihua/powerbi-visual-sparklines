@@ -1,18 +1,37 @@
 {
-  "grid": {
-    "displayName": "Grid",
+  "values": {
+    "displayName": "Values",
     "properties": {
-      "showHorizontal": {
+      "fontFamily": {
+        "type": {
+          "formatting": {
+            "fontFamily": true
+          }
+        }
+      },
+      "fontSize": {
+        "type": {
+          "formatting": {
+            "fontSize": true
+          }
+        }
+      },
+      "bold": {
         "type": {
           "bool": true
         }
       },
-      "showVertical": {
+      "italic": {
         "type": {
           "bool": true
         }
       },
-      "gridHorizontalColor": {
+      "underline": {
+        "type": {
+          "bool": true
+        }
+      },
+      "fontColor": {
         "type": {
           "fill": {
             "solid": {
@@ -21,7 +40,7 @@
           }
         }
       },
-      "gridVerticalColor": {
+      "backgroundColor": {
         "type": {
           "fill": {
             "solid": {
@@ -30,7 +49,7 @@
           }
         }
       },
-      "borderColor": {
+      "altBackgroundColor": {
         "type": {
           "fill": {
             "solid": {
@@ -39,9 +58,9 @@
           }
         }
       },
-      "borderWeight": {
+      "wrapText": {
         "type": {
-          "numeric": true
+          "bool": true
         }
       }
     }

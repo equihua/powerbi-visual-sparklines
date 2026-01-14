@@ -1,0 +1,32 @@
+{
+  "cellElements": {
+    "displayName": "Cell elements",
+    "properties": {
+      "fontColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "backgroundColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "alignment": {
+        "type": {
+          "formatting": {
+            "alignment": true
+          }
+        }
+      }
+    }
+  }
+}

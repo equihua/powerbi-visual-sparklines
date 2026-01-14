@@ -1,22 +1,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import powerbi from "powerbi-visuals-api";
 
-export class TotalsSettings extends formattingSettings.SimpleCard {
-  name = "totals";
-  displayName = "Total";
-
-  show = new formattingSettings.ToggleSwitch({
-    name: "show",
-    displayName: "Show",
-    value: false,
-  });
-
-  label = new formattingSettings.TextInput({
-    name: "label",
-    displayName: "Label",
-    value: "Total",
-    placeholder: "Total",
-  });
+export class ColumnHeadersSettings extends formattingSettings.SimpleCard {
+  name = "columnHeaders";
+  displayName = "Column headers";
 
   fontFamily = new formattingSettings.FontPicker({
     name: "fontFamily",
@@ -34,6 +21,24 @@ export class TotalsSettings extends formattingSettings.SimpleCard {
     },
   });
 
+  bold = new formattingSettings.ToggleSwitch({
+    name: "bold",
+    displayName: "Bold",
+    value: true,
+  });
+
+  italic = new formattingSettings.ToggleSwitch({
+    name: "italic",
+    displayName: "Italic",
+    value: false,
+  });
+
+  underline = new formattingSettings.ToggleSwitch({
+    name: "underline",
+    displayName: "Underline",
+    value: false,
+  });
+
   fontColor = new formattingSettings.ColorPicker({
     name: "fontColor",
     displayName: "Font color",
@@ -46,12 +51,28 @@ export class TotalsSettings extends formattingSettings.SimpleCard {
     value: { value: "#F2F2F2" },
   });
 
+  alignment = new formattingSettings.AlignmentGroup({
+    name: "alignment",
+    displayName: "Alignment",
+    mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
+    value: "center",
+  });
+
+  wrapText = new formattingSettings.ToggleSwitch({
+    name: "wrapText",
+    displayName: "Wrap text",
+    value: false,
+  });
+
   slices = [
-    this.show,
-    this.label,
     this.fontFamily,
     this.fontSize,
+    this.bold,
+    this.italic,
+    this.underline,
     this.fontColor,
     this.backgroundColor,
+    this.alignment,
+    this.wrapText,
   ];
 }
