@@ -85,6 +85,10 @@ export class Visual implements IVisual {
 
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
 
+    const allColumns = Object.keys(firstRow);
+    this.formattingSettings.specificColumn.updateColumnList(allColumns);
+    this.formattingSettings.cellElements.updateColumnList(allColumns);
+
     const newSparklineHash = generateHash({
       columns: sparklineColumnNames.sort(),
       settings: sparklineColumnNames.map((col) =>

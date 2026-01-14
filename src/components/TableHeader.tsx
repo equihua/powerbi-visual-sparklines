@@ -26,26 +26,63 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   };
 
   const headerStyle: React.CSSProperties = {
-    fontFamily: columnHeadersSettings.fontFamily.value,
-    fontSize: `${columnHeadersSettings.fontSize.value}px`,
-    fontWeight: columnHeadersSettings.bold.value ? "bold" : "normal",
-    fontStyle: columnHeadersSettings.italic.value ? "italic" : "normal",
-    textDecoration: columnHeadersSettings.underline.value ? "underline" : "none",
-    color: columnHeadersSettings.fontColor.value.value,
-    backgroundColor: columnHeadersSettings.backgroundColor.value.value,
-    textAlign: columnHeadersSettings.alignment.value as "left" | "center" | "right",
-    padding: "8px",
+    fontFamily: columnHeadersSettings.textGroup.font.fontFamily.value as string,
+    fontSize:
+      gridSettings.optionsCard.globalFontSize.value > 0
+        ? `${gridSettings.optionsCard.globalFontSize.value}px`
+        : `${columnHeadersSettings.textGroup.font.fontSize.value}px`,
+    fontWeight: columnHeadersSettings.textGroup.font.bold.value ? "bold" : "normal",
+    fontStyle: columnHeadersSettings.textGroup.font.italic.value ? "italic" : "normal",
+    textDecoration: columnHeadersSettings.textGroup.font.underline.value
+      ? "underline"
+      : "none",
+    color: columnHeadersSettings.textGroup.textColor.value.value,
+    backgroundColor: columnHeadersSettings.textGroup.backgroundColor.value.value,
+    textAlign: columnHeadersSettings.textGroup.alignment.value as
+      | "left"
+      | "center"
+      | "right",
+    padding: `${gridSettings.optionsCard.rowPadding.value}px`,
     cursor: sortable ? "pointer" : "default",
     userSelect: "none" as const,
-    whiteSpace: columnHeadersSettings.wrapText.value ? "normal" : "nowrap",
+    whiteSpace: columnHeadersSettings.textGroup.wrapText.value ? "normal" : "nowrap",
   };
 
-  if (gridSettings.showVertical.value) {
-    headerStyle.borderRight = `1px solid ${gridSettings.gridVerticalColor.value.value}`;
+  if (gridSettings.gridlinesCard.showVertical.value) {
+    headerStyle.borderRight = `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value.value}`;
   }
 
-  if (gridSettings.showHorizontal.value) {
-    headerStyle.borderBottom = `1px solid ${gridSettings.gridHorizontalColor.value.value}`;
+  if (gridSettings.gridlinesCard.showHorizontal.value) {
+    headerStyle.borderBottom = `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value.value}`;
+  }
+
+  // Aplicar bordes según la sección y posiciones seleccionadas
+  const shouldApplyBorder = (
+    position: "Top" | "Bottom" | "Left" | "Right"
+  ): boolean => {
+    const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+    if (borderSection !== "all" && borderSection !== "columnHeader") {
+      return false;
+    }
+
+    const borderKey =
+      `border${position}` as keyof typeof gridSettings.borderCard;
+    const borderSetting = gridSettings.borderCard[borderKey] as any;
+    return borderSetting?.value === true;
+  };
+
+  if (shouldApplyBorder("Top")) {
+    headerStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Bottom")) {
+    headerStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Left")) {
+    headerStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Right")) {
+    headerStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
   }
 
   return (

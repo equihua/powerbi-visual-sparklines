@@ -1,13 +1,28 @@
 {
   "specificColumn": {
-    "displayName": "Specific column",
+    "displayName": "Columna específica",
     "properties": {
-      "series": {
+      "columnSelector": {
         "type": {
           "text": true
         }
       },
-      "fontColor": {
+      "applyToHeader": {
+        "type": {
+          "bool": true
+        }
+      },
+      "applyToTotal": {
+        "type": {
+          "bool": true
+        }
+      },
+      "applyToValues": {
+        "type": {
+          "bool": true
+        }
+      },
+      "textColor": {
         "type": {
           "fill": {
             "solid": {

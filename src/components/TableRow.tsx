@@ -1,7 +1,7 @@
 import React from "react";
 import { SparklineColumnSettings } from "../settings";
 import { Sparkline } from "./Sparkline";
-import type { ValuesSettings, GridSettings } from "../settings/index";
+import type { ValuesCard, GridSettings } from "../settings/index";
 
 interface TableRowProps {
   row: Record<string, any>;
@@ -11,7 +11,7 @@ interface TableRowProps {
   onClick: () => void;
   rowSelection: boolean;
   rowSelectionColor: string;
-  valuesSettings: ValuesSettings;
+  valuesSettings: ValuesCard;
   gridSettings: GridSettings;
   sparklineSettings: Map<string, SparklineColumnSettings>;
 }
@@ -29,34 +29,67 @@ export const TableRow: React.FC<TableRowProps> = ({
   sparklineSettings,
 }) => {
   const isAlternateRow = index % 2 === 1;
-  
+
   const rowStyle: React.CSSProperties = {
-    backgroundColor: isSelected
+    backgroundColor: (isSelected && rowSelection)
       ? rowSelectionColor
-      : isAlternateRow && valuesSettings.altBackgroundColor.value.value
-      ? valuesSettings.altBackgroundColor.value.value
       : valuesSettings.backgroundColor.value.value,
     cursor: rowSelection ? "pointer" : "default",
   };
 
   const cellStyle: React.CSSProperties = {
-    fontFamily: valuesSettings.fontFamily.value,
-    fontSize: `${valuesSettings.fontSize.value}px`,
-    fontWeight: valuesSettings.bold.value ? "bold" : "normal",
-    fontStyle: valuesSettings.italic.value ? "italic" : "normal",
-    textDecoration: valuesSettings.underline.value ? "underline" : "none",
-    color: valuesSettings.fontColor.value.value,
-    textAlign: (valuesSettings.alignment.value.value || "left") as "left" | "center" | "right",
-    padding: "8px",
+    fontFamily: valuesSettings.font.fontFamily.value as string,
+    fontSize:
+      gridSettings.optionsCard.globalFontSize.value > 0
+        ? `${gridSettings.optionsCard.globalFontSize.value}px`
+        : `${valuesSettings.font.fontSize.value}px`,
+    fontWeight: valuesSettings.font.bold.value ? "bold" : "normal",
+    fontStyle: valuesSettings.font.italic.value ? "italic" : "normal",
+    textDecoration: valuesSettings.font.underline.value ? "underline" : "none",
+    color: valuesSettings.textColor.value.value,
+    textAlign: (valuesSettings.alignment.value || "left") as
+      | "left"
+      | "center"
+      | "right",
+    padding: `${gridSettings.optionsCard.rowPadding.value}px`,
     whiteSpace: valuesSettings.wrapText.value ? "normal" : "nowrap",
   };
 
-  if (gridSettings.showVertical.value) {
-    cellStyle.borderRight = `1px solid ${gridSettings.gridVerticalColor.value.value}`;
+  if (gridSettings.gridlinesCard.showVertical.value) {
+    cellStyle.borderRight = `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value.value}`;
   }
 
-  if (gridSettings.showHorizontal.value) {
-    cellStyle.borderBottom = `1px solid ${gridSettings.gridHorizontalColor.value.value}`;
+  if (gridSettings.gridlinesCard.showHorizontal.value) {
+    cellStyle.borderBottom = `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value.value}`;
+  }
+
+  // Aplicar bordes según la sección y posiciones seleccionadas
+  const shouldApplyBorder = (
+    position: "Top" | "Bottom" | "Left" | "Right"
+  ): boolean => {
+    const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+    if (borderSection !== "all" && borderSection !== "valuesSection") {
+      return false;
+    }
+
+    const borderKey =
+      `border${position}` as keyof typeof gridSettings.borderCard;
+    const borderSetting = gridSettings.borderCard[borderKey] as any;
+    return borderSetting?.value === true;
+  };
+
+  if (shouldApplyBorder("Top")) {
+    cellStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Bottom")) {
+    cellStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Left")) {
+    cellStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Right")) {
+    cellStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
   }
 
   return (
@@ -65,20 +98,23 @@ export const TableRow: React.FC<TableRowProps> = ({
         const cellValue = row[column];
         const sparklineConfig = sparklineSettings.get(column);
 
-        if (sparklineConfig && typeof cellValue === "object" && cellValue !== null) {
+        if (
+          sparklineConfig &&
+          typeof cellValue === "object" &&
+          cellValue !== null
+        ) {
           return (
             <td key={colIndex} style={cellStyle}>
-              <Sparkline
-                sparklineData={cellValue}
-                settings={sparklineConfig}
-              />
+              <Sparkline sparklineData={cellValue} settings={sparklineConfig} />
             </td>
           );
         }
 
         return (
           <td key={colIndex} style={cellStyle}>
-            {cellValue !== null && cellValue !== undefined ? String(cellValue) : ""}
+            {cellValue !== null && cellValue !== undefined
+              ? String(cellValue)
+              : ""}
           </td>
         );
       })}

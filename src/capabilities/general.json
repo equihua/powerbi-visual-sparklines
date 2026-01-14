@@ -21,14 +21,6 @@
           ]
         }
       },
-      "textSize": {
-        "displayName": "Tamaño de texto",
-        "type": {
-          "formatting": {
-            "fontSize": true
-          }
-        }
-      },
       "rowSelection": {
         "displayName": "Selección de fila",
         "type": {
@@ -43,12 +35,6 @@
               "color": true
             }
           }
-        }
-      },
-      "freezeCategories": {
-        "displayName": "Congelar columna de categoría",
-        "type": {
-          "bool": true
         }
       },
       "pagination": {

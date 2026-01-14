@@ -1,27 +1,32 @@
-import React, { useState, useMemo, memo } from "react";
+import React, { useState, useMemo, memo, useEffect } from "react";
 import { TableViewModel } from "../visualViewModel";
 import { SparklineColumnSettings } from "../settings";
+import { TotalsSettings } from "../settings/totals";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
 import { areMapsEqual } from "../utils/memoization";
-import type { ColumnHeadersSettings, ValuesSettings, TotalsSettings, GridSettings } from "../settings/index";
+import type {
+  ColumnHeadersSettings,
+  ValuesCard,
+  GridSettings,
+} from "../settings/index";
 
 interface TableProps {
   viewModel: TableViewModel;
   width: number;
-  
+
   columnHeadersSettings: ColumnHeadersSettings;
-  valuesSettings: ValuesSettings;
+  valuesSettings: ValuesCard;
   totalsSettings: TotalsSettings;
   gridSettings: GridSettings;
-  
+
   rowSelection: boolean;
   rowSelectionColor: string;
   sortable: boolean;
   searchable: boolean;
   pagination: boolean;
   rowsPerPage: number;
-  
+
   sparklineSettings: Map<string, SparklineColumnSettings>;
 }
 
@@ -57,11 +62,19 @@ export const Table = memo<TableProps>(
     rowsPerPage,
     sparklineSettings,
   }) => {
-    const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+    const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(
+      null
+    );
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+      if (!rowSelection) {
+        setSelectedRowIndex(null);
+      }
+    }, [rowSelection]);
 
     const columns = useMemo(() => {
       if (!viewModel.rows || viewModel.rows.length === 0) return [];
@@ -72,7 +85,7 @@ export const Table = memo<TableProps>(
       if (!searchable || !searchTerm) return viewModel.rows;
 
       return viewModel.rows.filter((row) => {
-        const rowValues = Object.keys(row).map(key => row[key]);
+        const rowValues = Object.keys(row).map((key) => row[key]);
         return rowValues.some((value) => {
           if (value === null || value === undefined) return false;
           if (typeof value === "object") return false;
@@ -111,6 +124,21 @@ export const Table = memo<TableProps>(
 
     const totalPages = Math.ceil(sortedRows.length / rowsPerPage);
 
+    const shouldApplyBorderToTotals = (
+      position: "Top" | "Bottom" | "Left" | "Right"
+    ): boolean => {
+      const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+      if (borderSection !== "all" && borderSection !== "totalsSection") {
+        return false;
+      }
+
+      const borderKey =
+        `border${position}` as keyof typeof gridSettings.borderCard;
+      const borderSetting = gridSettings.borderCard[borderKey] as any;
+      return borderSetting?.value === true;
+    };
+
     const handleSort = (column: string) => {
       if (!sortable) return;
       if (sortColumn === column) {
@@ -129,15 +157,56 @@ export const Table = memo<TableProps>(
     const gridStyles: React.CSSProperties = {
       borderCollapse: "collapse",
       width: "100%",
-      fontFamily: valuesSettings.fontFamily.value,
+      fontFamily: valuesSettings.font.fontFamily.value as string,
     };
 
-    if (gridSettings.showHorizontal.value || gridSettings.showVertical.value) {
+    if (
+      gridSettings.gridlinesCard.showHorizontal.value ||
+      gridSettings.gridlinesCard.showVertical.value
+    ) {
       gridStyles.borderSpacing = "0";
     }
 
+    const totalsRow = useMemo(() => {
+      if (
+        !totalsSettings.show.value ||
+        !viewModel.rows ||
+        viewModel.rows.length === 0
+      ) {
+        return null;
+      }
+
+      const totals: { [key: string]: any } = {};
+      columns.forEach((column) => {
+        const values = viewModel.rows.map((row) => row[column]);
+        const numericValues = values.filter((v) => typeof v === "number");
+
+        if (numericValues.length > 0) {
+          totals[column] = numericValues.reduce((sum, val) => sum + val, 0);
+        } else {
+          totals[column] = "";
+        }
+      });
+
+      if (columns.length > 0) {
+        totals[columns[0]] = totalsSettings.label.value;
+      }
+
+      return totals;
+    }, [
+      viewModel.rows,
+      columns,
+      totalsSettings.show.value,
+      totalsSettings.label.value,
+    ]);
+
+    const totalsStyle = totalsSettings.getStyle();
+
     return (
-      <div className="table-wrapper" style={{ width: `${width}px`, overflow: "auto" }}>
+      <div
+        className="table-wrapper"
+        style={{ width: `${width}px`, overflow: "auto" }}
+      >
         {searchable && (
           <div className="search-bar" style={{ padding: "10px" }}>
             <input
@@ -182,11 +251,62 @@ export const Table = memo<TableProps>(
                 sparklineSettings={sparklineSettings}
               />
             ))}
+            {totalsRow && (
+              <tr
+                style={{
+                  fontFamily: totalsStyle.fontFamily,
+                  fontSize: `${totalsStyle.fontSize}pt`,
+                  fontWeight: totalsStyle.bold ? "bold" : "normal",
+                  fontStyle: totalsStyle.italic ? "italic" : "normal",
+                  textDecoration: totalsStyle.underline ? "underline" : "none",
+                  color: totalsStyle.textColor,
+                  backgroundColor: totalsStyle.backgroundColor,
+                }}
+              >
+                {columns.map((column, colIndex) => {
+                  const cellStyle: React.CSSProperties = {
+                    padding: "8px",
+                    borderTop: gridSettings.gridlinesCard.showHorizontal.value
+                      ? `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value}`
+                      : "none",
+                    borderLeft:
+                      colIndex > 0 &&
+                      gridSettings.gridlinesCard.showVertical.value
+                        ? `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value}`
+                        : "none",
+                  };
+
+                  if (shouldApplyBorderToTotals("Top")) {
+                    cellStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Bottom")) {
+                    cellStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Left")) {
+                    cellStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Right")) {
+                    cellStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+
+                  return (
+                    <td key={colIndex} style={cellStyle}>
+                      {typeof totalsRow[column] === "number"
+                        ? totalsRow[column].toLocaleString()
+                        : totalsRow[column]}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
           </tbody>
         </table>
 
         {pagination && totalPages > 1 && (
-          <div className="pagination" style={{ padding: "10px", textAlign: "center" }}>
+          <div
+            className="pagination"
+            style={{ padding: "10px", textAlign: "center" }}
+          >
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
@@ -198,7 +318,9 @@ export const Table = memo<TableProps>(
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
               style={{ margin: "0 5px", padding: "5px 10px" }}
             >

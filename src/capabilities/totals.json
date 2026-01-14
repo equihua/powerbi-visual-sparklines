@@ -1,32 +1,80 @@
 {
   "totals": {
-    "displayName": "Total",
+    "displayName": "Totales",
     "properties": {
       "show": {
+        "displayName": "Valores",
         "type": {
           "bool": true
         }
       },
       "label": {
+        "displayName": "Etiqueta de total",
         "type": {
           "text": true
         }
       },
       "fontFamily": {
+        "displayName": "Familia de fuente",
         "type": {
-          "formatting": {
-            "fontFamily": true
-          }
+          "enumeration": [
+            {
+              "value": "Arial, sans-serif",
+              "displayName": "Arial"
+            },
+            {
+              "value": "Verdana, sans-serif",
+              "displayName": "Verdana"
+            },
+            {
+              "value": "Georgia, serif",
+              "displayName": "Georgia"
+            },
+            {
+              "value": "'Courier New', monospace",
+              "displayName": "Courier New"
+            },
+            {
+              "value": "'Segoe UI', sans-serif",
+              "displayName": "Segoe UI"
+            },
+            {
+              "value": "Tahoma, sans-serif",
+              "displayName": "Tahoma"
+            },
+            {
+              "value": "'Times New Roman', serif",
+              "displayName": "Times New Roman"
+            }
+          ]
         }
       },
       "fontSize": {
+        "displayName": "Tamaño",
         "type": {
-          "formatting": {
-            "fontSize": true
-          }
+          "numeric": true
         }
       },
-      "fontColor": {
+      "bold": {
+        "displayName": "Negrita",
+        "type": {
+          "bool": true
+        }
+      },
+      "italic": {
+        "displayName": "Cursiva",
+        "type": {
+          "bool": true
+        }
+      },
+      "underline": {
+        "displayName": "Subrayado",
+        "type": {
+          "bool": true
+        }
+      },
+      "textColor": {
+        "displayName": "Color del texto",
         "type": {
           "fill": {
             "solid": {
@@ -36,6 +84,7 @@
         }
       },
       "backgroundColor": {
+        "displayName": "Color de fondo",
         "type": {
           "fill": {
             "solid": {

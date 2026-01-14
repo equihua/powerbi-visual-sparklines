@@ -1,9 +1,5 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
-import {
-  TABLE_STYLE_OPTIONS,
-  GENERAL_DEFAULTS,
-  VALIDATORS,
-} from "../constants/visualDefaults";
+import { TABLE_STYLE_OPTIONS } from "../constants/visualDefaults";
 
 /**
  * Grupo Estilo - Configuraciones básicas de estilo de tabla
@@ -16,19 +12,9 @@ class StyleGroup extends formattingSettings.SimpleCard {
     value: TABLE_STYLE_OPTIONS[0],
   });
 
-  textSize = new formattingSettings.NumUpDown({
-    name: "textSize",
-    displayName: "Tamaño de texto",
-    value: GENERAL_DEFAULTS.textSize,
-    options: {
-      minValue: VALIDATORS.textSize.min,
-      maxValue: VALIDATORS.textSize.max,
-    },
-  });
-
   name: string = "styleSection";
   displayName: string = "Estilo";
-  slices: formattingSettings.Slice[] = [this.tableStyle, this.textSize];
+  slices: formattingSettings.Slice[] = [this.tableStyle];
 }
 
 /**
@@ -59,12 +45,6 @@ class SelectionGroup extends formattingSettings.SimpleCard {
  * Grupo Navegación - Propiedades de interactividad de navegación
  */
 class NavigationGroup extends formattingSettings.SimpleCard {
-  freezeCategories = new formattingSettings.ToggleSwitch({
-    name: "freezeCategories",
-    displayName: "Congelar categorías",
-    value: false,
-  });
-
   pagination = new formattingSettings.ToggleSwitch({
     name: "pagination",
     displayName: "Paginación",
@@ -90,7 +70,6 @@ class NavigationGroup extends formattingSettings.SimpleCard {
   name: string = "navigationSection";
   displayName: string = "Navegación";
   slices: formattingSettings.Slice[] = [
-    this.freezeCategories,
     this.pagination,
     this.rowsPerPage,
     this.scrollBehavior,
@@ -121,7 +100,7 @@ class FeaturesGroup extends formattingSettings.SimpleCard {
 /**
  * GeneralCompositeCard - Tarjeta compuesta principal
  * Contiene cuatro secciones expandibles: Estilo, Selección, Navegación y Funcionalidades
- * 
+ *
  * NOTA: La tipografía ha sido movida a una tarjeta separada (TypographyCard)
  * para mejorar la organización y usar FontControl de manera moderna.
  */
@@ -140,4 +119,3 @@ export class GeneralCompositeCard extends formattingSettings.CompositeCard {
     this.featuresGroup,
   ];
 }
-

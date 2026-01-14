@@ -1,89 +1,114 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import powerbi from "powerbi-visuals-api";
+import { VALUES_DEFAULTS, TextAlignment } from "../constants/visualDefaults";
 
-export class ValuesSettings extends formattingSettings.SimpleCard {
-  name = "values";
-  displayName = "Values";
+export interface ValuesStyle {
+  fontFamily: string;
+  fontSize: number;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  textColor: string;
+  backgroundColor: string;
+  alternateTextColor: string;
+  alternateBackgroundColor: string;
+}
 
-  fontFamily = new formattingSettings.FontPicker({
-    name: "fontFamily",
-    displayName: "Font family",
-    value: "Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
+export class ValuesCard extends formattingSettings.SimpleCard {
+  font = new formattingSettings.FontControl({
+    name: "font",
+    displayName: "Fuente",
+    fontFamily: new formattingSettings.FontPicker({
+      name: "fontFamily",
+      displayName: "Familia",
+      value: VALUES_DEFAULTS.fontFamily,
+    }),
+    fontSize: new formattingSettings.NumUpDown({
+      name: "fontSize",
+      displayName: "Tamaño",
+      value: VALUES_DEFAULTS.fontSize,
+      options: {
+        minValue: { value: 8, type: powerbi.visuals.ValidatorType.Min },
+        maxValue: { value: 72, type: powerbi.visuals.ValidatorType.Max },
+      },
+    }),
+    bold: new formattingSettings.ToggleSwitch({
+      name: "bold",
+      displayName: "Negrita",
+      value: VALUES_DEFAULTS.bold,
+    }),
+    italic: new formattingSettings.ToggleSwitch({
+      name: "italic",
+      displayName: "Cursiva",
+      value: VALUES_DEFAULTS.italic,
+    }),
+    underline: new formattingSettings.ToggleSwitch({
+      name: "underline",
+      displayName: "Subrayado",
+      value: VALUES_DEFAULTS.underline,
+    }),
   });
 
-  fontSize = new formattingSettings.NumUpDown({
-    name: "fontSize",
-    displayName: "Text size",
-    value: 11,
-    options: {
-      minValue: { value: 8, type: powerbi.visuals.ValidatorType.Min },
-      maxValue: { value: 40, type: powerbi.visuals.ValidatorType.Max },
-    },
-  });
-
-  bold = new formattingSettings.ToggleSwitch({
-    name: "bold",
-    displayName: "Bold",
-    value: false,
-  });
-
-  italic = new formattingSettings.ToggleSwitch({
-    name: "italic",
-    displayName: "Italic",
-    value: false,
-  });
-
-  underline = new formattingSettings.ToggleSwitch({
-    name: "underline",
-    displayName: "Underline",
-    value: false,
-  });
-
-  fontColor = new formattingSettings.ColorPicker({
-    name: "fontColor",
-    displayName: "Font color",
-    value: { value: "#000000" },
+  textColor = new formattingSettings.ColorPicker({
+    name: "textColor",
+    displayName: "Color del texto",
+    value: { value: VALUES_DEFAULTS.textColor },
   });
 
   backgroundColor = new formattingSettings.ColorPicker({
     name: "backgroundColor",
-    displayName: "Background color",
-    value: { value: "#FFFFFF" },
+    displayName: "Color de fondo",
+    value: { value: VALUES_DEFAULTS.backgroundColor },
   });
 
-  alignment = new formattingSettings.ItemDropdown({
+  alternateTextColor = new formattingSettings.ColorPicker({
+    name: "alternateTextColor",
+    displayName: "Color del texto alternativo",
+    value: { value: VALUES_DEFAULTS.alternateTextColor },
+  });
+
+  alternateBackgroundColor = new formattingSettings.ColorPicker({
+    name: "alternateBackgroundColor",
+    displayName: "Alternar color de fondo",
+    value: { value: VALUES_DEFAULTS.alternateBackgroundColor },
+  });
+
+  alignment = new formattingSettings.AlignmentGroup({
     name: "alignment",
-    displayName: "Alignment",
-    items: [
-      { displayName: "Left", value: "left" },
-      { displayName: "Center", value: "center" },
-      { displayName: "Right", value: "right" },
-    ],
-    value: { displayName: "Left", value: "left" },
-  });
-
-  altBackgroundColor = new formattingSettings.ColorPicker({
-    name: "altBackgroundColor",
-    displayName: "Alternate background color",
-    value: { value: "#F9F9F9" },
+    displayName: "Alineación",
+    mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
+    value: TextAlignment.Left,
   });
 
   wrapText = new formattingSettings.ToggleSwitch({
     name: "wrapText",
-    displayName: "Wrap text",
+    displayName: "Ajustar texto",
     value: false,
   });
 
+  name: string = "values";
+  displayName: string = "Valores";
   slices = [
-    this.fontFamily,
-    this.fontSize,
-    this.bold,
-    this.italic,
-    this.underline,
-    this.fontColor,
+    this.font,
+    this.textColor,
     this.backgroundColor,
+    this.alternateTextColor,
+    this.alternateBackgroundColor,
     this.alignment,
-    this.altBackgroundColor,
     this.wrapText,
   ];
+
+  getStyle(): ValuesStyle {
+    return {
+      fontFamily: this.font.fontFamily.value as string,
+      fontSize: this.font.fontSize.value,
+      bold: this.font.bold.value,
+      italic: this.font.italic.value,
+      underline: this.font.underline.value,
+      textColor: this.textColor.value.value,
+      backgroundColor: this.backgroundColor.value.value,
+      alternateTextColor: this.alternateTextColor.value.value,
+      alternateBackgroundColor: this.alternateBackgroundColor.value.value,
+    };
+  }
 }

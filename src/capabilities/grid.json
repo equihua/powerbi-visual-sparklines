@@ -7,9 +7,9 @@
           "bool": true
         }
       },
-      "showVertical": {
+      "gridHorizontalWeight": {
         "type": {
-          "bool": true
+          "numeric": true
         }
       },
       "gridHorizontalColor": {
@@ -21,6 +21,16 @@
           }
         }
       },
+      "showVertical": {
+        "type": {
+          "bool": true
+        }
+      },
+      "gridVerticalWeight": {
+        "type": {
+          "numeric": true
+        }
+      },
       "gridVerticalColor": {
         "type": {
           "fill": {
@@ -28,6 +38,48 @@
               "color": true
             }
           }
+        }
+      },
+      "borderSection": {
+        "type": {
+          "enumeration": [
+            {
+              "value": "all",
+              "displayName": "Todas"
+            },
+            {
+              "value": "columnHeader",
+              "displayName": "Encabezado de columna"
+            },
+            {
+              "value": "valuesSection",
+              "displayName": "Sección de valores"
+            },
+            {
+              "value": "totalsSection",
+              "displayName": "Sección de totales"
+            }
+          ]
+        }
+      },
+      "borderTop": {
+        "type": {
+          "bool": true
+        }
+      },
+      "borderBottom": {
+        "type": {
+          "bool": true
+        }
+      },
+      "borderLeft": {
+        "type": {
+          "bool": true
+        }
+      },
+      "borderRight": {
+        "type": {
+          "bool": true
         }
       },
       "borderColor": {
@@ -40,6 +92,16 @@
         }
       },
       "borderWeight": {
+        "type": {
+          "numeric": true
+        }
+      },
+      "rowPadding": {
+        "type": {
+          "numeric": true
+        }
+      },
+      "globalFontSize": {
         "type": {
           "numeric": true
         }

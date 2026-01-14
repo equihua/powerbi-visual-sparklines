@@ -89,14 +89,6 @@
                         ]
                     }
                 },
-                "textSize": {
-                    "displayName": "Tamaño de texto",
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
-                },
                 "rowSelection": {
                     "displayName": "Selección de fila",
                     "type": {
@@ -111,12 +103,6 @@
                                 "color": true
                             }
                         }
-                    }
-                },
-                "freezeCategories": {
-                    "displayName": "Congelar columna de categoría",
-                    "type": {
-                        "bool": true
                     }
                 },
                 "pagination": {
@@ -161,38 +147,69 @@
             }
         },
         "columnHeaders": {
-            "displayName": "Column headers",
+            "displayName": "Encabezados de columna",
             "properties": {
                 "fontFamily": {
+                    "displayName": "Familia de fuente",
                     "type": {
-                        "formatting": {
-                            "fontFamily": true
-                        }
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
                     }
                 },
                 "fontSize": {
+                    "displayName": "Tamaño",
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "numeric": true
                     }
                 },
                 "bold": {
+                    "displayName": "Negrita",
                     "type": {
                         "bool": true
                     }
                 },
                 "italic": {
+                    "displayName": "Cursiva",
                     "type": {
                         "bool": true
                     }
                 },
                 "underline": {
+                    "displayName": "Subrayado",
                     "type": {
                         "bool": true
                     }
                 },
-                "fontColor": {
+                "textColor": {
+                    "displayName": "Color del texto",
                     "type": {
                         "fill": {
                             "solid": {
@@ -202,6 +219,7 @@
                     }
                 },
                 "backgroundColor": {
+                    "displayName": "Color de fondo",
                     "type": {
                         "fill": {
                             "solid": {
@@ -211,6 +229,7 @@
                     }
                 },
                 "alignment": {
+                    "displayName": "Alineación del encabezado",
                     "type": {
                         "formatting": {
                             "alignment": true
@@ -218,45 +237,98 @@
                     }
                 },
                 "wrapText": {
+                    "displayName": "Ajuste de texto",
                     "type": {
                         "bool": true
+                    }
+                },
+                "autoSizeWidth": {
+                    "displayName": "Auto-size width",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "resizeBehavior": {
+                    "displayName": "Comportamiento de cambio de tamaño",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "fitToContent",
+                                "displayName": "Ajustar al contenido"
+                            },
+                            {
+                                "value": "growToFit",
+                                "displayName": "Aumentar para ajustar"
+                            }
+                        ]
                     }
                 }
             }
         },
         "values": {
-            "displayName": "Values",
+            "displayName": "Valores",
             "properties": {
                 "fontFamily": {
+                    "displayName": "Familia de fuente",
                     "type": {
-                        "formatting": {
-                            "fontFamily": true
-                        }
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
                     }
                 },
                 "fontSize": {
+                    "displayName": "Tamaño",
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "numeric": true
                     }
                 },
                 "bold": {
+                    "displayName": "Negrita",
                     "type": {
                         "bool": true
                     }
                 },
                 "italic": {
+                    "displayName": "Cursiva",
                     "type": {
                         "bool": true
                     }
                 },
                 "underline": {
+                    "displayName": "Subrayado",
                     "type": {
                         "bool": true
                     }
                 },
-                "fontColor": {
+                "textColor": {
+                    "displayName": "Color del texto",
                     "type": {
                         "fill": {
                             "solid": {
@@ -266,6 +338,7 @@
                     }
                 },
                 "backgroundColor": {
+                    "displayName": "Color de fondo",
                     "type": {
                         "fill": {
                             "solid": {
@@ -274,50 +347,94 @@
                         }
                     }
                 },
-                "altBackgroundColor": {
+                "alternateTextColor": {
+                    "displayName": "Color del texto alternativo",
                     "type": {
                         "fill": {
                             "solid": {
                                 "color": true
                             }
                         }
-                    }
-                },
-                "wrapText": {
-                    "type": {
-                        "bool": true
                     }
                 }
             }
         },
         "totals": {
-            "displayName": "Total",
+            "displayName": "Totales",
             "properties": {
                 "show": {
+                    "displayName": "Valores",
                     "type": {
                         "bool": true
                     }
                 },
                 "label": {
+                    "displayName": "Etiqueta de total",
                     "type": {
                         "text": true
                     }
                 },
                 "fontFamily": {
+                    "displayName": "Familia de fuente",
                     "type": {
-                        "formatting": {
-                            "fontFamily": true
-                        }
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
                     }
                 },
                 "fontSize": {
+                    "displayName": "Tamaño",
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "numeric": true
                     }
                 },
-                "fontColor": {
+                "bold": {
+                    "displayName": "Negrita",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "displayName": "Cursiva",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "displayName": "Subrayado",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "displayName": "Color del texto",
                     "type": {
                         "fill": {
                             "solid": {
@@ -327,6 +444,7 @@
                     }
                 },
                 "backgroundColor": {
+                    "displayName": "Color de fondo",
                     "type": {
                         "fill": {
                             "solid": {
@@ -338,14 +456,29 @@
             }
         },
         "specificColumn": {
-            "displayName": "Specific column",
+            "displayName": "Columna específica",
             "properties": {
-                "series": {
+                "columnSelector": {
                     "type": {
                         "text": true
                     }
                 },
-                "fontColor": {
+                "applyToHeader": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "applyToTotal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "applyToValues": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -373,9 +506,19 @@
             }
         },
         "cellElements": {
-            "displayName": "Cell elements",
+            "displayName": "Elementos de celda",
             "properties": {
-                "fontColor": {
+                "columnSelector": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "backgroundColorToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "backgroundMinColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -384,7 +527,7 @@
                         }
                     }
                 },
-                "backgroundColor": {
+                "backgroundMaxColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -393,10 +536,72 @@
                         }
                     }
                 },
-                "alignment": {
+                "fontColorToggle": {
                     "type": {
-                        "formatting": {
-                            "alignment": true
+                        "bool": true
+                    }
+                },
+                "fontMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "iconsToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "iconsMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "iconsMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "webUrlToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "webUrlMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "webUrlMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
                         }
                     }
                 }
@@ -410,9 +615,9 @@
                         "bool": true
                     }
                 },
-                "showVertical": {
+                "gridHorizontalWeight": {
                     "type": {
-                        "bool": true
+                        "numeric": true
                     }
                 },
                 "gridHorizontalColor": {
@@ -424,6 +629,16 @@
                         }
                     }
                 },
+                "showVertical": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "gridVerticalWeight": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
                 "gridVerticalColor": {
                     "type": {
                         "fill": {
@@ -431,6 +646,48 @@
                                 "color": true
                             }
                         }
+                    }
+                },
+                "borderSection": {
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "all",
+                                "displayName": "Todas"
+                            },
+                            {
+                                "value": "columnHeader",
+                                "displayName": "Encabezado de columna"
+                            },
+                            {
+                                "value": "valuesSection",
+                                "displayName": "Sección de valores"
+                            },
+                            {
+                                "value": "totalsSection",
+                                "displayName": "Sección de totales"
+                            }
+                        ]
+                    }
+                },
+                "borderTop": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderBottom": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderLeft": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderRight": {
+                    "type": {
+                        "bool": true
                     }
                 },
                 "borderColor": {
@@ -443,6 +700,16 @@
                     }
                 },
                 "borderWeight": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "rowPadding": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "globalFontSize": {
                     "type": {
                         "numeric": true
                     }

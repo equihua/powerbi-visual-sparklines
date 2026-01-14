@@ -2,7 +2,7 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import {
   GeneralCompositeCard,
   ColumnHeadersSettings,
-  ValuesSettings,
+  ValuesCard,
   TotalsSettings,
   SpecificColumnSettings,
   CellElementsSettings,
@@ -16,22 +16,24 @@ export type { SparklineColumnSettings };
 export class VisualFormattingSettingsModel extends formattingSettings.Model {
   general: GeneralCompositeCard = new GeneralCompositeCard();
   columnHeaders: ColumnHeadersSettings = new ColumnHeadersSettings();
-  values: ValuesSettings = new ValuesSettings();
+  values: ValuesCard = new ValuesCard();
   totals: TotalsSettings = new TotalsSettings();
   specificColumn: SpecificColumnSettings = new SpecificColumnSettings();
   cellElements: CellElementsSettings = new CellElementsSettings();
   grid: GridSettings = new GridSettings();
   sparklineCard: SparklineCompositeCard | null = null;
 
-  cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] = [
-    this.general,
-    this.columnHeaders,
-    this.values,
-    this.totals,
-    this.specificColumn,
-    this.cellElements,
-    this.grid,
-  ];
+  cards: (formattingSettings.SimpleCard | formattingSettings.CompositeCard)[] =
+    [
+      this.general,
+      this.grid,
+      this.values,
+      this.columnHeaders,
+      this.totals,
+      this.specificColumn,
+      this.cellElements,
+      ...(this.sparklineCard ? [this.sparklineCard] : []),
+    ];
 
   public updateSparklineCards(sparklineColumnNames: string[]): void {
     if (sparklineColumnNames && sparklineColumnNames.length > 0) {
@@ -46,12 +48,12 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
   private rebuildCards(): void {
     this.cards = [
       this.general,
-      this.columnHeaders,
+      this.grid,
       this.values,
+      this.columnHeaders,
       this.totals,
       this.specificColumn,
       this.cellElements,
-      this.grid,
       ...(this.sparklineCard ? [this.sparklineCard] : []),
     ];
   }
