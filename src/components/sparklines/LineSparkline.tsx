@@ -1,22 +1,23 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
-import { SparklineDataPoint } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { line } from "d3-shape";
+import { SparklineDataPoint } from "../../visualViewModel";
+import { SparklineColumnSettings } from "../../settings";
 
-interface AreaSparklineProps {
+interface LineSparklineProps {
   dataPoints: SparklineDataPoint[];
   settings: SparklineColumnSettings;
 }
 
-export const AreaSparkline: React.FC<AreaSparklineProps> = ({
+export const LineSparkline: React.FC<LineSparklineProps> = ({
   dataPoints,
   settings,
 }) => {
   const width = 60;
   const height = 20;
   const padding = 2;
-  const fillColor = settings.color || "#0078D4";
+  const strokeColor = settings.color || "#0078D4";
   const strokeWidth = settings.lineWidth || 1.5;
 
   const data = dataPoints.map((d) => d.y);
@@ -31,21 +32,19 @@ export const AreaSparkline: React.FC<AreaSparklineProps> = ({
     .domain([minValue, maxValue])
     .range([height - padding, padding]);
 
-  const areaPoints = data.map((d, i) => `${xScale(i)},${yScale(d)}`).join(" ");
+  const lineGenerator = line<number>()
+    .x((_d, i) => xScale(i))
+    .y((d) => yScale(d));
 
-  const baselineY = height - padding;
-  const areaPath = `M${padding},${baselineY} L${areaPoints} L${
-    width - padding
-  },${baselineY} Z`;
+  const pathData = lineGenerator(data);
 
   return (
     <svg width={width} height={height}>
       <path
-        fill={fillColor}
-        fillOpacity={0.3}
-        stroke={fillColor}
+        fill="none"
+        stroke={strokeColor}
         strokeWidth={strokeWidth}
-        d={areaPath}
+        d={pathData || ""}
       />
     </svg>
   );

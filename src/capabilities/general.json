@@ -8,15 +8,39 @@
           "enumeration": [
             {
               "value": "default",
-              "displayName": "Predeterminado"
+              "displayName": "Valor predeterminado"
             },
             {
-              "value": "striped",
-              "displayName": "A rayas"
+              "value": "none",
+              "displayName": "Ninguno"
             },
             {
-              "value": "bordered",
-              "displayName": "Con bordes"
+              "value": "minimal",
+              "displayName": "Mínimo"
+            },
+            {
+              "value": "boldHeader",
+              "displayName": "Encabezado en negrita"
+            },
+            {
+              "value": "alternatingRows",
+              "displayName": "Filas alternas"
+            },
+            {
+              "value": "highlightRows",
+              "displayName": "Filas llamativas"
+            },
+            {
+              "value": "highlightRowsBoldHeader",
+              "displayName": "Filas llamativas del encabezado en negrita"
+            },
+            {
+              "value": "dispersed",
+              "displayName": "Disperso"
+            },
+            {
+              "value": "compressed",
+              "displayName": "Comprimido"
             }
           ]
         }
@@ -57,6 +81,18 @@
       },
       "sortable": {
         "displayName": "Ordenamiento habilitado",
+        "type": {
+          "bool": true
+        }
+      },
+      "columnReorder": {
+        "displayName": "Reordenar columnas",
+        "type": {
+          "bool": true
+        }
+      },
+      "columnResize": {
+        "displayName": "Redimensionar columnas",
         "type": {
           "bool": true
         }

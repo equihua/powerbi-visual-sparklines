@@ -5,6 +5,8 @@ import { TotalsSettings } from "../settings/totals";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
 import { areMapsEqual } from "../utils/memoization";
+import { useColumnReorder } from "../hooks/useColumnReorder";
+import { useColumnResize } from "../hooks/useColumnResize";
 import type {
   ColumnHeadersSettings,
   ValuesCard,
@@ -24,10 +26,15 @@ interface TableProps {
   rowSelectionColor: string;
   sortable: boolean;
   searchable: boolean;
+  enableColumnReorder: boolean;
+  enableColumnResize: boolean;
   pagination: boolean;
   rowsPerPage: number;
 
   sparklineSettings: Map<string, SparklineColumnSettings>;
+
+  // Estilo de tabla (TableStyle)
+  tableStyle: string;
 }
 
 function arePropsEqual(prevProps: TableProps, nextProps: TableProps): boolean {
@@ -37,6 +44,10 @@ function arePropsEqual(prevProps: TableProps, nextProps: TableProps): boolean {
   if (prevProps.rowsPerPage !== nextProps.rowsPerPage) return false;
   if (prevProps.searchable !== nextProps.searchable) return false;
   if (prevProps.sortable !== nextProps.sortable) return false;
+  if (prevProps.enableColumnReorder !== nextProps.enableColumnReorder)
+    return false;
+  if (prevProps.enableColumnResize !== nextProps.enableColumnResize)
+    return false;
   if (prevProps.rowSelection !== nextProps.rowSelection) return false;
 
   if (!areMapsEqual(prevProps.sparklineSettings, nextProps.sparklineSettings)) {
@@ -58,12 +69,15 @@ export const Table = memo<TableProps>(
     rowSelectionColor,
     sortable,
     searchable,
+    enableColumnReorder,
+    enableColumnResize,
     pagination,
     rowsPerPage,
     sparklineSettings,
+    tableStyle,
   }) => {
     const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(
-      null
+      null,
     );
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -80,6 +94,22 @@ export const Table = memo<TableProps>(
       if (!viewModel.rows || viewModel.rows.length === 0) return [];
       return Object.keys(viewModel.rows[0]);
     }, [viewModel.rows]);
+
+    // Hooks para reordenamiento y resize de columnas
+    const {
+      columnOrder,
+      draggedColumn,
+      dropTargetColumn,
+      handleDragStart,
+      handleDragOver,
+      handleDragEnd,
+    } = useColumnReorder(columns.length);
+
+    const { columnWidths, handleResizeStart } = useColumnResize({
+      columnCount: columns.length,
+      containerWidth: width,
+      minWidth: 80,
+    });
 
     const filteredRows = useMemo(() => {
       if (!searchable || !searchTerm) return viewModel.rows;
@@ -125,7 +155,7 @@ export const Table = memo<TableProps>(
     const totalPages = Math.ceil(sortedRows.length / rowsPerPage);
 
     const shouldApplyBorderToTotals = (
-      position: "Top" | "Bottom" | "Left" | "Right"
+      position: "Top" | "Bottom" | "Left" | "Right",
     ): boolean => {
       const borderSection = gridSettings.borderCard.borderSection.value.value;
 
@@ -225,9 +255,22 @@ export const Table = memo<TableProps>(
           </div>
         )}
 
-        <table style={gridStyles}>
+        <table
+          className={`sparkline-table style-${tableStyle}`}
+          style={gridStyles}
+        >
           <TableHeader
             columns={columns}
+            columnOrder={enableColumnReorder ? columnOrder : undefined}
+            columnWidths={enableColumnResize ? columnWidths : undefined}
+            draggedColumn={enableColumnReorder ? draggedColumn : undefined}
+            dropTargetColumn={
+              enableColumnReorder ? dropTargetColumn : undefined
+            }
+            onDragStart={enableColumnReorder ? handleDragStart : undefined}
+            onDragOver={enableColumnReorder ? handleDragOver : undefined}
+            onDragEnd={enableColumnReorder ? handleDragEnd : undefined}
+            onResizeStart={enableColumnResize ? handleResizeStart : undefined}
             sortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
@@ -331,5 +374,5 @@ export const Table = memo<TableProps>(
       </div>
     );
   },
-  arePropsEqual
+  arePropsEqual,
 );

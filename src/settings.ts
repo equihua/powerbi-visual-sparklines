@@ -13,6 +13,11 @@ import {
 
 export type { SparklineColumnSettings };
 
+/**
+ * Nota: ValueColumnConfig se define y exporta desde formatters/FormattingManager.ts
+ * para mantener la lógica de extracción centralizada en FormattingManager.
+ */
+
 export class VisualFormattingSettingsModel extends formattingSettings.Model {
   general: GeneralCompositeCard = new GeneralCompositeCard();
   columnHeaders: ColumnHeadersSettings = new ColumnHeadersSettings();
@@ -71,7 +76,7 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
 
   public setSparklineSettings(
     columnName: string,
-    settings: SparklineColumnSettings
+    settings: SparklineColumnSettings,
   ): void {
     this.sparklineCard?.setSettings(columnName, settings);
   }

@@ -1,6 +1,6 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import {
-  SPARKLINE_CHART_TYPE_OPTIONS,
+  SPARKLINE_TYPE_OPTIONS,
   SPARKLINE_DEFAULTS,
   VALIDATORS,
 } from "../constants/visualDefaults";
@@ -19,8 +19,8 @@ class SparklineColumnGroup extends formattingSettings.Group {
   chartType = new formattingSettings.ItemDropdown({
     name: "chartType",
     displayName: "Tipo de gráfico",
-    items: [...SPARKLINE_CHART_TYPE_OPTIONS],
-    value: SPARKLINE_CHART_TYPE_OPTIONS[0],
+    items: [...SPARKLINE_TYPE_OPTIONS],
+    value: SPARKLINE_TYPE_OPTIONS[0],
   });
 
   color = new formattingSettings.ColorPicker({

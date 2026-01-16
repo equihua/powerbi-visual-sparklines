@@ -11,9 +11,9 @@ import powerbi from "powerbi-visuals-api";
 // ============================================================================
 
 /**
- * Tipos de gráficos sparkline disponibles
+ * Tipos de minigráficos disponibles
  */
-export enum SparklineChartType {
+export enum SparklineType {
   Line = "line",
   Bar = "bar",
   Area = "area",
@@ -22,14 +22,14 @@ export enum SparklineChartType {
 }
 
 /**
- * Opciones de tipos de gráfico para dropdowns
+ * Opciones de tipos de minigráfico
  */
-export const SPARKLINE_CHART_TYPE_OPTIONS = [
-  { value: SparklineChartType.Line, displayName: "Línea" },
-  { value: SparklineChartType.Bar, displayName: "Barras" },
-  { value: SparklineChartType.Area, displayName: "Área" },
-  { value: SparklineChartType.Pie, displayName: "Circular" },
-  { value: SparklineChartType.Donut, displayName: "Anillo" },
+export const SPARKLINE_TYPE_OPTIONS = [
+  { value: SparklineType.Line, displayName: "Línea" },
+  { value: SparklineType.Bar, displayName: "Barras" },
+  { value: SparklineType.Area, displayName: "Área" },
+  { value: SparklineType.Pie, displayName: "Circular" },
+  { value: SparklineType.Donut, displayName: "Anillo" },
 ] as const;
 
 /**
@@ -48,7 +48,7 @@ export enum TableStyle {
 }
 
 /**
- * Opciones de estilos de tabla para dropdowns
+ * Opciones de estilos de tabla
  */
 export const TABLE_STYLE_OPTIONS = [
   { value: TableStyle.Default, displayName: "Valor predeterminado" },
@@ -75,7 +75,7 @@ export enum TextAlignment {
 }
 
 /**
- * Opciones de alineación para dropdowns
+ * Opciones de alineación
  */
 export const TEXT_ALIGNMENT_OPTIONS = [
   { value: TextAlignment.Left, displayName: "Izquierda" },
@@ -97,7 +97,7 @@ export enum FontFamily {
 }
 
 /**
- * Opciones de familias de fuente para dropdowns
+ * Opciones de familias de fuente
  */
 export const FONT_FAMILY_OPTIONS = [
   { value: FontFamily.Arial, displayName: "Arial" },
@@ -120,7 +120,7 @@ export enum BorderStyle {
 }
 
 /**
- * Opciones de estilos de borde para dropdowns
+ * Opciones de estilos de borde
  */
 export const BORDER_STYLE_OPTIONS = [
   { value: BorderStyle.Solid, displayName: "Sólido" },
@@ -140,7 +140,7 @@ export enum BorderSection {
 }
 
 /**
- * Opciones de secciones de borde para dropdowns
+ * Opciones de secciones de borde
  */
 export const BORDER_SECTION_OPTIONS = [
   { value: BorderSection.All, displayName: "Todas" },
@@ -158,7 +158,7 @@ export enum ScrollBehavior {
 }
 
 /**
- * Opciones de comportamiento de scroll para dropdowns
+ * Opciones de comportamiento de scroll
  */
 export const SCROLL_BEHAVIOR_OPTIONS = [
   { value: ScrollBehavior.Smooth, displayName: "Suave" },
@@ -172,7 +172,7 @@ export const SCROLL_BEHAVIOR_OPTIONS = [
 /**
  * Colores predeterminados para el visual
  */
-export const DEFAULT_COLORS = {
+export const COLORS_DEFAULT = {
   // Colores de texto
   primaryText: "#000000",
   secondaryText: "#666666",
@@ -200,7 +200,7 @@ export const DEFAULT_COLORS = {
 export const TYPOGRAPHY_DEFAULTS = {
   fontFamily: FontFamily.SegoeUI,
   fontSize: 11,
-  fontColor: DEFAULT_COLORS.primaryText,
+  fontColor: COLORS_DEFAULT.primaryText,
   lineHeight: 1.4,
   letterSpacing: 0,
   bold: false,
@@ -216,8 +216,8 @@ export const TYPOGRAPHY_DEFAULTS = {
 // ============================================================================
 
 export const SPARKLINE_DEFAULTS = {
-  chartType: SparklineChartType.Line,
-  color: DEFAULT_COLORS.primaryBlue,
+  chartType: SparklineType.Line,
+  color: COLORS_DEFAULT.primaryBlue,
   lineWidth: 1.5,
   lineWidthMin: 0.5,
   lineWidthMax: 10,
@@ -240,18 +240,18 @@ export const GENERAL_DEFAULTS = {
 
 export const COLUMN_DEFAULTS = {
   // Encabezado
-  headerFontColor: DEFAULT_COLORS.primaryText,
+  headerFontColor: COLORS_DEFAULT.primaryText,
   headerFontSize: 12,
   headerAlignment: TextAlignment.Center,
   headerBold: true,
-  headerBackgroundColor: DEFAULT_COLORS.lightGray,
+  headerBackgroundColor: COLORS_DEFAULT.lightGray,
   headerPadding: 8,
 
   // Celda
-  cellFontColor: DEFAULT_COLORS.primaryText,
+  cellFontColor: COLORS_DEFAULT.primaryText,
   cellFontSize: 11,
   cellAlignment: TextAlignment.Left,
-  cellBackgroundColor: DEFAULT_COLORS.white,
+  cellBackgroundColor: COLORS_DEFAULT.white,
   cellPadding: 6,
 
   // Formato de números
@@ -273,8 +273,8 @@ export const COLUMN_DEFAULTS = {
 export const ROW_DEFAULTS = {
   rowHeight: 28,
   rowPadding: 6,
-  alternatingRowColor: DEFAULT_COLORS.alternatingRow,
-  hoverBackgroundColor: DEFAULT_COLORS.hoverBackground,
+  alternatingRowColor: COLORS_DEFAULT.alternatingRow,
+  hoverBackgroundColor: COLORS_DEFAULT.hoverBackground,
 } as const;
 
 // ============================================================================
@@ -284,12 +284,12 @@ export const ROW_DEFAULTS = {
 export const GRID_DEFAULTS = {
   // Líneas horizontales
   showHorizontalLines: true,
-  horizontalLineColor: DEFAULT_COLORS.lineGray,
+  horizontalLineColor: COLORS_DEFAULT.lineGray,
   horizontalLineWidth: 1,
 
   // Líneas verticales
   showVerticalLines: false,
-  verticalLineColor: DEFAULT_COLORS.lineGray,
+  verticalLineColor: COLORS_DEFAULT.lineGray,
   verticalLineWidth: 1,
 
   // Bordes
@@ -298,14 +298,14 @@ export const GRID_DEFAULTS = {
   borderBottom: true,
   borderLeft: false,
   borderRight: false,
-  borderColor: DEFAULT_COLORS.borderGray,
+  borderColor: COLORS_DEFAULT.borderGray,
   borderWidth: 1,
   borderStyle: BorderStyle.Solid,
   borderRadius: 0,
 
   // Sombras
   shadowBorder: false,
-  shadowColor: DEFAULT_COLORS.shadowGray,
+  shadowColor: COLORS_DEFAULT.shadowGray,
 
   // Espaciado
   rowSpacing: 6,
@@ -321,10 +321,10 @@ export const VALUES_DEFAULTS = {
   bold: false,
   italic: false,
   underline: false,
-  textColor: DEFAULT_COLORS.primaryText,
-  backgroundColor: DEFAULT_COLORS.white,
-  alternateTextColor: DEFAULT_COLORS.primaryText,
-  alternateBackgroundColor: DEFAULT_COLORS.alternatingRow,
+  textColor: COLORS_DEFAULT.primaryText,
+  backgroundColor: COLORS_DEFAULT.white,
+  alternateTextColor: COLORS_DEFAULT.primaryText,
+  alternateBackgroundColor: COLORS_DEFAULT.alternatingRow,
 } as const;
 
 // ============================================================================
@@ -337,8 +337,8 @@ export const COLUMN_HEADERS_DEFAULTS = {
   bold: true,
   italic: false,
   underline: false,
-  textColor: DEFAULT_COLORS.primaryText,
-  backgroundColor: DEFAULT_COLORS.lightGray,
+  textColor: COLORS_DEFAULT.primaryText,
+  backgroundColor: COLORS_DEFAULT.lightGray,
   alignment: TextAlignment.Center,
   wrapText: false,
   autoSizeWidth: false,
@@ -357,8 +357,8 @@ export const TOTALS_DEFAULTS = {
   bold: true,
   italic: false,
   underline: false,
-  textColor: DEFAULT_COLORS.primaryText,
-  backgroundColor: DEFAULT_COLORS.lightGray,
+  textColor: COLORS_DEFAULT.primaryText,
+  backgroundColor: COLORS_DEFAULT.lightGray,
 } as const;
 
 // ============================================================================
@@ -370,8 +370,8 @@ export const SPECIFIC_COLUMN_DEFAULTS = {
   applyToHeader: false,
   applyToTotal: false,
   applyToValues: true,
-  textColor: DEFAULT_COLORS.primaryText,
-  backgroundColor: DEFAULT_COLORS.white,
+  textColor: COLORS_DEFAULT.primaryText,
+  backgroundColor: COLORS_DEFAULT.white,
   alignment: TextAlignment.Left,
 } as const;
 
@@ -383,23 +383,23 @@ export const CELL_ELEMENTS_DEFAULTS = {
   columnSelector: "",
   backgroundColorToggle: false,
   backgroundGradient: {
-    minColor: { value: DEFAULT_COLORS.white },
-    maxColor: { value: DEFAULT_COLORS.lightGray },
+    minColor: { value: COLORS_DEFAULT.white },
+    maxColor: { value: COLORS_DEFAULT.lightGray },
   },
   fontColorToggle: false,
   fontGradient: {
-    minColor: { value: DEFAULT_COLORS.primaryText },
-    maxColor: { value: DEFAULT_COLORS.secondaryText },
+    minColor: { value: COLORS_DEFAULT.primaryText },
+    maxColor: { value: COLORS_DEFAULT.secondaryText },
   },
   iconsToggle: false,
   iconsGradient: {
-    minColor: { value: DEFAULT_COLORS.primaryBlue },
-    maxColor: { value: DEFAULT_COLORS.selectionBlue },
+    minColor: { value: COLORS_DEFAULT.primaryBlue },
+    maxColor: { value: COLORS_DEFAULT.selectionBlue },
   },
   webUrlToggle: false,
   webUrlGradient: {
-    minColor: { value: DEFAULT_COLORS.primaryBlue },
-    maxColor: { value: DEFAULT_COLORS.selectionBlue },
+    minColor: { value: COLORS_DEFAULT.primaryBlue },
+    maxColor: { value: COLORS_DEFAULT.selectionBlue },
   },
 } as const;
 
@@ -410,7 +410,7 @@ export const CELL_ELEMENTS_DEFAULTS = {
 export const INTERACTIVITY_DEFAULTS = {
   freezeCategories: false,
   rowSelection: true,
-  rowSelectionColor: DEFAULT_COLORS.selectionBlue,
+  rowSelectionColor: COLORS_DEFAULT.selectionBlue,
   pagination: false,
   rowsPerPage: 10,
   searchable: false,
@@ -431,7 +431,7 @@ export const VALIDATORS = {
     max: { value: 40, type: powerbi.visuals.ValidatorType.Max },
   },
   lineWidth: {
-    min: { value: 0.5, type: powerbi.visuals.ValidatorType.Min },
+    min: { value: 1, type: powerbi.visuals.ValidatorType.Min },
     max: { value: 10, type: powerbi.visuals.ValidatorType.Max },
   },
 } as const;

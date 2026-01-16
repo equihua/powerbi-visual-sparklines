@@ -17,7 +17,7 @@
 .sparkline-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
   color: #252423;
   table-layout: auto;
   border-spacing: 0;
@@ -42,6 +42,7 @@
     transition: background-color 0.15s ease-in-out;
   }
 
+  /* Zebra y hover por defecto: se activan vía estilos */
   tr:nth-child(even) {
     background: #faf9f8;
   }
@@ -61,6 +62,87 @@
 }
 
 /* ===========================================================
+   MODIFICADORES DE ESTILO DE TABLA
+   Se aplican como className: .sparkline-table.style-<preset>
+=========================================================== */
+.sparkline-table.style-default {
+  /* Usa configuración base */
+}
+
+.sparkline-table.style-none {
+  th {
+    background: transparent;
+    border-bottom: none;
+  }
+  td {
+    border-bottom: none;
+  }
+  tr:nth-child(even) {
+    background: transparent;
+  }
+  tr:hover {
+    background: transparent;
+  }
+}
+
+.sparkline-table.style-minimal {
+  th {
+    background: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+    padding: 3px 6px;
+    font-weight: 600;
+  }
+  td {
+    border-bottom: 1px solid #eeeeee;
+    padding: 3px 6px;
+  }
+  tr:nth-child(even) {
+    background: transparent;
+  }
+}
+
+.sparkline-table.style-boldHeader {
+  th {
+    font-weight: 700;
+  }
+}
+
+.sparkline-table.style-alternatingRows {
+  tr:nth-child(even) {
+    background: #faf9f8;
+  }
+}
+
+.sparkline-table.style-highlightRows {
+  tr:hover {
+    background: #ffe5b3;
+  }
+}
+
+.sparkline-table.style-highlightRowsBoldHeader {
+  th {
+    font-weight: 700;
+  }
+  tr:hover {
+    background: #ffe5b3;
+  }
+}
+
+.sparkline-table.style-dispersed {
+  th,
+  td {
+    padding: 8px 12px;
+  }
+}
+
+.sparkline-table.style-compressed {
+  th,
+  td {
+    padding: 2px 4px;
+  }
+}
+
+/* ===========================================================
    SPARKLINES
 =========================================================== */
 .sparkline-table svg {
@@ -69,7 +151,9 @@
   transition: all 0.2s ease-out;
 
   path {
-    transition: stroke 0.25s ease, stroke-width 0.25s ease;
+    transition:
+      stroke 0.25s ease,
+      stroke-width 0.25s ease;
   }
 
   path:hover {
@@ -78,7 +162,9 @@
   }
 
   circle {
-    transition: opacity 0.2s ease, r 0.2s ease;
+    transition:
+      opacity 0.2s ease,
+      r 0.2s ease;
     opacity: 0;
   }
 

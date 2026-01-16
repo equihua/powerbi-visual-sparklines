@@ -92,9 +92,26 @@ class FeaturesGroup extends formattingSettings.SimpleCard {
     value: true,
   });
 
+  columnReorder = new formattingSettings.ToggleSwitch({
+    name: "columnReorder",
+    displayName: "Reordenar columnas",
+    value: true,
+  });
+
+  columnResize = new formattingSettings.ToggleSwitch({
+    name: "columnResize",
+    displayName: "Redimensionar columnas",
+    value: true,
+  });
+
   name: string = "featuresSection";
   displayName: string = "Funcionalidades";
-  slices: formattingSettings.Slice[] = [this.searchable, this.sortable];
+  slices: formattingSettings.Slice[] = [
+    this.searchable,
+    this.sortable,
+    this.columnReorder,
+    this.columnResize,
+  ];
 }
 
 /**

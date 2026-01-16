@@ -1,11 +1,11 @@
 import React from "react";
 import { SparklineData, SparklineDataPoint } from "../visualViewModel";
 import { SparklineColumnSettings } from "../settings";
-import { LineSparkline } from "./LineSparkline";
-import { BarSparkline } from "./BarSparkline";
-import { AreaSparkline } from "./AreaSparkline";
-import { PieSparkline } from "./PieSparkline";
-import { DonutSparkline } from "./DonutSparkline";
+import { LineSparkline } from "./sparklines/LineSparkline";
+import { BarSparkline } from "./sparklines/BarSparkline";
+import { AreaSparkline } from "./sparklines/AreaSparkline";
+import { PieSparkline } from "./sparklines/PieSparkline";
+import { DonutSparkline } from "./sparklines/DonutSparkline";
 
 interface SparklineProps {
   sparklineData: SparklineData;

@@ -1,8 +1,8 @@
 import React from "react";
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
-import { SparklineDataPoint } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { SparklineDataPoint } from "../../visualViewModel";
+import { SparklineColumnSettings } from "../../settings";
 
 interface BarSparklineProps {
   dataPoints: SparklineDataPoint[];

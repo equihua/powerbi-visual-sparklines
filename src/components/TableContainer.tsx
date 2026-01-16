@@ -24,19 +24,28 @@ export const TableContainer: React.FC<TableContainerProps> = ({
   const tableProps = {
     viewModel,
     width: viewport.width,
-    
+
     columnHeadersSettings: formattingSettings.columnHeaders,
     valuesSettings: formattingSettings.values,
     totalsSettings: formattingSettings.totals,
     gridSettings: formattingSettings.grid,
-    
+
     rowSelection: formattingSettings.general.selectionGroup.rowSelection.value,
-    rowSelectionColor: formattingSettings.general.selectionGroup.rowSelectionColor.value.value,
+    rowSelectionColor:
+      formattingSettings.general.selectionGroup.rowSelectionColor.value.value,
     sortable: formattingSettings.general.featuresGroup.sortable.value,
     searchable: formattingSettings.general.featuresGroup.searchable.value,
+    enableColumnReorder:
+      formattingSettings.general.featuresGroup.columnReorder.value,
+    enableColumnResize:
+      formattingSettings.general.featuresGroup.columnResize.value,
     pagination: formattingSettings.general.navigationGroup.pagination.value,
     rowsPerPage: formattingSettings.general.navigationGroup.rowsPerPage.value,
-    
+
+    // Estilo de tabla (TableStyle)
+    tableStyle: formattingSettings.general.styleGroup.tableStyle.value
+      .value as string,
+
     sparklineSettings,
   };
 

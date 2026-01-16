@@ -1,6 +1,6 @@
 import React from "react";
-import { SparklineDataPoint } from "../visualViewModel";
-import { SparklineColumnSettings } from "../settings";
+import { SparklineDataPoint } from "../../visualViewModel";
+import { SparklineColumnSettings } from "../../settings";
 
 interface PieSparklineProps {
   dataPoints: SparklineDataPoint[];

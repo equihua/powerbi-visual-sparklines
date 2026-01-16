@@ -3,32 +3,22 @@ import { createRoot, Root } from "react-dom/client";
 import "./../style/visual.less";
 
 import powerbi from "powerbi-visuals-api";
-import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IViewport = powerbi.IViewport;
 
-import {
-  type SparklineColumnSettings,
-  VisualFormattingSettingsModel,
-} from "./settings";
 import { visualTransform } from "./visualTransform";
 import { TableViewModel } from "./visualViewModel";
 import { TableContainer } from "./components/TableContainer";
-import { generateHash } from "./utils/memoization";
+import { FormattingManager } from "./formatters/FormattingManager";
 
 export class Visual implements IVisual {
   private readonly target: HTMLElement;
   private readonly reactRoot: HTMLDivElement;
   private root: Root | null = null;
-  private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
-  private formattingSettings: VisualFormattingSettingsModel;
-  private formattingSettingsService: FormattingSettingsService;
-
-  private previousSparklineHash: string = "";
-  private previousViewModelHash: string = "";
+  private formattingManager: FormattingManager;
 
   constructor(options: VisualConstructorOptions) {
     this.target = options.element;
@@ -37,8 +27,7 @@ export class Visual implements IVisual {
     this.reactRoot.className = "sparkline-container";
     this.target.appendChild(this.reactRoot);
 
-    this.formattingSettingsService = new FormattingSettingsService();
-    this.formattingSettings = new VisualFormattingSettingsModel();
+    this.formattingManager = new FormattingManager();
   }
 
   public update(options: VisualUpdateOptions): void {
@@ -48,14 +37,6 @@ export class Visual implements IVisual {
       this.clearContainer();
       return;
     }
-
-    this.formattingSettings =
-      this.formattingSettingsService.populateFormattingSettingsModel(
-        VisualFormattingSettingsModel,
-        options.dataViews[0]
-      );
-
-    console.log("=== Formatting Settings ===", this.formattingSettings);
 
     const viewModel = visualTransform(options.dataViews);
 
@@ -67,44 +48,8 @@ export class Visual implements IVisual {
     console.log("=== ViewModel ===");
     console.table(viewModel.rows);
 
-    const firstRow = viewModel.rows[0];
-    const sparklineColumnNames: string[] = [];
-
-    Object.keys(firstRow).forEach((key) => {
-      const value = firstRow[key];
-      if (
-        value &&
-        typeof value === "object" &&
-        "Nombre" in value &&
-        "Axis" in value &&
-        "Values" in value
-      ) {
-        sparklineColumnNames.push(key);
-      }
-    });
-
-    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
-
-    const allColumns = Object.keys(firstRow);
-    this.formattingSettings.specificColumn.updateColumnList(allColumns);
-    this.formattingSettings.cellElements.updateColumnList(allColumns);
-
-    const newSparklineHash = generateHash({
-      columns: sparklineColumnNames.sort(),
-      settings: sparklineColumnNames.map((col) =>
-        this.formattingSettings.getSparklineSettings(col)
-      ),
-    });
-
-    if (newSparklineHash !== this.previousSparklineHash) {
-      this.sparklineSettings.clear();
-      sparklineColumnNames.forEach((columnName) => {
-        const settings =
-          this.formattingSettings.getSparklineSettings(columnName);
-        this.sparklineSettings.set(columnName, settings);
-      });
-      this.previousSparklineHash = newSparklineHash;
-    }
+    // FormattingManager detecta automáticamente columnas y extrae configuraciones
+    this.formattingManager.initializeSettings(options.dataViews[0], viewModel);
 
     this.renderTable(viewModel, options.viewport);
   }
@@ -124,16 +69,14 @@ export class Visual implements IVisual {
     this.root.render(
       React.createElement(TableContainer, {
         viewModel,
-        formattingSettings: this.formattingSettings,
-        sparklineSettings: this.sparklineSettings,
+        formattingSettings: this.formattingManager.getFormattingSettings(),
+        sparklineSettings: this.formattingManager.getSparklineSettingsMap(),
         viewport,
-      })
+      }),
     );
   }
 
   public getFormattingModel(): powerbi.visuals.FormattingModel {
-    return this.formattingSettingsService.buildFormattingModel(
-      this.formattingSettings
-    );
+    return this.formattingManager.getFormattingModel();
   }
 }
