@@ -1,0 +1,104 @@
+{
+  "cellElements": {
+    "displayName": "Elementos de celda",
+    "properties": {
+      "columnSelector": {
+        "type": {
+          "text": true
+        }
+      },
+      "backgroundColorToggle": {
+        "type": {
+          "bool": true
+        }
+      },
+      "backgroundMinColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "backgroundMaxColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "fontColorToggle": {
+        "type": {
+          "bool": true
+        }
+      },
+      "fontMinColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "fontMaxColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "iconsToggle": {
+        "type": {
+          "bool": true
+        }
+      },
+      "iconsMinColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "iconsMaxColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "webUrlToggle": {
+        "type": {
+          "bool": true
+        }
+      },
+      "webUrlMinColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "webUrlMaxColor": {
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

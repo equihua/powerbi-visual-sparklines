@@ -1,452 +1,335 @@
-import React, { useState, useMemo, memo } from "react";
+import React, { useState, useMemo, memo, useEffect } from "react";
 import { TableViewModel } from "../visualViewModel";
-import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
+import { SparklineColumnSettings } from "../settings";
+import { TotalsSettings } from "../settings/totals";
 import { TableHeader } from "./TableHeader";
 import { TableRow } from "./TableRow";
 import { areMapsEqual } from "../utils/memoization";
+import type {
+  ColumnHeadersSettings,
+  ValuesCard,
+  GridSettings,
+} from "../settings/index";
 
 interface TableProps {
   viewModel: TableViewModel;
-  textSize: number;
-  tableStyle: string;
-  showHorizontalLines: boolean;
-  horizontalLineColor: string;
-  horizontalLineWidth: number;
-  showVerticalLines: boolean;
-  verticalLineColor: string;
-  verticalLineWidth: number;
-  borderStyle: string;
-  borderColor: string;
-  borderWidth: number;
-  borderSection: "all" | "header" | "rows";
+  width: number;
+
+  columnHeadersSettings: ColumnHeadersSettings;
+  valuesSettings: ValuesCard;
+  totalsSettings: TotalsSettings;
+  gridSettings: GridSettings;
+
   rowSelection: boolean;
   rowSelectionColor: string;
   sortable: boolean;
-  freezeCategories: boolean;
   searchable: boolean;
   pagination: boolean;
   rowsPerPage: number;
-  fontFamily: string;
-  wordWrap: boolean;
-  textOverflow: "clip" | "ellipsis" | "wrap";
-  headerAlignment: "left" | "center" | "right";
-  headerPadding: number;
-  headerBold: boolean;
-  stickyHeader: boolean;
-  headerFontColor: string;
-  headerFontSize: number;
-  headerBackgroundColor: string;
-  rowHeight: number;
-  alternatingRowColor: string;
-  hoverBackgroundColor: string;
-  rowPadding: number;
-  categoryColumnAlignment: "left" | "center" | "right";
-  categoryCellAlignment: "left" | "center" | "right";
-  categoryCellPadding: number;
-  categoryCellFontColor: string;
-  categoryCellFontSize: number;
-  categoryCellBackgroundColor: string;
-  measureCellAlignment: "left" | "center" | "right";
-  measureCellPadding: number;
-  measureCellFontColor: string;
-  measureCellFontSize: number;
-  measureCellBackgroundColor: string;
-  decimalPlaces: number;
-  thousandsSeparator: boolean;
-  currencySymbol: string;
-  currencyPosition: "before" | "after";
-  negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
-  customNegativeColor: string;
+
   sparklineSettings: Map<string, SparklineColumnSettings>;
-  columnSettings: Map<string, ColumnConfigSettings>;
-  width: number;
 }
 
-/**
- * Función de comparación personalizada para React.memo
- * Evita re-renders innecesarios cuando solo cambian valores de formato menores
- */
 function arePropsEqual(prevProps: TableProps, nextProps: TableProps): boolean {
-  // Comparar datos principales (crítico)
   if (prevProps.viewModel !== nextProps.viewModel) return false;
   if (prevProps.width !== nextProps.width) return false;
-
-  // Comparar configuraciones funcionales críticas
   if (prevProps.pagination !== nextProps.pagination) return false;
   if (prevProps.rowsPerPage !== nextProps.rowsPerPage) return false;
   if (prevProps.searchable !== nextProps.searchable) return false;
   if (prevProps.sortable !== nextProps.sortable) return false;
   if (prevProps.rowSelection !== nextProps.rowSelection) return false;
 
-  // Comparar Maps (importante para sparklines y configuraciones de columna)
-  if (!areMapsEqual(prevProps.sparklineSettings, nextProps.sparklineSettings))
+  if (!areMapsEqual(prevProps.sparklineSettings, nextProps.sparklineSettings)) {
     return false;
-  if (!areMapsEqual(prevProps.columnSettings, nextProps.columnSettings))
-    return false;
-
-  // Para props de estilo, solo comparar si realmente cambiaron
-  // (esto es más rápido que re-renderizar todo el componente)
-  const styleProps: (keyof TableProps)[] = [
-    "textSize",
-    "tableStyle",
-    "fontFamily",
-    "borderStyle",
-    "borderColor",
-    "borderWidth",
-    "borderSection",
-    "rowHeight",
-    "alternatingRowColor",
-    "hoverBackgroundColor",
-    "rowPadding",
-    "showHorizontalLines",
-    "horizontalLineColor",
-    "horizontalLineWidth",
-    "showVerticalLines",
-    "verticalLineColor",
-    "verticalLineWidth",
-    "rowSelectionColor",
-    "headerAlignment",
-    "headerPadding",
-    "headerBold",
-    "headerFontColor",
-    "headerFontSize",
-    "headerBackgroundColor",
-    "categoryCellAlignment",
-    "categoryCellPadding",
-    "categoryCellFontColor",
-    "categoryCellFontSize",
-    "categoryCellBackgroundColor",
-    "measureCellAlignment",
-    "measureCellPadding",
-    "measureCellFontColor",
-    "measureCellFontSize",
-    "measureCellBackgroundColor",
-    "decimalPlaces",
-    "thousandsSeparator",
-    "currencySymbol",
-    "currencyPosition",
-    "negativeNumberFormat",
-    "customNegativeColor",
-    "wordWrap",
-    "textOverflow",
-    "freezeCategories",
-    "stickyHeader",
-    "categoryColumnAlignment",
-  ];
-
-  for (const prop of styleProps) {
-    if (prevProps[prop] !== nextProps[prop]) return false;
   }
 
   return true;
 }
 
-const TableComponent: React.FC<TableProps> = ({
-  viewModel,
-  textSize,
-  tableStyle,
-  showHorizontalLines,
-  horizontalLineColor,
-  horizontalLineWidth,
-  showVerticalLines,
-  verticalLineColor,
-  verticalLineWidth,
-  borderStyle,
-  borderColor,
-  borderWidth,
-  borderSection,
-  rowSelection,
-  rowSelectionColor,
-  sortable,
-  freezeCategories,
-  searchable,
-  pagination,
-  rowsPerPage,
-  fontFamily,
-  wordWrap,
-  textOverflow,
-  headerAlignment,
-  headerPadding,
-  headerBold,
-  stickyHeader,
-  headerFontColor,
-  headerFontSize,
-  headerBackgroundColor,
-  rowHeight,
-  alternatingRowColor,
-  hoverBackgroundColor,
-  rowPadding,
-  categoryColumnAlignment,
-  categoryCellAlignment,
-  categoryCellPadding,
-  categoryCellFontColor,
-  categoryCellFontSize,
-  categoryCellBackgroundColor,
-  measureCellAlignment,
-  measureCellPadding,
-  measureCellFontColor,
-  measureCellFontSize,
-  measureCellBackgroundColor,
-  decimalPlaces,
-  thousandsSeparator,
-  currencySymbol,
-  currencyPosition,
-  negativeNumberFormat,
-  customNegativeColor,
-  sparklineSettings,
-  columnSettings,
-  width,
-}) => {
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
-  const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-
-  if (!viewModel || !viewModel.rows || viewModel.rows.length === 0) {
-    return <div>No data available</div>;
-  }
-
-  // Memoizar análisis de columnas (solo recalcular si cambian las filas)
-  const columnAnalysis = useMemo(() => {
-    const firstRow = viewModel.rows[0];
-    const columnNames: string[] = [];
-    const sparklineColumnNames: string[] = [];
-
-    Object.keys(firstRow).forEach((key) => {
-      const value = firstRow[key];
-      if (
-        value &&
-        typeof value === "object" &&
-        "Nombre" in value &&
-        "Axis" in value &&
-        "Values" in value
-      ) {
-        sparklineColumnNames.push(key);
-      } else {
-        columnNames.push(key);
-      }
-    });
-
-    return { columnNames, sparklineColumnNames };
-  }, [viewModel.rows]);
-
-  const { columnNames, sparklineColumnNames } = columnAnalysis;
-
-  const handleSort = (columnName: string) => {
-    if (!sortable) return;
-
-    if (sortColumn === columnName) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(columnName);
-      setSortDirection("asc");
-    }
-  };
-
-  const handleRowClick = (index: number) => {
-    if (!rowSelection) return;
-    setSelectedRowIndex(selectedRowIndex === index ? null : index);
-  };
-
-  // Memoizar filtrado (evitar recálculo en cada render)
-  const filteredRows = useMemo(() => {
-    if (!searchable || !searchQuery.trim()) {
-      return viewModel.rows;
-    }
-
-    const q = searchQuery.toLowerCase();
-    return viewModel.rows.filter((row) =>
-      columnNames.some((cn) => String(row[cn]).toLowerCase().includes(q))
+export const Table = memo<TableProps>(
+  ({
+    viewModel,
+    width,
+    columnHeadersSettings,
+    valuesSettings,
+    totalsSettings,
+    gridSettings,
+    rowSelection,
+    rowSelectionColor,
+    sortable,
+    searchable,
+    pagination,
+    rowsPerPage,
+    sparklineSettings,
+  }) => {
+    const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(
+      null
     );
-  }, [viewModel.rows, searchable, searchQuery, columnNames]);
+    const [sortColumn, setSortColumn] = useState<string | null>(null);
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
 
-  // Memoizar ordenamiento (operación costosa)
-  const sortedRows = useMemo(() => {
-    if (!sortable || !sortColumn) {
-      return filteredRows;
-    }
+    useEffect(() => {
+      if (!rowSelection) {
+        setSelectedRowIndex(null);
+      }
+    }, [rowSelection]);
 
-    return [...filteredRows].sort((a, b) => {
-      const aValue = a[sortColumn];
-      const bValue = b[sortColumn];
+    const columns = useMemo(() => {
+      if (!viewModel.rows || viewModel.rows.length === 0) return [];
+      return Object.keys(viewModel.rows[0]);
+    }, [viewModel.rows]);
 
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return 1;
-      if (bValue == null) return -1;
+    const filteredRows = useMemo(() => {
+      if (!searchable || !searchTerm) return viewModel.rows;
 
-      let comparison = 0;
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        comparison = aValue - bValue;
-      } else {
-        comparison = String(aValue).localeCompare(String(bValue));
+      return viewModel.rows.filter((row) => {
+        const rowValues = Object.keys(row).map((key) => row[key]);
+        return rowValues.some((value) => {
+          if (value === null || value === undefined) return false;
+          if (typeof value === "object") return false;
+          return String(value).toLowerCase().includes(searchTerm.toLowerCase());
+        });
+      });
+    }, [viewModel.rows, searchTerm, searchable]);
+
+    const sortedRows = useMemo(() => {
+      if (!sortColumn) return filteredRows;
+
+      return [...filteredRows].sort((a, b) => {
+        const aVal = a[sortColumn];
+        const bVal = b[sortColumn];
+
+        if (aVal === null || aVal === undefined) return 1;
+        if (bVal === null || bVal === undefined) return -1;
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        const aStr = String(aVal);
+        const bStr = String(bVal);
+        return sortDirection === "asc"
+          ? aStr.localeCompare(bStr)
+          : bStr.localeCompare(aStr);
+      });
+    }, [filteredRows, sortColumn, sortDirection]);
+
+    const paginatedRows = useMemo(() => {
+      if (!pagination) return sortedRows;
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      return sortedRows.slice(startIndex, startIndex + rowsPerPage);
+    }, [sortedRows, pagination, currentPage, rowsPerPage]);
+
+    const totalPages = Math.ceil(sortedRows.length / rowsPerPage);
+
+    const shouldApplyBorderToTotals = (
+      position: "Top" | "Bottom" | "Left" | "Right"
+    ): boolean => {
+      const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+      if (borderSection !== "all" && borderSection !== "totalsSection") {
+        return false;
       }
 
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-  }, [filteredRows, sortable, sortColumn, sortDirection]);
+      const borderKey =
+        `border${position}` as keyof typeof gridSettings.borderCard;
+      const borderSetting = gridSettings.borderCard[borderKey] as any;
+      return borderSetting?.value === true;
+    };
 
-  // Memoizar paginación
-  const pageRows = useMemo(() => {
-    if (!pagination) {
-      return sortedRows;
+    const handleSort = (column: string) => {
+      if (!sortable) return;
+      if (sortColumn === column) {
+        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      } else {
+        setSortColumn(column);
+        setSortDirection("asc");
+      }
+    };
+
+    const handleRowClick = (index: number) => {
+      if (!rowSelection) return;
+      setSelectedRowIndex(selectedRowIndex === index ? null : index);
+    };
+
+    const gridStyles: React.CSSProperties = {
+      borderCollapse: "collapse",
+      width: "100%",
+      fontFamily: valuesSettings.font.fontFamily.value as string,
+    };
+
+    if (
+      gridSettings.gridlinesCard.showHorizontal.value ||
+      gridSettings.gridlinesCard.showVertical.value
+    ) {
+      gridStyles.borderSpacing = "0";
     }
 
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    return sortedRows.slice(startIndex, endIndex);
-  }, [sortedRows, pagination, page, rowsPerPage]);
+    const totalsRow = useMemo(() => {
+      if (
+        !totalsSettings.show.value ||
+        !viewModel.rows ||
+        viewModel.rows.length === 0
+      ) {
+        return null;
+      }
 
-  const tableClassName = `sparkline-table ${
-    tableStyle === "striped" ? "striped" : ""
-  }`;
+      const totals: { [key: string]: any } = {};
+      columns.forEach((column) => {
+        const values = viewModel.rows.map((row) => row[column]);
+        const numericValues = values.filter((v) => typeof v === "number");
 
-  const commonBorder = `${borderWidth}px ${borderStyle} ${borderColor}`;
-  const tableBorderStyles =
-    borderSection === "all"
-      ? { border: commonBorder }
-      : borderSection === "header"
-      ? {}
-      : {}; // rows handled in row styles
+        if (numericValues.length > 0) {
+          totals[column] = numericValues.reduce((sum, val) => sum + val, 0);
+        } else {
+          totals[column] = "";
+        }
+      });
 
-  return (
-    <div style={{ width: `${width}px`, fontFamily }}>
-      {searchable && (
-        <div style={{ marginBottom: 8 }}>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            style={{ width: "100%", padding: 6 }}
-          />
-        </div>
-      )}
-      <table
-        className={tableClassName}
-        style={{
-          fontSize: `${textSize}px`,
-          width: `100%`,
-          borderCollapse: "collapse",
-          ...tableBorderStyles,
-        }}
+      if (columns.length > 0) {
+        totals[columns[0]] = totalsSettings.label.value;
+      }
+
+      return totals;
+    }, [
+      viewModel.rows,
+      columns,
+      totalsSettings.show.value,
+      totalsSettings.label.value,
+    ]);
+
+    const totalsStyle = totalsSettings.getStyle();
+
+    return (
+      <div
+        className="table-wrapper"
+        style={{ width: `${width}px`, overflow: "auto" }}
       >
-        <TableHeader
-          columnNames={columnNames}
-          sparklineColumnNames={sparklineColumnNames}
-          sortable={sortable}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-          alignment={headerAlignment}
-          padding={headerPadding}
-          bold={headerBold}
-          sticky={stickyHeader}
-          showVerticalLines={showVerticalLines}
-          verticalLineColor={verticalLineColor}
-          verticalLineWidth={verticalLineWidth}
-          borderBottom={
-            borderSection === "header" || borderSection === "all"
-              ? commonBorder
-              : undefined
-          }
-          fontColor={headerFontColor}
-          fontSize={headerFontSize}
-          backgroundColor={headerBackgroundColor}
-          columnSettings={columnSettings}
-        />
-        <tbody>
-          {pageRows.map((rowData, index) => (
-            <TableRow
-              key={index}
-              rowData={rowData}
-              columnNames={columnNames}
-              sparklineColumnNames={sparklineColumnNames}
-              index={index}
-              tableStyle={tableStyle}
-              showHorizontalLines={showHorizontalLines}
-              horizontalLineColor={horizontalLineColor}
-              horizontalLineWidth={horizontalLineWidth}
-              showVerticalLines={showVerticalLines}
-              verticalLineColor={verticalLineColor}
-              verticalLineWidth={verticalLineWidth}
-              isSelected={rowSelection && selectedRowIndex === index}
-              onRowClick={() => handleRowClick(index)}
-              rowSelectionColor={rowSelectionColor}
-              freezeCategories={freezeCategories}
-              rowHeight={rowHeight}
-              alternatingRowColor={alternatingRowColor}
-              hoverBackgroundColor={hoverBackgroundColor}
-              rowPadding={rowPadding}
-              categoryCellAlignment={categoryCellAlignment}
-              categoryCellPadding={categoryCellPadding}
-              categoryCellFontColor={categoryCellFontColor}
-              categoryCellFontSize={categoryCellFontSize}
-              categoryCellBackgroundColor={categoryCellBackgroundColor}
-              measureCellAlignment={measureCellAlignment}
-              measureCellPadding={measureCellPadding}
-              measureCellFontColor={measureCellFontColor}
-              measureCellFontSize={measureCellFontSize}
-              measureCellBackgroundColor={measureCellBackgroundColor}
-              wordWrap={wordWrap}
-              textOverflow={textOverflow}
-              borderForRows={
-                borderSection === "rows" || borderSection === "all"
-                  ? commonBorder
-                  : undefined
-              }
-              decimalPlaces={decimalPlaces}
-              thousandsSeparator={thousandsSeparator}
-              currencySymbol={currencySymbol}
-              currencyPosition={currencyPosition}
-              negativeNumberFormat={negativeNumberFormat}
-              customNegativeColor={customNegativeColor}
-              sparklineSettings={sparklineSettings}
-              columnSettings={columnSettings}
+        {searchable && (
+          <div className="search-bar" style={{ padding: "10px" }}>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
             />
-          ))}
-        </tbody>
-      </table>
-      {pagination && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: 8,
-          }}
-        >
-          <span>
-            Página {page} de{" "}
-            {Math.max(1, Math.ceil(sortedRows.length / rowsPerPage))}
-          </span>
-          <div>
+          </div>
+        )}
+
+        <table style={gridStyles}>
+          <TableHeader
+            columns={columns}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            sortable={sortable}
+            columnHeadersSettings={columnHeadersSettings}
+            gridSettings={gridSettings}
+          />
+          <tbody>
+            {paginatedRows.map((row, index) => (
+              <TableRow
+                key={index}
+                row={row}
+                columns={columns}
+                index={index}
+                isSelected={selectedRowIndex === index}
+                onClick={() => handleRowClick(index)}
+                rowSelection={rowSelection}
+                rowSelectionColor={rowSelectionColor}
+                valuesSettings={valuesSettings}
+                gridSettings={gridSettings}
+                sparklineSettings={sparklineSettings}
+              />
+            ))}
+            {totalsRow && (
+              <tr
+                style={{
+                  fontFamily: totalsStyle.fontFamily,
+                  fontSize: `${totalsStyle.fontSize}pt`,
+                  fontWeight: totalsStyle.bold ? "bold" : "normal",
+                  fontStyle: totalsStyle.italic ? "italic" : "normal",
+                  textDecoration: totalsStyle.underline ? "underline" : "none",
+                  color: totalsStyle.textColor,
+                  backgroundColor: totalsStyle.backgroundColor,
+                }}
+              >
+                {columns.map((column, colIndex) => {
+                  const cellStyle: React.CSSProperties = {
+                    padding: "8px",
+                    borderTop: gridSettings.gridlinesCard.showHorizontal.value
+                      ? `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value}`
+                      : "none",
+                    borderLeft:
+                      colIndex > 0 &&
+                      gridSettings.gridlinesCard.showVertical.value
+                        ? `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value}`
+                        : "none",
+                  };
+
+                  if (shouldApplyBorderToTotals("Top")) {
+                    cellStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Bottom")) {
+                    cellStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Left")) {
+                    cellStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+                  if (shouldApplyBorderToTotals("Right")) {
+                    cellStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+                  }
+
+                  return (
+                    <td key={colIndex} style={cellStyle}>
+                      {typeof totalsRow[column] === "number"
+                        ? totalsRow[column].toLocaleString()
+                        : totalsRow[column]}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {pagination && totalPages > 1 && (
+          <div
+            className="pagination"
+            style={{ padding: "10px", textAlign: "center" }}
+          >
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              style={{ margin: "0 5px", padding: "5px 10px" }}
             >
-              Anterior
+              Previous
             </button>
+            <span style={{ margin: "0 10px" }}>
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               onClick={() =>
-                setPage((p) =>
-                  Math.min(Math.ceil(sortedRows.length / rowsPerPage), p + 1)
-                )
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
-              disabled={page >= Math.ceil(sortedRows.length / rowsPerPage)}
-              style={{ marginLeft: 8 }}
+              disabled={currentPage === totalPages}
+              style={{ margin: "0 5px", padding: "5px 10px" }}
             >
-              Siguiente
+              Next
             </button>
           </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Exportar componente memoizado
-export const Table = memo(TableComponent, arePropsEqual);
+        )}
+      </div>
+    );
+  },
+  arePropsEqual
+);

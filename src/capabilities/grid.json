@@ -1,15 +1,18 @@
 {
   "grid": {
-    "displayName": "Cuadrícula y bordes",
+    "displayName": "Grid",
     "properties": {
-      "showHorizontalLines": {
-        "displayName": "Líneas horizontales",
+      "showHorizontal": {
         "type": {
           "bool": true
         }
       },
-      "horizontalLineColor": {
-        "displayName": "Color líneas horizontales",
+      "gridHorizontalWeight": {
+        "type": {
+          "numeric": true
+        }
+      },
+      "gridHorizontalColor": {
         "type": {
           "fill": {
             "solid": {
@@ -18,36 +21,26 @@
           }
         }
       },
-      "horizontalLineWidth": {
-        "displayName": "Ancho líneas horizontales",
-        "type": {
-          "numeric": true
-        }
-      },
-      "showVerticalLines": {
-        "displayName": "Líneas verticales",
+      "showVertical": {
         "type": {
           "bool": true
         }
       },
-      "verticalLineColor": {
-        "displayName": "Color líneas verticales",
+      "gridVerticalWeight": {
+        "type": {
+          "numeric": true
+        }
+      },
+      "gridVerticalColor": {
         "type": {
           "fill": {
             "solid": {
               "color": true
             }
           }
-        }
-      },
-      "verticalLineWidth": {
-        "displayName": "Ancho líneas verticales",
-        "type": {
-          "numeric": true
         }
       },
       "borderSection": {
-        "displayName": "Aplicar bordes a",
         "type": {
           "enumeration": [
             {
@@ -55,42 +48,41 @@
               "displayName": "Todas"
             },
             {
-              "value": "header",
-              "displayName": "Encabezado"
+              "value": "columnHeader",
+              "displayName": "Encabezado de columna"
             },
             {
-              "value": "rows",
-              "displayName": "Filas"
+              "value": "valuesSection",
+              "displayName": "Sección de valores"
+            },
+            {
+              "value": "totalsSection",
+              "displayName": "Sección de totales"
             }
           ]
         }
       },
       "borderTop": {
-        "displayName": "Borde superior",
         "type": {
           "bool": true
         }
       },
       "borderBottom": {
-        "displayName": "Borde inferior",
         "type": {
           "bool": true
         }
       },
       "borderLeft": {
-        "displayName": "Borde izquierdo",
         "type": {
           "bool": true
         }
       },
       "borderRight": {
-        "displayName": "Borde derecho",
         "type": {
           "bool": true
         }
       },
       "borderColor": {
-        "displayName": "Color de borde",
         "type": {
           "fill": {
             "solid": {
@@ -99,59 +91,17 @@
           }
         }
       },
-      "borderWidth": {
-        "displayName": "Ancho de borde",
+      "borderWeight": {
         "type": {
           "numeric": true
         }
       },
-      "borderStyle": {
-        "displayName": "Estilo de borde",
-        "type": {
-          "enumeration": [
-            {
-              "value": "solid",
-              "displayName": "Sólido"
-            },
-            {
-              "value": "dashed",
-              "displayName": "Guionado"
-            },
-            {
-              "value": "dotted",
-              "displayName": "Punteado"
-            },
-            {
-              "value": "double",
-              "displayName": "Doble"
-            }
-          ]
-        }
-      },
-      "borderRadius": {
-        "displayName": "Radio de esquina",
+      "rowPadding": {
         "type": {
           "numeric": true
         }
       },
-      "shadowBorder": {
-        "displayName": "Sombra de borde",
-        "type": {
-          "bool": true
-        }
-      },
-      "shadowColor": {
-        "displayName": "Color de sombra",
-        "type": {
-          "fill": {
-            "solid": {
-              "color": true
-            }
-          }
-        }
-      },
-      "rowSpacing": {
-        "displayName": "Espaciado interno de filas",
+      "globalFontSize": {
         "type": {
           "numeric": true
         }

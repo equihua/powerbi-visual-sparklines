@@ -1,82 +1,128 @@
 {
-  "typography": {
-    "displayName": "Tipografía",
-    "properties": {
-      "fontFamily": {
-        "displayName": "Familia de fuente",
-        "type": {
-          "enumeration": [
-            {
-              "value": "Arial, sans-serif",
-              "displayName": "Arial"
+    "typography": {
+        "displayName": "Tipografía",
+        "properties": {
+            "applyTo": {
+                "displayName": "Aplicar a",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "all",
+                            "displayName": "Toda la tabla"
+                        },
+                        {
+                            "value": "column",
+                            "displayName": "Columna específica"
+                        }
+                    ]
+                }
             },
-            {
-              "value": "Verdana, sans-serif",
-              "displayName": "Verdana"
+            "targetColumn": {
+                "displayName": "Columna objetivo",
+                "type": {
+                    "enumeration": []
+                }
             },
-            {
-              "value": "Georgia, serif",
-              "displayName": "Georgia"
+            "fontFamily": {
+                "displayName": "Familia de fuente",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "Arial, sans-serif",
+                            "displayName": "Arial"
+                        },
+                        {
+                            "value": "Verdana, sans-serif",
+                            "displayName": "Verdana"
+                        },
+                        {
+                            "value": "Georgia, serif",
+                            "displayName": "Georgia"
+                        },
+                        {
+                            "value": "'Courier New', monospace",
+                            "displayName": "Courier New"
+                        },
+                        {
+                            "value": "'Segoe UI', sans-serif",
+                            "displayName": "Segoe UI"
+                        },
+                        {
+                            "value": "Tahoma, sans-serif",
+                            "displayName": "Tahoma"
+                        },
+                        {
+                            "value": "'Times New Roman', serif",
+                            "displayName": "Times New Roman"
+                        }
+                    ]
+                }
             },
-            {
-              "value": "'Courier New', monospace",
-              "displayName": "Courier New"
+            "fontSize": {
+                "displayName": "Tamaño",
+                "type": {
+                    "numeric": true
+                }
             },
-            {
-              "value": "'Segoe UI', sans-serif",
-              "displayName": "Segoe UI"
+            "bold": {
+                "displayName": "Negrita",
+                "type": {
+                    "bool": true
+                }
             },
-            {
-              "value": "Tahoma, sans-serif",
-              "displayName": "Tahoma"
+            "italic": {
+                "displayName": "Cursiva",
+                "type": {
+                    "bool": true
+                }
             },
-            {
-              "value": "'Times New Roman', serif",
-              "displayName": "Times New Roman"
+            "underline": {
+                "displayName": "Subrayado",
+                "type": {
+                    "bool": true
+                }
+            },
+            "fontColor": {
+                "displayName": "Color de texto",
+                "type": {
+                    "fill": {
+                        "solid": {
+                            "color": true
+                        }
+                    }
+                }
+            },
+            "alignment": {
+                "displayName": "Alineación",
+                "type": {
+                    "enumeration": [
+                        {
+                            "value": "left",
+                            "displayName": "Izquierda"
+                        },
+                        {
+                            "value": "center",
+                            "displayName": "Centro"
+                        },
+                        {
+                            "value": "right",
+                            "displayName": "Derecha"
+                        }
+                    ]
+                }
+            },
+            "lineHeight": {
+                "displayName": "Alto de línea",
+                "type": {
+                    "numeric": true
+                }
+            },
+            "letterSpacing": {
+                "displayName": "Espaciado entre letras",
+                "type": {
+                    "numeric": true
+                }
             }
-          ]
         }
-      },
-      "fontSize": {
-        "displayName": "Tamaño de fuente base",
-        "type": {
-          "numeric": true
-        }
-      },
-      "fontColor": {
-        "displayName": "Color de fuente base",
-        "type": {
-          "fill": {
-            "solid": {
-              "color": true
-            }
-          }
-        }
-      },
-      "lineHeight": {
-        "displayName": "Alto de línea",
-        "type": {
-          "numeric": true
-        }
-      },
-      "letterSpacing": {
-        "displayName": "Espaciado entre letras",
-        "type": {
-          "numeric": true
-        }
-      },
-      "bold": {
-        "displayName": "Negrita global",
-        "type": {
-          "bool": true
-        }
-      },
-      "italic": {
-        "displayName": "Cursiva global",
-        "type": {
-          "bool": true
-        }
-      }
     }
-  }
 }

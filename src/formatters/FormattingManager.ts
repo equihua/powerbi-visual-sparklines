@@ -219,10 +219,21 @@ export class FormattingManager {
   public getTableFormattingProps(): TableFormattingProps {
     const defaultColumnSettings = this.formattingSettings.getColumnSettings("");
 
+    const typography: any = this.formattingSettings.typography;
+    const font = typography?.font || typography;
+    const alignment =
+      (typography?.alignment?.value as "left" | "center" | "right") || "left";
+    const fontColor =
+      typography?.fontColor?.value?.value ||
+      typography?.fontColor?.value ||
+      "#000000";
+    const fontSize = font?.fontSize?.value || typography?.fontSize?.value || 11;
+    const bold = font?.bold?.value || typography?.bold?.value || false;
+
     return {
       // General
-      textSize: this.formattingSettings.general.textSize.value,
-      tableStyle: this.formattingSettings.general.tableStyle.value
+      textSize: this.formattingSettings.general.styleGroup.textSize.value,
+      tableStyle: this.formattingSettings.general.styleGroup.tableStyle.value
         .value as string,
 
       // Grid - Líneas horizontales
@@ -256,24 +267,22 @@ export class FormattingManager {
 
       // Interactividad
       rowSelection:
-        this.formattingSettings.interactivity.selectionGroup.rowSelection.value,
+        this.formattingSettings.general.selectionGroup.rowSelection.value,
       rowSelectionColor:
-        this.formattingSettings.interactivity.selectionGroup.rowSelectionColor
-          .value.value,
-      sortable:
-        this.formattingSettings.interactivity.featuresGroup.sortable.value,
-      freezeCategories:
-        this.formattingSettings.interactivity.navigationGroup.freezeCategories
+        this.formattingSettings.general.selectionGroup.rowSelectionColor.value
           .value,
+      sortable: this.formattingSettings.general.featuresGroup.sortable.value,
+      freezeCategories:
+        this.formattingSettings.general.navigationGroup.freezeCategories.value,
       searchable:
-        this.formattingSettings.interactivity.featuresGroup.searchable.value,
+        this.formattingSettings.general.featuresGroup.searchable.value,
       pagination:
-        this.formattingSettings.interactivity.navigationGroup.pagination.value,
+        this.formattingSettings.general.navigationGroup.pagination.value,
       rowsPerPage:
-        this.formattingSettings.interactivity.navigationGroup.rowsPerPage.value,
+        this.formattingSettings.general.navigationGroup.rowsPerPage.value,
 
       // Tipografía
-      fontFamily: this.formattingSettings.typography.fontFamily.value
+      fontFamily: this.formattingSettings.general.typographyGroup.value
         .value as string,
 
       // Filas
@@ -289,37 +298,25 @@ export class FormattingManager {
         this.formattingSettings.rows.rowDimensionsGroup.rowPadding.value,
 
       // Encabezados (por defecto)
-      headerAlignment: defaultColumnSettings.headerAlignment as
-        | "left"
-        | "center"
-        | "right",
+      headerAlignment: alignment,
       headerPadding: defaultColumnSettings.headerPadding,
-      headerBold: defaultColumnSettings.headerBold,
-      headerFontColor: defaultColumnSettings.headerFontColor,
-      headerFontSize: defaultColumnSettings.headerFontSize,
+      headerBold: bold,
+      headerFontColor: fontColor,
+      headerFontSize: fontSize,
       headerBackgroundColor: defaultColumnSettings.headerBackgroundColor,
 
       // Celdas (por defecto)
-      categoryColumnAlignment: defaultColumnSettings.cellAlignment as
-        | "left"
-        | "center"
-        | "right",
-      categoryCellAlignment: defaultColumnSettings.cellAlignment as
-        | "left"
-        | "center"
-        | "right",
+      categoryColumnAlignment: alignment,
+      categoryCellAlignment: alignment,
       categoryCellPadding: defaultColumnSettings.cellPadding,
-      categoryCellFontColor: defaultColumnSettings.cellFontColor,
-      categoryCellFontSize: defaultColumnSettings.cellFontSize,
+      categoryCellFontColor: fontColor,
+      categoryCellFontSize: fontSize,
       categoryCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
 
-      measureCellAlignment: defaultColumnSettings.cellAlignment as
-        | "left"
-        | "center"
-        | "right",
+      measureCellAlignment: alignment,
       measureCellPadding: defaultColumnSettings.cellPadding,
-      measureCellFontColor: defaultColumnSettings.cellFontColor,
-      measureCellFontSize: defaultColumnSettings.cellFontSize,
+      measureCellFontColor: fontColor,
+      measureCellFontSize: fontSize,
       measureCellBackgroundColor: defaultColumnSettings.cellBackgroundColor,
 
       // Formato de números
@@ -392,15 +389,8 @@ export class FormattingManager {
     return (
       this.columnSettings.get(columnName) ||
       this.formattingSettings.getColumnSettings("") || {
-        headerFontColor: "#000000",
-        headerFontSize: 12,
-        headerAlignment: "center",
-        headerBold: true,
         headerBackgroundColor: "#F5F5F5",
         headerPadding: 8,
-        cellFontColor: "#000000",
-        cellFontSize: 11,
-        cellAlignment: "left",
         cellBackgroundColor: "#FFFFFF",
         cellPadding: 6,
         decimalPlaces: 2,

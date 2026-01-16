@@ -1,0 +1,96 @@
+{
+  "values": {
+    "displayName": "Valores",
+    "properties": {
+      "fontFamily": {
+        "displayName": "Familia de fuente",
+        "type": {
+          "enumeration": [
+            {
+              "value": "Arial, sans-serif",
+              "displayName": "Arial"
+            },
+            {
+              "value": "Verdana, sans-serif",
+              "displayName": "Verdana"
+            },
+            {
+              "value": "Georgia, serif",
+              "displayName": "Georgia"
+            },
+            {
+              "value": "'Courier New', monospace",
+              "displayName": "Courier New"
+            },
+            {
+              "value": "'Segoe UI', sans-serif",
+              "displayName": "Segoe UI"
+            },
+            {
+              "value": "Tahoma, sans-serif",
+              "displayName": "Tahoma"
+            },
+            {
+              "value": "'Times New Roman', serif",
+              "displayName": "Times New Roman"
+            }
+          ]
+        }
+      },
+      "fontSize": {
+        "displayName": "Tamaño",
+        "type": {
+          "numeric": true
+        }
+      },
+      "bold": {
+        "displayName": "Negrita",
+        "type": {
+          "bool": true
+        }
+      },
+      "italic": {
+        "displayName": "Cursiva",
+        "type": {
+          "bool": true
+        }
+      },
+      "underline": {
+        "displayName": "Subrayado",
+        "type": {
+          "bool": true
+        }
+      },
+      "textColor": {
+        "displayName": "Color del texto",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "backgroundColor": {
+        "displayName": "Color de fondo",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      },
+      "alternateTextColor": {
+        "displayName": "Color del texto alternativo",
+        "type": {
+          "fill": {
+            "solid": {
+              "color": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

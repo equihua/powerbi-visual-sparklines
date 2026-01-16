@@ -36,20 +36,33 @@ export const SPARKLINE_CHART_TYPE_OPTIONS = [
  * Estilos de tabla disponibles
  */
 export enum TableStyle {
+  Minimal = "minimal",
   Default = "default",
-  Striped = "striped",
-  Bordered = "bordered",
-  Hover = "hover",
+  None = "none",
+  BoldHeader = "boldHeader",
+  AlternatingRows = "alternatingRows",
+  HighlightRows = "highlightRows",
+  HighlightRowsBoldHeader = "highlightRowsBoldHeader",
+  Dispersed = "dispersed",
+  Compressed = "compressed",
 }
 
 /**
  * Opciones de estilos de tabla para dropdowns
  */
 export const TABLE_STYLE_OPTIONS = [
-  { value: TableStyle.Default, displayName: "Predeterminado" },
-  { value: TableStyle.Striped, displayName: "A rayas" },
-  { value: TableStyle.Bordered, displayName: "Con bordes" },
-  { value: TableStyle.Hover, displayName: "Al pasar el ratón" },
+  { value: TableStyle.Default, displayName: "Valor predeterminado" },
+  { value: TableStyle.None, displayName: "Ninguno" },
+  { value: TableStyle.Minimal, displayName: "Mínimo" },
+  { value: TableStyle.BoldHeader, displayName: "Encabezado en negrita" },
+  { value: TableStyle.AlternatingRows, displayName: "Filas alternas" },
+  { value: TableStyle.HighlightRows, displayName: "Filas llamativas" },
+  {
+    value: TableStyle.HighlightRowsBoldHeader,
+    displayName: "Filas llamativas del encabezado en negrita",
+  },
+  { value: TableStyle.Dispersed, displayName: "Disperso" },
+  { value: TableStyle.Compressed, displayName: "Comprimido" },
 ] as const;
 
 /**
@@ -121,8 +134,9 @@ export const BORDER_STYLE_OPTIONS = [
  */
 export enum BorderSection {
   All = "all",
-  Header = "header",
-  Rows = "rows",
+  ColumnHeader = "columnHeader",
+  ValuesSection = "valuesSection",
+  TotalsSection = "totalsSection",
 }
 
 /**
@@ -130,8 +144,9 @@ export enum BorderSection {
  */
 export const BORDER_SECTION_OPTIONS = [
   { value: BorderSection.All, displayName: "Todas" },
-  { value: BorderSection.Header, displayName: "Encabezado" },
-  { value: BorderSection.Rows, displayName: "Filas" },
+  { value: BorderSection.ColumnHeader, displayName: "Encabezado de columna" },
+  { value: BorderSection.ValuesSection, displayName: "Sección de valores" },
+  { value: BorderSection.TotalsSection, displayName: "Sección de totales" },
 ] as const;
 
 /**
@@ -190,6 +205,10 @@ export const TYPOGRAPHY_DEFAULTS = {
   letterSpacing: 0,
   bold: false,
   italic: false,
+  underline: false,
+  alignment: TextAlignment.Left,
+  applyTo: "all" as const,
+  targetColumn: "",
 } as const;
 
 // ============================================================================
@@ -290,6 +309,98 @@ export const GRID_DEFAULTS = {
 
   // Espaciado
   rowSpacing: 6,
+} as const;
+
+// ============================================================================
+// VALORES PREDETERMINADOS - VALUES
+// ============================================================================
+
+export const VALUES_DEFAULTS = {
+  fontFamily: FontFamily.Arial,
+  fontSize: 11,
+  bold: false,
+  italic: false,
+  underline: false,
+  textColor: DEFAULT_COLORS.primaryText,
+  backgroundColor: DEFAULT_COLORS.white,
+  alternateTextColor: DEFAULT_COLORS.primaryText,
+  alternateBackgroundColor: DEFAULT_COLORS.alternatingRow,
+} as const;
+
+// ============================================================================
+// VALORES PREDETERMINADOS - COLUMN HEADERS
+// ============================================================================
+
+export const COLUMN_HEADERS_DEFAULTS = {
+  fontFamily: FontFamily.SegoeUI,
+  fontSize: 12,
+  bold: true,
+  italic: false,
+  underline: false,
+  textColor: DEFAULT_COLORS.primaryText,
+  backgroundColor: DEFAULT_COLORS.lightGray,
+  alignment: TextAlignment.Center,
+  wrapText: false,
+  autoSizeWidth: false,
+  resizeBehavior: "fitToContent",
+} as const;
+
+// ============================================================================
+// VALORES PREDETERMINADOS - TOTALS
+// ============================================================================
+
+export const TOTALS_DEFAULTS = {
+  show: false,
+  label: "Total",
+  fontFamily: FontFamily.SegoeUI,
+  fontSize: 12,
+  bold: true,
+  italic: false,
+  underline: false,
+  textColor: DEFAULT_COLORS.primaryText,
+  backgroundColor: DEFAULT_COLORS.lightGray,
+} as const;
+
+// ============================================================================
+// VALORES PREDETERMINADOS - SPECIFIC COLUMN
+// ============================================================================
+
+export const SPECIFIC_COLUMN_DEFAULTS = {
+  columnSelector: "",
+  applyToHeader: false,
+  applyToTotal: false,
+  applyToValues: true,
+  textColor: DEFAULT_COLORS.primaryText,
+  backgroundColor: DEFAULT_COLORS.white,
+  alignment: TextAlignment.Left,
+} as const;
+
+// ============================================================================
+// VALORES PREDETERMINADOS - CELL ELEMENTS
+// ============================================================================
+
+export const CELL_ELEMENTS_DEFAULTS = {
+  columnSelector: "",
+  backgroundColorToggle: false,
+  backgroundGradient: {
+    minColor: { value: DEFAULT_COLORS.white },
+    maxColor: { value: DEFAULT_COLORS.lightGray },
+  },
+  fontColorToggle: false,
+  fontGradient: {
+    minColor: { value: DEFAULT_COLORS.primaryText },
+    maxColor: { value: DEFAULT_COLORS.secondaryText },
+  },
+  iconsToggle: false,
+  iconsGradient: {
+    minColor: { value: DEFAULT_COLORS.primaryBlue },
+    maxColor: { value: DEFAULT_COLORS.selectionBlue },
+  },
+  webUrlToggle: false,
+  webUrlGradient: {
+    minColor: { value: DEFAULT_COLORS.primaryBlue },
+    maxColor: { value: DEFAULT_COLORS.selectionBlue },
+  },
 } as const;
 
 // ============================================================================

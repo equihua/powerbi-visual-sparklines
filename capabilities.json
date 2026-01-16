@@ -85,468 +85,8 @@
                             {
                                 "value": "bordered",
                                 "displayName": "Con bordes"
-                            },
-                            {
-                                "value": "hover",
-                                "displayName": "Al pasar el ratón"
                             }
                         ]
-                    }
-                },
-                "textSize": {
-                    "displayName": "Tamaño de texto",
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
-                }
-            }
-        },
-        "typography": {
-            "displayName": "Tipografía",
-            "properties": {
-                "fontFamily": {
-                    "displayName": "Familia de fuente",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "Arial, sans-serif",
-                                "displayName": "Arial"
-                            },
-                            {
-                                "value": "Verdana, sans-serif",
-                                "displayName": "Verdana"
-                            },
-                            {
-                                "value": "Georgia, serif",
-                                "displayName": "Georgia"
-                            },
-                            {
-                                "value": "'Courier New', monospace",
-                                "displayName": "Courier New"
-                            },
-                            {
-                                "value": "'Segoe UI', sans-serif",
-                                "displayName": "Segoe UI"
-                            },
-                            {
-                                "value": "Tahoma, sans-serif",
-                                "displayName": "Tahoma"
-                            },
-                            {
-                                "value": "'Times New Roman', serif",
-                                "displayName": "Times New Roman"
-                            }
-                        ]
-                    }
-                },
-                "fontSize": {
-                    "displayName": "Tamaño de fuente base",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "fontColor": {
-                    "displayName": "Color de fuente base",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "lineHeight": {
-                    "displayName": "Alto de línea",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "letterSpacing": {
-                    "displayName": "Espaciado entre letras",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "bold": {
-                    "displayName": "Negrita global",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "italic": {
-                    "displayName": "Cursiva global",
-                    "type": {
-                        "bool": true
-                    }
-                }
-            }
-        },
-        "columns": {
-            "displayName": "Columnas",
-            "properties": {
-                "columnSelector": {
-                    "displayName": "Seleccionar columna",
-                    "type": {
-                        "enumeration": []
-                    }
-                },
-                "headerFontColor": {
-                    "displayName": "Color fuente encabezado",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "headerFontSize": {
-                    "displayName": "Tamaño fuente encabezado",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "headerAlignment": {
-                    "displayName": "Alineación encabezado",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "left",
-                                "displayName": "Izquierda"
-                            },
-                            {
-                                "value": "center",
-                                "displayName": "Centro"
-                            },
-                            {
-                                "value": "right",
-                                "displayName": "Derecha"
-                            }
-                        ]
-                    }
-                },
-                "headerBold": {
-                    "displayName": "Negrita encabezado",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "headerBackgroundColor": {
-                    "displayName": "Color fondo encabezado",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "headerPadding": {
-                    "displayName": "Espaciado encabezado",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "cellFontColor": {
-                    "displayName": "Color fuente celda",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "cellFontSize": {
-                    "displayName": "Tamaño fuente celda",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "cellAlignment": {
-                    "displayName": "Alineación celda",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "left",
-                                "displayName": "Izquierda"
-                            },
-                            {
-                                "value": "center",
-                                "displayName": "Centro"
-                            },
-                            {
-                                "value": "right",
-                                "displayName": "Derecha"
-                            }
-                        ]
-                    }
-                },
-                "cellBackgroundColor": {
-                    "displayName": "Color fondo celda",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "cellPadding": {
-                    "displayName": "Espaciado celda",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "decimalPlaces": {
-                    "displayName": "Decimales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "thousandsSeparator": {
-                    "displayName": "Separador de miles",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "prefix": {
-                    "displayName": "Prefijo",
-                    "type": {
-                        "text": true
-                    }
-                },
-                "suffix": {
-                    "displayName": "Sufijo",
-                    "type": {
-                        "text": true
-                    }
-                },
-                "columnWidth": {
-                    "displayName": "Ancho de columna",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "sortable": {
-                    "displayName": "Ordenable",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "columnVisible": {
-                    "displayName": "Visible",
-                    "type": {
-                        "bool": true
-                    }
-                }
-            }
-        },
-        "rows": {
-            "displayName": "Filas",
-            "properties": {
-                "rowHeight": {
-                    "displayName": "Alto de fila",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "alternatingRowColor": {
-                    "displayName": "Color de fila alternada",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "hoverBackgroundColor": {
-                    "displayName": "Color de fondo al pasar el ratón",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "rowPadding": {
-                    "displayName": "Espaciado interno de filas",
-                    "type": {
-                        "numeric": true
-                    }
-                }
-            }
-        },
-        "grid": {
-            "displayName": "Cuadrícula y bordes",
-            "properties": {
-                "showHorizontalLines": {
-                    "displayName": "Líneas horizontales",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "horizontalLineColor": {
-                    "displayName": "Color líneas horizontales",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "horizontalLineWidth": {
-                    "displayName": "Ancho líneas horizontales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "showVerticalLines": {
-                    "displayName": "Líneas verticales",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "verticalLineColor": {
-                    "displayName": "Color líneas verticales",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "verticalLineWidth": {
-                    "displayName": "Ancho líneas verticales",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "borderSection": {
-                    "displayName": "Aplicar bordes a",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "all",
-                                "displayName": "Todas"
-                            },
-                            {
-                                "value": "header",
-                                "displayName": "Encabezado"
-                            },
-                            {
-                                "value": "rows",
-                                "displayName": "Filas"
-                            }
-                        ]
-                    }
-                },
-                "borderTop": {
-                    "displayName": "Borde superior",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderBottom": {
-                    "displayName": "Borde inferior",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderLeft": {
-                    "displayName": "Borde izquierdo",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderRight": {
-                    "displayName": "Borde derecho",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "borderColor": {
-                    "displayName": "Color de borde",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "borderWidth": {
-                    "displayName": "Ancho de borde",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "borderStyle": {
-                    "displayName": "Estilo de borde",
-                    "type": {
-                        "enumeration": [
-                            {
-                                "value": "solid",
-                                "displayName": "Sólido"
-                            },
-                            {
-                                "value": "dashed",
-                                "displayName": "Guionado"
-                            },
-                            {
-                                "value": "dotted",
-                                "displayName": "Punteado"
-                            },
-                            {
-                                "value": "double",
-                                "displayName": "Doble"
-                            }
-                        ]
-                    }
-                },
-                "borderRadius": {
-                    "displayName": "Radio de esquina",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "shadowBorder": {
-                    "displayName": "Sombra de borde",
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "shadowColor": {
-                    "displayName": "Color de sombra",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "rowSpacing": {
-                    "displayName": "Espaciado interno de filas",
-                    "type": {
-                        "numeric": true
-                    }
-                }
-            }
-        },
-        "interactivity": {
-            "displayName": "Interactividad",
-            "properties": {
-                "freezeCategories": {
-                    "displayName": "Congelar columna de categoría",
-                    "type": {
-                        "bool": true
                     }
                 },
                 "rowSelection": {
@@ -602,6 +142,576 @@
                                 "displayName": "Automático"
                             }
                         ]
+                    }
+                }
+            }
+        },
+        "columnHeaders": {
+            "displayName": "Encabezados de columna",
+            "properties": {
+                "fontFamily": {
+                    "displayName": "Familia de fuente",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "bold": {
+                    "displayName": "Negrita",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "displayName": "Cursiva",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "displayName": "Subrayado",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "displayName": "Color del texto",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "alignment": {
+                    "displayName": "Alineación del encabezado",
+                    "type": {
+                        "formatting": {
+                            "alignment": true
+                        }
+                    }
+                },
+                "wrapText": {
+                    "displayName": "Ajuste de texto",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "autoSizeWidth": {
+                    "displayName": "Auto-size width",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "resizeBehavior": {
+                    "displayName": "Comportamiento de cambio de tamaño",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "fitToContent",
+                                "displayName": "Ajustar al contenido"
+                            },
+                            {
+                                "value": "growToFit",
+                                "displayName": "Aumentar para ajustar"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "values": {
+            "displayName": "Valores",
+            "properties": {
+                "fontFamily": {
+                    "displayName": "Familia de fuente",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "bold": {
+                    "displayName": "Negrita",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "displayName": "Cursiva",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "displayName": "Subrayado",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "displayName": "Color del texto",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "alternateTextColor": {
+                    "displayName": "Color del texto alternativo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "totals": {
+            "displayName": "Totales",
+            "properties": {
+                "show": {
+                    "displayName": "Valores",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "label": {
+                    "displayName": "Etiqueta de total",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "fontFamily": {
+                    "displayName": "Familia de fuente",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "Arial, sans-serif",
+                                "displayName": "Arial"
+                            },
+                            {
+                                "value": "Verdana, sans-serif",
+                                "displayName": "Verdana"
+                            },
+                            {
+                                "value": "Georgia, serif",
+                                "displayName": "Georgia"
+                            },
+                            {
+                                "value": "'Courier New', monospace",
+                                "displayName": "Courier New"
+                            },
+                            {
+                                "value": "'Segoe UI', sans-serif",
+                                "displayName": "Segoe UI"
+                            },
+                            {
+                                "value": "Tahoma, sans-serif",
+                                "displayName": "Tahoma"
+                            },
+                            {
+                                "value": "'Times New Roman', serif",
+                                "displayName": "Times New Roman"
+                            }
+                        ]
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Tamaño",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "bold": {
+                    "displayName": "Negrita",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "italic": {
+                    "displayName": "Cursiva",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "underline": {
+                    "displayName": "Subrayado",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "displayName": "Color del texto",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "displayName": "Color de fondo",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "specificColumn": {
+            "displayName": "Columna específica",
+            "properties": {
+                "columnSelector": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "applyToHeader": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "applyToTotal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "applyToValues": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "alignment": {
+                    "type": {
+                        "formatting": {
+                            "alignment": true
+                        }
+                    }
+                }
+            }
+        },
+        "cellElements": {
+            "displayName": "Elementos de celda",
+            "properties": {
+                "columnSelector": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "backgroundColorToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "backgroundMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "backgroundMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontColorToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "iconsToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "iconsMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "iconsMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "webUrlToggle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "webUrlMinColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "webUrlMaxColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "grid": {
+            "displayName": "Grid",
+            "properties": {
+                "showHorizontal": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "gridHorizontalWeight": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "gridHorizontalColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "showVertical": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "gridVerticalWeight": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "gridVerticalColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borderSection": {
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "all",
+                                "displayName": "Todas"
+                            },
+                            {
+                                "value": "columnHeader",
+                                "displayName": "Encabezado de columna"
+                            },
+                            {
+                                "value": "valuesSection",
+                                "displayName": "Sección de valores"
+                            },
+                            {
+                                "value": "totalsSection",
+                                "displayName": "Sección de totales"
+                            }
+                        ]
+                    }
+                },
+                "borderTop": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderBottom": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderLeft": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderRight": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "borderColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "borderWeight": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "rowPadding": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "globalFontSize": {
+                    "type": {
+                        "numeric": true
                     }
                 }
             }

@@ -1,176 +1,179 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import powerbi from "powerbi-visuals-api";
 import {
-  BORDER_STYLE_OPTIONS,
+  BorderSection,
   BORDER_SECTION_OPTIONS,
-  GRID_DEFAULTS,
 } from "../constants/visualDefaults";
 
-class HorizontalLinesGroup extends formattingSettings.SimpleCard {
-  showHorizontalLines = new formattingSettings.ToggleSwitch({
-    name: "showHorizontalLines",
-    displayName: "Mostrar líneas horizontales",
-    value: GRID_DEFAULTS.showHorizontalLines,
+// ============================================================================
+// SUBTARJETAS (GRUPOS COLAPSIBLES)
+// ============================================================================
+
+class GridlinesCard extends formattingSettings.SimpleCard {
+  name: string = "gridlines";
+  displayName: string = "Líneas de cuadrícula";
+
+  showHorizontal = new formattingSettings.ToggleSwitch({
+    name: "showHorizontal",
+    displayName: "Líneas de cuadrícula horizontales",
+    value: true,
   });
 
-  horizontalLineColor = new formattingSettings.ColorPicker({
-    name: "horizontalLineColor",
-    displayName: "Color",
-    value: { value: GRID_DEFAULTS.horizontalLineColor },
-  });
-
-  horizontalLineWidth = new formattingSettings.NumUpDown({
-    name: "horizontalLineWidth",
+  gridHorizontalWeight = new formattingSettings.NumUpDown({
+    name: "gridHorizontalWeight",
     displayName: "Ancho",
-    value: GRID_DEFAULTS.horizontalLineWidth,
+    value: 1,
+    options: {
+      minValue: { value: 0, type: powerbi.visuals.ValidatorType.Min },
+      maxValue: { value: 10, type: powerbi.visuals.ValidatorType.Max },
+    },
   });
 
-  name: string = "horizontalLines";
-  displayName: string = "Líneas horizontales";
-  slices: formattingSettings.Slice[] = [
-    this.showHorizontalLines,
-    this.horizontalLineColor,
-    this.horizontalLineWidth,
+  gridHorizontalColor = new formattingSettings.ColorPicker({
+    name: "gridHorizontalColor",
+    displayName: "Color",
+    value: { value: "#E0E0E0" },
+  });
+
+  showVertical = new formattingSettings.ToggleSwitch({
+    name: "showVertical",
+    displayName: "Líneas de cuadrícula verticales",
+    value: false,
+  });
+
+  gridVerticalWeight = new formattingSettings.NumUpDown({
+    name: "gridVerticalWeight",
+    displayName: "Ancho",
+    value: 1,
+    options: {
+      minValue: { value: 0, type: powerbi.visuals.ValidatorType.Min },
+      maxValue: { value: 10, type: powerbi.visuals.ValidatorType.Max },
+    },
+  });
+
+  gridVerticalColor = new formattingSettings.ColorPicker({
+    name: "gridVerticalColor",
+    displayName: "Color",
+    value: { value: "#E0E0E0" },
+  });
+
+  slices = [
+    this.showHorizontal,
+    this.gridHorizontalWeight,
+    this.gridHorizontalColor,
+    this.showVertical,
+    this.gridVerticalWeight,
+    this.gridVerticalColor,
   ];
 }
 
-class VerticalLinesGroup extends formattingSettings.SimpleCard {
-  showVerticalLines = new formattingSettings.ToggleSwitch({
-    name: "showVerticalLines",
-    displayName: "Mostrar líneas verticales",
-    value: GRID_DEFAULTS.showVerticalLines,
-  });
+class BorderCard extends formattingSettings.SimpleCard {
+  name: string = "border";
+  displayName: string = "Borde";
 
-  verticalLineColor = new formattingSettings.ColorPicker({
-    name: "verticalLineColor",
-    displayName: "Color",
-    value: { value: GRID_DEFAULTS.verticalLineColor },
-  });
-
-  verticalLineWidth = new formattingSettings.NumUpDown({
-    name: "verticalLineWidth",
-    displayName: "Ancho",
-    value: GRID_DEFAULTS.verticalLineWidth,
-  });
-
-  name: string = "verticalLines";
-  displayName: string = "Líneas verticales";
-  slices: formattingSettings.Slice[] = [
-    this.showVerticalLines,
-    this.verticalLineColor,
-    this.verticalLineWidth,
-  ];
-}
-
-class BordersGroup extends formattingSettings.SimpleCard {
   borderSection = new formattingSettings.ItemDropdown({
     name: "borderSection",
-    displayName: "Aplicar a",
-    items: [...BORDER_SECTION_OPTIONS],
+    displayName: "Sección",
+    items: BORDER_SECTION_OPTIONS.map((option) => ({
+      value: option.value,
+      displayName: option.displayName,
+    })),
     value: BORDER_SECTION_OPTIONS[0],
   });
 
   borderTop = new formattingSettings.ToggleSwitch({
     name: "borderTop",
     displayName: "Superior",
-    value: GRID_DEFAULTS.borderTop,
+    value: false,
   });
 
   borderBottom = new formattingSettings.ToggleSwitch({
     name: "borderBottom",
     displayName: "Inferior",
-    value: GRID_DEFAULTS.borderBottom,
+    value: false,
   });
 
   borderLeft = new formattingSettings.ToggleSwitch({
     name: "borderLeft",
     displayName: "Izquierda",
-    value: GRID_DEFAULTS.borderLeft,
+    value: false,
   });
 
   borderRight = new formattingSettings.ToggleSwitch({
     name: "borderRight",
     displayName: "Derecha",
-    value: GRID_DEFAULTS.borderRight,
+    value: false,
   });
 
   borderColor = new formattingSettings.ColorPicker({
     name: "borderColor",
     displayName: "Color",
-    value: { value: GRID_DEFAULTS.borderColor },
+    value: { value: "#CCCCCC" },
   });
 
-  borderWidth = new formattingSettings.NumUpDown({
-    name: "borderWidth",
+  borderWeight = new formattingSettings.NumUpDown({
+    name: "borderWeight",
     displayName: "Ancho",
-    value: GRID_DEFAULTS.borderWidth,
+    value: 1,
+    options: {
+      minValue: { value: 0, type: powerbi.visuals.ValidatorType.Min },
+      maxValue: { value: 10, type: powerbi.visuals.ValidatorType.Max },
+    },
   });
 
-  borderStyle = new formattingSettings.ItemDropdown({
-    name: "borderStyle",
-    displayName: "Estilo",
-    items: [...BORDER_STYLE_OPTIONS],
-    value: BORDER_STYLE_OPTIONS[0],
-  });
-
-  borderRadius = new formattingSettings.NumUpDown({
-    name: "borderRadius",
-    displayName: "Radio de esquina",
-    value: GRID_DEFAULTS.borderRadius,
-  });
-
-  shadowBorder = new formattingSettings.ToggleSwitch({
-    name: "shadowBorder",
-    displayName: "Sombra",
-    value: GRID_DEFAULTS.shadowBorder,
-  });
-
-  shadowColor = new formattingSettings.ColorPicker({
-    name: "shadowColor",
-    displayName: "Color de sombra",
-    value: { value: GRID_DEFAULTS.shadowColor },
-  });
-
-  name: string = "borders";
-  displayName: string = "Bordes";
-  slices: formattingSettings.Slice[] = [
+  slices = [
     this.borderSection,
     this.borderTop,
     this.borderBottom,
     this.borderLeft,
     this.borderRight,
     this.borderColor,
-    this.borderWidth,
-    this.borderStyle,
-    this.borderRadius,
-    this.shadowBorder,
-    this.shadowColor,
+    this.borderWeight,
   ];
 }
 
-class SpacingGroup extends formattingSettings.SimpleCard {
-  rowSpacing = new formattingSettings.NumUpDown({
-    name: "rowSpacing",
-    displayName: "Espaciado interno filas",
-    value: GRID_DEFAULTS.rowSpacing,
+class OptionsCard extends formattingSettings.SimpleCard {
+  name: string = "options";
+  displayName: string = "Opciones";
+
+  rowPadding = new formattingSettings.NumUpDown({
+    name: "rowPadding",
+    displayName: "Espaciado interno de las filas",
+    value: 1,
+    options: {
+      minValue: { value: 0, type: powerbi.visuals.ValidatorType.Min },
+      maxValue: { value: 50, type: powerbi.visuals.ValidatorType.Max },
+    },
   });
 
-  name: string = "spacing";
-  displayName: string = "Espaciado";
-  slices: formattingSettings.Slice[] = [this.rowSpacing];
+  globalFontSize = new formattingSettings.NumUpDown({
+    name: "globalFontSize",
+    displayName: "Tamaño de fuente global",
+    value: 10,
+    options: {
+      minValue: { value: 8, type: powerbi.visuals.ValidatorType.Min },
+      maxValue: { value: 40, type: powerbi.visuals.ValidatorType.Max },
+    },
+  });
+
+  slices = [this.rowPadding, this.globalFontSize];
 }
 
-export class GridSettings extends formattingSettings.CompositeCard {
-  horizontalLinesGroup = new HorizontalLinesGroup();
-  verticalLinesGroup = new VerticalLinesGroup();
-  bordersGroup = new BordersGroup();
-  spacingGroup = new SpacingGroup();
+// ============================================================================
+// TARJETA PRINCIPAL: GRID
+// ============================================================================
 
+export class GridSettings extends formattingSettings.CompositeCard {
   name: string = "grid";
-  displayName: string = "Cuadrícula y bordes";
+  displayName: string = "Grid";
+
+  gridlinesCard = new GridlinesCard();
+  borderCard = new BorderCard();
+  optionsCard = new OptionsCard();
+
   groups: formattingSettings.Group[] = [
-    this.horizontalLinesGroup,
-    this.verticalLinesGroup,
-    this.bordersGroup,
-    this.spacingGroup,
+    this.gridlinesCard,
+    this.borderCard,
+    this.optionsCard,
   ];
 }

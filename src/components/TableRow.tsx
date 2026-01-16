@@ -1,179 +1,120 @@
 import React from "react";
-import { TableRowData, SparklineData } from "../visualViewModel";
-import { SparklineColumnSettings, ColumnConfigSettings } from "../settings";
-import { TableCell } from "./TableCell";
+import { SparklineColumnSettings } from "../settings";
 import { Sparkline } from "./Sparkline";
+import type { ValuesCard, GridSettings } from "../settings/index";
 
 interface TableRowProps {
-  rowData: TableRowData;
-  columnNames: string[];
-  sparklineColumnNames: string[];
+  row: Record<string, any>;
+  columns: string[];
   index: number;
-  tableStyle: string;
-  showHorizontalLines: boolean;
-  horizontalLineColor: string;
-  horizontalLineWidth: number;
-  showVerticalLines: boolean;
-  verticalLineColor: string;
-  verticalLineWidth: number;
   isSelected: boolean;
-  onRowClick: () => void;
+  onClick: () => void;
+  rowSelection: boolean;
   rowSelectionColor: string;
-  freezeCategories: boolean;
-  rowHeight: number;
-  alternatingRowColor: string;
-  hoverBackgroundColor: string;
-  rowPadding: number;
-  categoryCellAlignment: "left" | "center" | "right";
-  categoryCellPadding: number;
-  categoryCellFontColor: string;
-  categoryCellFontSize: number;
-  categoryCellBackgroundColor: string;
-  measureCellAlignment: "left" | "center" | "right";
-  measureCellPadding: number;
-  measureCellFontColor: string;
-  measureCellFontSize: number;
-  measureCellBackgroundColor: string;
-  wordWrap: boolean;
-  textOverflow: "clip" | "ellipsis" | "wrap";
-  borderForRows?: string;
-  decimalPlaces: number;
-  thousandsSeparator: boolean;
-  currencySymbol: string;
-  currencyPosition: "before" | "after";
-  negativeNumberFormat: "minus" | "parentheses" | "minusred" | "parenthesesred";
-  customNegativeColor: string;
+  valuesSettings: ValuesCard;
+  gridSettings: GridSettings;
   sparklineSettings: Map<string, SparklineColumnSettings>;
-  columnSettings: Map<string, ColumnConfigSettings>;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
-  rowData,
-  columnNames,
-  sparklineColumnNames,
+  row,
+  columns,
   index,
-  tableStyle,
-  showHorizontalLines,
-  horizontalLineColor,
-  horizontalLineWidth,
-  showVerticalLines,
-  verticalLineColor,
-  verticalLineWidth,
   isSelected,
-  onRowClick,
+  onClick,
+  rowSelection,
   rowSelectionColor,
-  freezeCategories,
-  rowHeight,
-  alternatingRowColor,
-  hoverBackgroundColor,
-  rowPadding,
-  categoryCellAlignment,
-  categoryCellPadding,
-  categoryCellFontColor,
-  categoryCellFontSize,
-  categoryCellBackgroundColor,
-  measureCellAlignment,
-  measureCellPadding,
-  measureCellFontColor,
-  measureCellFontSize,
-  measureCellBackgroundColor,
-  wordWrap,
-  textOverflow,
-  borderForRows,
-  decimalPlaces,
-  thousandsSeparator,
-  currencySymbol,
-  currencyPosition,
-  negativeNumberFormat,
-  customNegativeColor,
+  valuesSettings,
+  gridSettings,
   sparklineSettings,
-  columnSettings,
 }) => {
-  let backgroundColor =
-    tableStyle === "striped" && index % 2 === 1
-      ? alternatingRowColor || "#f0f0f0"
-      : undefined;
+  const isAlternateRow = index % 2 === 1;
 
-  if (isSelected) {
-    backgroundColor = rowSelectionColor || "#d0e8ff";
+  const rowStyle: React.CSSProperties = {
+    backgroundColor: (isSelected && rowSelection)
+      ? rowSelectionColor
+      : valuesSettings.backgroundColor.value.value,
+    cursor: rowSelection ? "pointer" : "default",
+  };
+
+  const cellStyle: React.CSSProperties = {
+    fontFamily: valuesSettings.font.fontFamily.value as string,
+    fontSize:
+      gridSettings.optionsCard.globalFontSize.value > 0
+        ? `${gridSettings.optionsCard.globalFontSize.value}px`
+        : `${valuesSettings.font.fontSize.value}px`,
+    fontWeight: valuesSettings.font.bold.value ? "bold" : "normal",
+    fontStyle: valuesSettings.font.italic.value ? "italic" : "normal",
+    textDecoration: valuesSettings.font.underline.value ? "underline" : "none",
+    color: valuesSettings.textColor.value.value,
+    textAlign: (valuesSettings.alignment.value || "left") as
+      | "left"
+      | "center"
+      | "right",
+    padding: `${gridSettings.optionsCard.rowPadding.value}px`,
+    whiteSpace: valuesSettings.wrapText.value ? "normal" : "nowrap",
+  };
+
+  if (gridSettings.gridlinesCard.showVertical.value) {
+    cellStyle.borderRight = `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value.value}`;
   }
 
-  const borderBottom = showHorizontalLines
-    ? `${horizontalLineWidth}px solid ${horizontalLineColor}`
-    : "none";
+  if (gridSettings.gridlinesCard.showHorizontal.value) {
+    cellStyle.borderBottom = `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value.value}`;
+  }
+
+  // Aplicar bordes según la sección y posiciones seleccionadas
+  const shouldApplyBorder = (
+    position: "Top" | "Bottom" | "Left" | "Right"
+  ): boolean => {
+    const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+    if (borderSection !== "all" && borderSection !== "valuesSection") {
+      return false;
+    }
+
+    const borderKey =
+      `border${position}` as keyof typeof gridSettings.borderCard;
+    const borderSetting = gridSettings.borderCard[borderKey] as any;
+    return borderSetting?.value === true;
+  };
+
+  if (shouldApplyBorder("Top")) {
+    cellStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Bottom")) {
+    cellStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Left")) {
+    cellStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Right")) {
+    cellStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
 
   return (
-    <tr
-      style={{
-        backgroundColor,
-        borderBottom,
-        cursor: "pointer",
-        height: rowHeight,
-        border: borderForRows,
-        transition: "background-color 150ms ease-in-out",
-      }}
-      onClick={onRowClick}
-    >
-      {columnNames.map((columnName, cellIndex) => {
-        const colSettings = columnSettings.get(columnName);
-        const isCategory = cellIndex === 0;
+    <tr style={rowStyle} onClick={onClick}>
+      {columns.map((column, colIndex) => {
+        const cellValue = row[column];
+        const sparklineConfig = sparklineSettings.get(column);
 
-        const cellAlignment = colSettings?.cellAlignment || (isCategory ? categoryCellAlignment : measureCellAlignment);
-        const cellPadding = colSettings?.cellPadding ?? (isCategory ? categoryCellPadding : measureCellPadding);
-        const cellColor = colSettings?.cellFontColor || (isCategory ? categoryCellFontColor : measureCellFontColor);
-        const cellFontSize = colSettings?.cellFontSize ?? (isCategory ? categoryCellFontSize : measureCellFontSize);
-        const cellBgColor = colSettings?.cellBackgroundColor || (isCategory ? categoryCellBackgroundColor : measureCellBackgroundColor);
-        const cellDecimalPlaces = colSettings?.decimalPlaces ?? decimalPlaces;
-        const cellThousandsSeparator = colSettings?.thousandsSeparator ?? thousandsSeparator;
-        const cellPrefix = colSettings?.prefix || currencySymbol;
+        if (
+          sparklineConfig &&
+          typeof cellValue === "object" &&
+          cellValue !== null
+        ) {
+          return (
+            <td key={colIndex} style={cellStyle}>
+              <Sparkline sparklineData={cellValue} settings={sparklineConfig} />
+            </td>
+          );
+        }
 
         return (
-          <TableCell
-            key={cellIndex}
-            value={rowData[columnName]}
-            alignment={cellAlignment as "left" | "center" | "right"}
-            padding={cellPadding}
-            color={cellColor}
-            fontSize={cellFontSize}
-            backgroundColor={cellBgColor}
-            freezeLeft={freezeCategories && cellIndex === 0}
-            showVerticalLines={showVerticalLines}
-            verticalLineColor={verticalLineColor}
-            verticalLineWidth={verticalLineWidth}
-            wordWrap={wordWrap}
-            textOverflow={textOverflow}
-            decimalPlaces={cellDecimalPlaces}
-            thousandsSeparator={cellThousandsSeparator}
-            currencySymbol={cellPrefix}
-            currencyPosition={currencyPosition}
-            negativeNumberFormat={negativeNumberFormat}
-            customNegativeColor={customNegativeColor}
-          />
-        );
-      })}
-      {sparklineColumnNames.map((columnName, sparklineIndex) => {
-        const sparklineData = rowData[columnName] as SparklineData;
-        const settings = sparklineSettings.get(columnName) || {
-          chartType: "line",
-          color: "#0078D4",
-          lineWidth: 1.5,
-        };
-
-        return (
-          <td
-            key={`sparkline-${sparklineIndex}`}
-            style={{
-              borderBottom,
-              borderRight: showVerticalLines
-                ? `${verticalLineWidth}px solid ${verticalLineColor}`
-                : undefined,
-            }}
-          >
-            {sparklineData &&
-              sparklineData.Values &&
-              sparklineData.Values.length > 0 && (
-                <Sparkline sparklineData={sparklineData} settings={settings} />
-              )}
+          <td key={colIndex} style={cellStyle}>
+            {cellValue !== null && cellValue !== undefined
+              ? String(cellValue)
+              : ""}
           </td>
         );
       })}

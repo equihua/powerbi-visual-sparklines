@@ -1,31 +1,3 @@
-/*
- *  Power BI Visual CLI
- *
- *  Copyright (c) Microsoft Corporation
- *  All rights reserved.
- *  MIT License
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the ""Software""), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  THE SOFTWARE.
- */
-
-"use strict";
-
 import React from "react";
 import { createRoot, Root } from "react-dom/client";
 import "./../style/visual.less";
@@ -40,7 +12,6 @@ import IViewport = powerbi.IViewport;
 
 import {
   type SparklineColumnSettings,
-  type ColumnConfigSettings,
   VisualFormattingSettingsModel,
 } from "./settings";
 import { visualTransform } from "./visualTransform";
@@ -53,13 +24,10 @@ export class Visual implements IVisual {
   private readonly reactRoot: HTMLDivElement;
   private root: Root | null = null;
   private sparklineSettings: Map<string, SparklineColumnSettings> = new Map();
-  private columnSettings: Map<string, ColumnConfigSettings> = new Map();
   private formattingSettings: VisualFormattingSettingsModel;
   private formattingSettingsService: FormattingSettingsService;
 
-  // Caches para detectar cambios en configuraciones
   private previousSparklineHash: string = "";
-  private previousColumnHash: string = "";
   private previousViewModelHash: string = "";
 
   constructor(options: VisualConstructorOptions) {
@@ -81,6 +49,14 @@ export class Visual implements IVisual {
       return;
     }
 
+    this.formattingSettings =
+      this.formattingSettingsService.populateFormattingSettingsModel(
+        VisualFormattingSettingsModel,
+        options.dataViews[0]
+      );
+
+    console.log("=== Formatting Settings ===", this.formattingSettings);
+
     const viewModel = visualTransform(options.dataViews);
 
     if (!viewModel || !viewModel.rows || viewModel.rows.length === 0) {
@@ -93,7 +69,6 @@ export class Visual implements IVisual {
 
     const firstRow = viewModel.rows[0];
     const sparklineColumnNames: string[] = [];
-    const measureColumnNames: string[] = [];
 
     Object.keys(firstRow).forEach((key) => {
       const value = firstRow[key];
@@ -105,26 +80,15 @@ export class Visual implements IVisual {
         "Values" in value
       ) {
         sparklineColumnNames.push(key);
-      } else if (typeof value === "number") {
-        measureColumnNames.push(key);
       }
     });
 
-    console.log("Measure columns:", measureColumnNames);
-
     this.formattingSettings.updateSparklineCards(sparklineColumnNames);
-    this.formattingSettings.updateColumnCards(measureColumnNames);
 
-    this.formattingSettings =
-      this.formattingSettingsService.populateFormattingSettingsModel(
-        VisualFormattingSettingsModel,
-        options.dataViews[0]
-      );
+    const allColumns = Object.keys(firstRow);
+    this.formattingSettings.specificColumn.updateColumnList(allColumns);
+    this.formattingSettings.cellElements.updateColumnList(allColumns);
 
-    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
-    this.formattingSettings.updateColumnCards(measureColumnNames);
-
-    // Calcular hash de configuraciones para detectar cambios reales
     const newSparklineHash = generateHash({
       columns: sparklineColumnNames.sort(),
       settings: sparklineColumnNames.map((col) =>
@@ -132,14 +96,6 @@ export class Visual implements IVisual {
       ),
     });
 
-    const newColumnHash = generateHash({
-      columns: measureColumnNames.sort(),
-      settings: measureColumnNames.map((col) =>
-        this.formattingSettings.getColumnSettings(col)
-      ),
-    });
-
-    // Solo actualizar sparklineSettings si realmente cambió
     if (newSparklineHash !== this.previousSparklineHash) {
       this.sparklineSettings.clear();
       sparklineColumnNames.forEach((columnName) => {
@@ -149,21 +105,6 @@ export class Visual implements IVisual {
       });
       this.previousSparklineHash = newSparklineHash;
     }
-
-    // Solo actualizar columnSettings si realmente cambió
-    if (newColumnHash !== this.previousColumnHash) {
-      this.columnSettings.clear();
-      measureColumnNames.forEach((columnName) => {
-        const settings = this.formattingSettings.getColumnSettings(columnName);
-        this.columnSettings.set(columnName, settings);
-      });
-      this.previousColumnHash = newColumnHash;
-    }
-    this.columnSettings.clear();
-    measureColumnNames.forEach((columnName) => {
-      const settings = this.formattingSettings.getColumnSettings(columnName);
-      this.columnSettings.set(columnName, settings);
-    });
 
     this.renderTable(viewModel, options.viewport);
   }
@@ -180,13 +121,11 @@ export class Visual implements IVisual {
       this.root = createRoot(this.reactRoot);
     }
 
-    // Renderizado simplificado: solo pasamos los datos necesarios al contenedor
     this.root.render(
       React.createElement(TableContainer, {
         viewModel,
         formattingSettings: this.formattingSettings,
         sparklineSettings: this.sparklineSettings,
-        columnSettings: this.columnSettings,
         viewport,
       })
     );

@@ -1,105 +1,101 @@
 import React from "react";
-import { ColumnConfigSettings } from "../settings";
+import type { ColumnHeadersSettings, GridSettings } from "../settings/index";
 
 interface TableHeaderProps {
-  columnNames: string[];
-  sparklineColumnNames: string[];
-  sortable: boolean;
+  columns: string[];
   sortColumn: string | null;
   sortDirection: "asc" | "desc";
-  onSort: (columnName: string) => void;
-  alignment: "left" | "center" | "right";
-  padding: number;
-  bold: boolean;
-  sticky: boolean;
-  showVerticalLines: boolean;
-  verticalLineColor: string;
-  verticalLineWidth: number;
-  borderBottom?: string;
-  fontColor: string;
-  fontSize: number;
-  backgroundColor: string;
-  columnSettings: Map<string, ColumnConfigSettings>;
+  onSort: (column: string) => void;
+  sortable: boolean;
+  columnHeadersSettings: ColumnHeadersSettings;
+  gridSettings: GridSettings;
 }
 
 export const TableHeader: React.FC<TableHeaderProps> = ({
-  columnNames,
-  sparklineColumnNames,
-  sortable,
+  columns,
   sortColumn,
   sortDirection,
   onSort,
-  alignment,
-  padding,
-  bold,
-  sticky,
-  showVerticalLines,
-  verticalLineColor,
-  verticalLineWidth,
-  borderBottom,
-  fontColor,
-  fontSize,
-  backgroundColor,
-  columnSettings,
+  sortable,
+  columnHeadersSettings,
+  gridSettings,
 }) => {
-  const getSortIndicator = (columnName: string) => {
-    if (!sortable || sortColumn !== columnName) return null;
+  const getSortIndicator = (column: string) => {
+    if (!sortable || sortColumn !== column) return null;
     return sortDirection === "asc" ? " ▲" : " ▼";
   };
 
+  const headerStyle: React.CSSProperties = {
+    fontFamily: columnHeadersSettings.textGroup.font.fontFamily.value as string,
+    fontSize:
+      gridSettings.optionsCard.globalFontSize.value > 0
+        ? `${gridSettings.optionsCard.globalFontSize.value}px`
+        : `${columnHeadersSettings.textGroup.font.fontSize.value}px`,
+    fontWeight: columnHeadersSettings.textGroup.font.bold.value ? "bold" : "normal",
+    fontStyle: columnHeadersSettings.textGroup.font.italic.value ? "italic" : "normal",
+    textDecoration: columnHeadersSettings.textGroup.font.underline.value
+      ? "underline"
+      : "none",
+    color: columnHeadersSettings.textGroup.textColor.value.value,
+    backgroundColor: columnHeadersSettings.textGroup.backgroundColor.value.value,
+    textAlign: columnHeadersSettings.textGroup.alignment.value as
+      | "left"
+      | "center"
+      | "right",
+    padding: `${gridSettings.optionsCard.rowPadding.value}px`,
+    cursor: sortable ? "pointer" : "default",
+    userSelect: "none" as const,
+    whiteSpace: columnHeadersSettings.textGroup.wrapText.value ? "normal" : "nowrap",
+  };
+
+  if (gridSettings.gridlinesCard.showVertical.value) {
+    headerStyle.borderRight = `${gridSettings.gridlinesCard.gridVerticalWeight.value}px solid ${gridSettings.gridlinesCard.gridVerticalColor.value.value}`;
+  }
+
+  if (gridSettings.gridlinesCard.showHorizontal.value) {
+    headerStyle.borderBottom = `${gridSettings.gridlinesCard.gridHorizontalWeight.value}px solid ${gridSettings.gridlinesCard.gridHorizontalColor.value.value}`;
+  }
+
+  // Aplicar bordes según la sección y posiciones seleccionadas
+  const shouldApplyBorder = (
+    position: "Top" | "Bottom" | "Left" | "Right"
+  ): boolean => {
+    const borderSection = gridSettings.borderCard.borderSection.value.value;
+
+    if (borderSection !== "all" && borderSection !== "columnHeader") {
+      return false;
+    }
+
+    const borderKey =
+      `border${position}` as keyof typeof gridSettings.borderCard;
+    const borderSetting = gridSettings.borderCard[borderKey] as any;
+    return borderSetting?.value === true;
+  };
+
+  if (shouldApplyBorder("Top")) {
+    headerStyle.borderTop = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Bottom")) {
+    headerStyle.borderBottom = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Left")) {
+    headerStyle.borderLeft = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+  if (shouldApplyBorder("Right")) {
+    headerStyle.borderRight = `${gridSettings.borderCard.borderWeight.value}px solid ${gridSettings.borderCard.borderColor.value.value}`;
+  }
+
   return (
     <thead>
-      <tr style={{ borderBottom }}>
-        {columnNames.map((columnName, index) => {
-          const colSettings = columnSettings.get(columnName);
-          const colAlignment = colSettings?.headerAlignment || alignment;
-          const colPadding = colSettings?.headerPadding ?? padding;
-          const colBold = colSettings?.headerBold ?? bold;
-          const colFontColor = colSettings?.headerFontColor || fontColor;
-          const colFontSize = colSettings?.headerFontSize ?? fontSize;
-          const colBackgroundColor = colSettings?.headerBackgroundColor || backgroundColor;
-
-          return (
-            <th
-              key={index}
-              onClick={() => sortable && onSort(columnName)}
-              style={{
-                cursor: sortable ? "pointer" : "default",
-                userSelect: "none",
-                textAlign: colAlignment as "left" | "center" | "right",
-                padding: colPadding,
-                fontWeight: colBold ? 700 : 400,
-                color: colFontColor,
-                fontSize: colFontSize,
-                position: sticky && index === 0 ? ("sticky" as const) : undefined,
-                left: sticky && index === 0 ? 0 : undefined,
-                background:
-                  sticky && index === 0
-                    ? colBackgroundColor || "#fff"
-                    : colBackgroundColor || undefined,
-                borderRight: showVerticalLines
-                  ? `${verticalLineWidth}px solid ${verticalLineColor}`
-                  : undefined,
-              }}
-            >
-              {columnName}
-              {getSortIndicator(columnName)}
-            </th>
-          );
-        })}
-        {sparklineColumnNames.map((columnName, index) => (
+      <tr>
+        {columns.map((column, index) => (
           <th
-            key={`sparkline-${index}`}
-            style={{
-              textAlign: alignment,
-              padding,
-              fontWeight: bold ? 700 : 400,
-              color: fontColor,
-              fontSize,
-              backgroundColor,
-            }}
+            key={index}
+            onClick={() => sortable && onSort(column)}
+            style={headerStyle}
           >
-            {columnName}
+            {column}
+            {getSortIndicator(column)}
           </th>
         ))}
       </tr>
