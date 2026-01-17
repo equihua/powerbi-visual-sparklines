@@ -3,21 +3,24 @@ import { SparklineDataPoint } from "../../visualViewModel";
 import { SparklineColumnSettings } from "../../settings";
 
 interface PieSparklineProps {
-  dataPoints: SparklineDataPoint[];
+  dataPoint: SparklineDataPoint[];
   settings: SparklineColumnSettings;
 }
 
 export const PieSparkline: React.FC<PieSparklineProps> = ({
-  dataPoints,
+  dataPoint,
   settings,
 }) => {
   const size = 20;
   const radius = size / 2 - 2;
   const fillColor = settings.color || "#0078D4";
+  const startAngle = (settings.pieStartAngle ?? 0) * (Math.PI / 180);
+  const showLabels = settings.pieShowLabels ?? false;
+  const labelPosition = settings.pieLabelPosition ?? "outside";
 
-  const data = dataPoints.map((d) => d.y);
+  const data = dataPoint.map((d) => d.y);
   const total = data.reduce((sum, val) => sum + val, 0);
-  let currentAngle = 0;
+  let currentAngle = startAngle;
 
   const slices = data.map((value, index) => {
     const sliceAngle = (value / total) * 2 * Math.PI;
@@ -34,22 +37,41 @@ export const PieSparkline: React.FC<PieSparklineProps> = ({
 
     const opacity = 1 - index * 0.2;
 
+    const midAngle = currentAngle + sliceAngle / 2;
+    const labelRadius =
+      labelPosition === "inside" ? radius * 0.6 : radius * 1.2;
+    const labelX = radius + labelRadius * Math.cos(midAngle);
+    const labelY = radius + labelRadius * Math.sin(midAngle);
+
     currentAngle = endAngle;
 
-    return { pathData, opacity, key: index };
+    return { pathData, opacity, key: index, labelX, labelY, value };
   });
 
   return (
     <svg width={size} height={size}>
       {slices.map((slice) => (
-        <path
-          key={slice.key}
-          d={slice.pathData}
-          fill={fillColor}
-          fillOpacity={slice.opacity}
-          stroke="#fff"
-          strokeWidth={0.5}
-        />
+        <g key={slice.key}>
+          <path
+            d={slice.pathData}
+            fill={fillColor}
+            fillOpacity={slice.opacity}
+            stroke="#fff"
+            strokeWidth={0.5}
+          />
+          {showLabels && (
+            <text
+              x={slice.labelX}
+              y={slice.labelY}
+              fontSize="4"
+              fill="#000"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {slice.value.toFixed(0)}
+            </text>
+          )}
+        </g>
       ))}
     </svg>
   );

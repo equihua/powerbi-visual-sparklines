@@ -185,6 +185,19 @@ export class FormattingManager {
     dataView: DataView,
     viewModel: TableViewModel,
   ): void {
+    // Log para debugging: ver contenido del dataView antes de poblar
+    console.log("[FormattingManager] DataView metadata objects:", dataView.metadata?.objects);
+    console.log("[FormattingManager] DataView categorical values:", dataView.categorical?.values);
+
+    if (dataView.categorical?.values) {
+      dataView.categorical.values.forEach((value, index) => {
+        console.log(`[FormattingManager] Value ${index} (${value.source.displayName}):`, {
+          objects: value.source.objects,
+          roles: value.source.roles,
+        });
+      });
+    }
+
     // 1. Popula desde DataView usando el servicio de Power BI
     this.formattingSettings =
       this.formattingSettingsService.populateFormattingSettingsModel(
@@ -200,7 +213,9 @@ export class FormattingManager {
     this.detectedValueColumns = measureColumnNames;
 
     // 3. Sincroniza los esquemas dinámicos
-    this.syncSchemaColumns(sparklineColumnNames, measureColumnNames);
+    this.syncSchemaColumns(sparklineColumnNames, measureColumnNames, dataView);
+
+    this.populateSparklineSettingsFromDataView(dataView, sparklineColumnNames);
 
     // 4. Extrae las configuraciones
     this.extractSettings(sparklineColumnNames, measureColumnNames);
@@ -214,6 +229,43 @@ export class FormattingManager {
   }
 
   /**
+   * Puebla las configuraciones de sparklines desde el DataView
+   *
+   * Lee las propiedades de sparkline desde dataView.categorical.values
+   * y las aplica al modelo de configuración interno.
+   *
+   * @param dataView - DataView de Power BI
+   * @param sparklineColumnNames - Columnas de sparkline a procesar
+   */
+  private populateSparklineSettingsFromDataView(
+    dataView: DataView,
+    sparklineColumnNames: string[],
+  ): void {
+    if (!dataView.categorical?.values || !this.formattingSettings.sparklineCard) {
+      return;
+    }
+
+    dataView.categorical.values.forEach((valueColumn) => {
+      const columnName = valueColumn.source.displayName;
+      const objects = valueColumn.source.objects;
+
+      if (objects && objects.sparklineColumn && sparklineColumnNames.indexOf(columnName) !== -1) {
+        const sparklineObj = objects.sparklineColumn as any;
+        console.log(`[FormattingManager] Found sparklineColumn objects for ${columnName}:`, sparklineObj);
+
+        const settings: Partial<SparklineColumnSettings> = {
+          chartType: sparklineObj.chartType || 'line',
+          color: sparklineObj.color?.solid?.color || '#0078D4',
+          lineWidth: sparklineObj.lineStrokeWidth || 1.5,
+        };
+
+        console.log(`[FormattingManager] Applying settings to ${columnName}:`, settings);
+        this.formattingSettings.setSparklineSettings(columnName, settings as SparklineColumnSettings);
+      }
+    });
+  }
+
+  /**
    * Sincroniza las columnas dinámicas (sparklines y medidas)
    *
    * Esta operación es necesaria cuando el esquema de datos cambia,
@@ -221,13 +273,16 @@ export class FormattingManager {
    *
    * @param sparklineColumnNames - Columnas de sparkline a sincronizar
    * @param measureColumnNames - Columnas de medida a sincronizar
+   * @param dataView - DataView de Power BI para obtener metadata completa
    */
   public syncSchemaColumns(
     sparklineColumnNames: string[],
     measureColumnNames: string[],
+    dataView: DataView,
   ): void {
-    // Actualiza los modelos de tarjetas dinámicas
-    this.formattingSettings.updateSparklineCards(sparklineColumnNames);
+    // Obtiene las columnas completas con metadata desde el dataView
+    const sparklineColumns = this.getSparklineColumnsFromDataView(dataView, sparklineColumnNames);
+    this.formattingSettings.updateSparklineCards(sparklineColumns);
 
     // Sincroniza los selectores de columnas con la lista de columnas de valor
     if (this.formattingSettings.specificColumn) {
@@ -239,6 +294,42 @@ export class FormattingManager {
     if (this.formattingSettings.cellElements) {
       this.formattingSettings.cellElements.updateColumnList(measureColumnNames);
     }
+  }
+
+  /**
+   * Obtiene las columnas de sparkline completas con metadata desde el DataView
+   *
+   * Filtra solo las columnas que tienen el rol 'sparkline' asignado en Power BI,
+   * evitando duplicados por queryName.
+   *
+   * @param dataView - DataView de Power BI
+   * @param sparklineColumnNames - Nombres de columnas de sparkline a filtrar
+   * @returns Array de columnas con metadata completa
+   */
+  private getSparklineColumnsFromDataView(
+    dataView: DataView,
+    sparklineColumnNames: string[],
+  ): powerbi.DataViewMetadataColumn[] {
+    if (!dataView.categorical?.values) {
+      return [];
+    }
+
+    const columns: powerbi.DataViewMetadataColumn[] = [];
+    const seenQueryNames = new Set<string>();
+
+    dataView.categorical.values.forEach((valueColumn) => {
+      const hasSparklineRole = valueColumn.source.roles && valueColumn.source.roles['sparkline'];
+      const isSparklineColumn = sparklineColumnNames.indexOf(valueColumn.source.displayName) !== -1;
+      const queryName = valueColumn.source.queryName;
+
+      if (hasSparklineRole && isSparklineColumn && queryName && !seenQueryNames.has(queryName)) {
+        columns.push(valueColumn.source);
+        seenQueryNames.add(queryName);
+      }
+    });
+
+    console.log('[FormattingManager] Sparkline columns found:', columns.map(c => ({ displayName: c.displayName, queryName: c.queryName, roles: c.roles })));
+    return columns;
   }
 
   /**
@@ -286,7 +377,6 @@ export class FormattingManager {
    *
    * Este método prepara las configuraciones tipadas para el renderizado,
    * evitando lecturas repetidas durante la renderización.
-   * Usa memoización para evitar re-extracciones cuando el esquema no cambia.
    *
    * @param sparklineColumnNames - Columnas de sparkline para extraer
    * @param measureColumnNames - Columnas de medida para extraer
@@ -295,26 +385,13 @@ export class FormattingManager {
     sparklineColumnNames: string[],
     measureColumnNames: string[],
   ): void {
-    // Genera hash para memoización
-    const currentSchemaHash = generateHash({
-      sparklines: sparklineColumnNames.sort(),
-      values: measureColumnNames.sort(),
-    });
-
-    // Si el esquema no cambió, no re-extraemos
-    if (
-      this.lastSchemaHash === currentSchemaHash &&
-      this.sparklineSettings.size > 0
-    ) {
-      return;
-    }
-
-    this.lastSchemaHash = currentSchemaHash;
+    console.log("[FormattingManager] extractSettings called");
 
     // Extrae configuraciones de sparklines
     this.sparklineSettings.clear();
     sparklineColumnNames.forEach((columnName) => {
       const settings = this.formattingSettings.getSparklineSettings(columnName);
+      console.log(`[FormattingManager] extractSettings for ${columnName}:`, settings);
       this.sparklineSettings.set(columnName, {
         chartType: settings.chartType,
         color: settings.color,

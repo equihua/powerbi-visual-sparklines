@@ -5,20 +5,22 @@ import { SparklineDataPoint } from "../../visualViewModel";
 import { SparklineColumnSettings } from "../../settings";
 
 interface BarSparklineProps {
-  dataPoints: SparklineDataPoint[];
+  dataPoint: SparklineDataPoint[];
   settings: SparklineColumnSettings;
 }
 
 export const BarSparkline: React.FC<BarSparklineProps> = ({
-  dataPoints,
+  dataPoint,
   settings,
 }) => {
   const width = 60;
   const height = 20;
   const padding = 2;
   const fillColor = settings.color || "#0078D4";
+  const barSpacing = settings.barSpacing ?? 1;
+  const opacity = settings.barOpacity ?? 1;
 
-  const data = dataPoints.map((d) => d.y);
+  const data = dataPoint.map((d) => d.y);
 
   const xScale = scaleLinear()
     .domain([0, data.length])
@@ -29,20 +31,27 @@ export const BarSparkline: React.FC<BarSparklineProps> = ({
     .domain([0, maxValue])
     .range([height - padding, padding]);
 
-  const barWidth = (width - 2 * padding) / data.length - 1;
+  const barWidth = Math.max(
+    1,
+    (width - 2 * padding) / data.length - barSpacing,
+  );
 
   return (
     <svg width={width} height={height}>
-      {data.map((value, index) => (
-        <rect
-          key={index}
-          x={xScale(index)}
-          y={yScale(value)}
-          width={barWidth}
-          height={height - padding - yScale(value)}
-          fill={fillColor}
-        />
-      ))}
+      {data.map((value, index) => {
+        const barHeight = height - padding - yScale(value);
+        return (
+          <rect
+            key={index}
+            x={xScale(index)}
+            y={yScale(value)}
+            width={barWidth}
+            height={barHeight}
+            fill={fillColor}
+            opacity={opacity}
+          />
+        );
+      })}
     </svg>
   );
 };

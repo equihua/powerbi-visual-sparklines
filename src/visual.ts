@@ -32,6 +32,7 @@ export class Visual implements IVisual {
 
   public update(options: VisualUpdateOptions): void {
     console.log("Visual update", options);
+    console.log("Update type:", options.type);
 
     if (!options.dataViews || !options.dataViews[0]) {
       this.clearContainer();
@@ -50,6 +51,12 @@ export class Visual implements IVisual {
 
     // FormattingManager detecta automáticamente columnas y extrae configuraciones
     this.formattingManager.initializeSettings(options.dataViews[0], viewModel);
+
+    console.log("=== Sparkline Settings Map ===");
+    const sparklineSettings = this.formattingManager.getSparklineSettingsMap();
+    sparklineSettings.forEach((settings, columnName) => {
+      console.log(`${columnName}:`, settings);
+    });
 
     this.renderTable(viewModel, options.viewport);
   }

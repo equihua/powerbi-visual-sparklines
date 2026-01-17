@@ -3,22 +3,26 @@ import { SparklineDataPoint } from "../../visualViewModel";
 import { SparklineColumnSettings } from "../../settings";
 
 interface DonutSparklineProps {
-  dataPoints: SparklineDataPoint[];
+  dataPoint: SparklineDataPoint[];
   settings: SparklineColumnSettings;
 }
 
 export const DonutSparkline: React.FC<DonutSparklineProps> = ({
-  dataPoints,
+  dataPoint,
   settings,
 }) => {
   const size = 20;
   const outerRadius = size / 2 - 2;
-  const innerRadius = outerRadius * 0.5;
+  const innerRadiusRatio = settings.donutInnerRadius ?? 0.5;
+  const innerRadius = outerRadius * innerRadiusRatio;
   const fillColor = settings.color || "#0078D4";
+  const startAngle = (settings.donutStartAngle ?? 0) * (Math.PI / 180);
+  const showLabels = settings.donutShowLabels ?? false;
+  const labelPosition = settings.donutLabelPosition ?? "outside";
 
-  const data = dataPoints.map((d) => d.y);
+  const data = dataPoint.map((d) => d.y);
   const total = data.reduce((sum, val) => sum + val, 0);
-  let currentAngle = 0;
+  let currentAngle = startAngle;
 
   const slices = data.map((value, index) => {
     const sliceAngle = (value / total) * 2 * Math.PI;
@@ -40,22 +44,43 @@ export const DonutSparkline: React.FC<DonutSparklineProps> = ({
 
     const opacity = 1 - index * 0.2;
 
+    const midAngle = currentAngle + sliceAngle / 2;
+    const labelRadius =
+      labelPosition === "inside"
+        ? (outerRadius + innerRadius) / 2
+        : outerRadius * 1.2;
+    const labelX = outerRadius + labelRadius * Math.cos(midAngle);
+    const labelY = outerRadius + labelRadius * Math.sin(midAngle);
+
     currentAngle = endAngle;
 
-    return { pathData, opacity, key: index };
+    return { pathData, opacity, key: index, labelX, labelY, value };
   });
 
   return (
     <svg width={size} height={size}>
       {slices.map((slice) => (
-        <path
-          key={slice.key}
-          d={slice.pathData}
-          fill={fillColor}
-          fillOpacity={slice.opacity}
-          stroke="#fff"
-          strokeWidth={0.5}
-        />
+        <g key={slice.key}>
+          <path
+            d={slice.pathData}
+            fill={fillColor}
+            fillOpacity={slice.opacity}
+            stroke="#fff"
+            strokeWidth={0.5}
+          />
+          {showLabels && (
+            <text
+              x={slice.labelX}
+              y={slice.labelY}
+              fontSize="4"
+              fill="#000"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {slice.value.toFixed(0)}
+            </text>
+          )}
+        </g>
       ))}
     </svg>
   );

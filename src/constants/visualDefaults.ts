@@ -215,12 +215,55 @@ export const TYPOGRAPHY_DEFAULTS = {
 // VALORES PREDETERMINADOS - SPARKLINE
 // ============================================================================
 
+export const CURVE_TYPE_OPTIONS = [
+  { value: "linear", displayName: "Lineal" },
+  { value: "smooth", displayName: "Suave" },
+  { value: "step", displayName: "Escalones" },
+] as const;
+
+export const LABEL_POSITION_OPTIONS = [
+  { value: "inside", displayName: "Interior" },
+  { value: "outside", displayName: "Exterior" },
+] as const;
+
 export const SPARKLINE_DEFAULTS = {
   chartType: SparklineType.Line,
   color: COLORS_DEFAULT.primaryBlue,
   lineWidth: 1.5,
-  lineWidthMin: 0.5,
-  lineWidthMax: 10,
+
+  line: {
+    strokeWidth: 1.5,
+    showPoints: false,
+    pointRadius: 2,
+    curveType: "linear",
+  },
+
+  area: {
+    strokeWidth: 1.5,
+    fillOpacity: 0.3,
+    showPoints: false,
+    pointRadius: 2,
+    curveType: "linear",
+  },
+
+  bar: {
+    spacing: 1,
+    opacity: 1,
+    showValues: false,
+  },
+
+  pie: {
+    startAngle: 0,
+    showLabels: false,
+    labelPosition: "inside",
+  },
+
+  donut: {
+    innerRadius: 0.5,
+    startAngle: 0,
+    showLabels: false,
+    labelPosition: "inside",
+  },
 } as const;
 
 // ============================================================================
@@ -433,6 +476,28 @@ export const VALIDATORS = {
   lineWidth: {
     min: { value: 1, type: powerbi.visuals.ValidatorType.Min },
     max: { value: 10, type: powerbi.visuals.ValidatorType.Max },
+  },
+  sparkline: {
+    line: {
+      strokeWidth: { min: 0.5, max: 5 },
+      pointRadius: { min: 1, max: 5 },
+    },
+    area: {
+      strokeWidth: { min: 0.5, max: 5 },
+      fillOpacity: { min: 0, max: 1 },
+      pointRadius: { min: 1, max: 5 },
+    },
+    bar: {
+      spacing: { min: 0, max: 5 },
+      opacity: { min: 0, max: 1 },
+    },
+    pie: {
+      startAngle: { min: 0, max: 360 },
+    },
+    donut: {
+      innerRadius: { min: 0, max: 0.8 },
+      startAngle: { min: 0, max: 360 },
+    },
   },
 } as const;
 

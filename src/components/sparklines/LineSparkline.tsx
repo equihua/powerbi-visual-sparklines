@@ -1,26 +1,36 @@
 import React, { useRef, useEffect } from "react";
 import { scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
-import { line } from "d3-shape";
+import {
+  line,
+  curveLinear,
+  curveMonotoneX,
+  curveStep,
+  curveBasis,
+  curveCardinal,
+} from "d3-shape";
 import { SparklineDataPoint } from "../../visualViewModel";
 import { SparklineColumnSettings } from "../../settings";
 
 interface LineSparklineProps {
-  dataPoints: SparklineDataPoint[];
+  dataPoint: SparklineDataPoint[];
   settings: SparklineColumnSettings;
 }
 
 export const LineSparkline: React.FC<LineSparklineProps> = ({
-  dataPoints,
+  dataPoint,
   settings,
 }) => {
   const width = 60;
   const height = 20;
   const padding = 2;
   const strokeColor = settings.color || "#0078D4";
-  const strokeWidth = settings.lineWidth || 1.5;
+  const strokeWidth = settings.lineWidth ?? 1.5;
+  const showPoints = settings.lineShowPoints ?? false;
+  const pointRadius = settings.linePointRadius ?? 2;
+  const curveType = settings.lineCurveType ?? "linear";
 
-  const data = dataPoints.map((d) => d.y);
+  const data = dataPoint.map((d) => d.y);
 
   const xScale = scaleLinear()
     .domain([0, data.length - 1])
@@ -32,9 +42,25 @@ export const LineSparkline: React.FC<LineSparklineProps> = ({
     .domain([minValue, maxValue])
     .range([height - padding, padding]);
 
+  const getCurve = () => {
+    switch (curveType) {
+      case "monotone":
+        return curveMonotoneX;
+      case "step":
+        return curveStep;
+      case "basis":
+        return curveBasis;
+      case "cardinal":
+        return curveCardinal;
+      default:
+        return curveLinear;
+    }
+  };
+
   const lineGenerator = line<number>()
     .x((_d, i) => xScale(i))
-    .y((d) => yScale(d));
+    .y((d) => yScale(d))
+    .curve(getCurve());
 
   const pathData = lineGenerator(data);
 
@@ -46,6 +72,16 @@ export const LineSparkline: React.FC<LineSparklineProps> = ({
         strokeWidth={strokeWidth}
         d={pathData || ""}
       />
+      {showPoints &&
+        data.map((d, i) => (
+          <circle
+            key={i}
+            cx={xScale(i)}
+            cy={yScale(d)}
+            r={pointRadius}
+            fill={strokeColor}
+          />
+        ))}
     </svg>
   );
 };

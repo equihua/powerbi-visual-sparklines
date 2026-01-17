@@ -783,7 +783,7 @@
                     }
                 },
                 "color": {
-                    "displayName": "Color",
+                    "displayName": "Color principal",
                     "type": {
                         "fill": {
                             "solid": {
@@ -792,10 +792,162 @@
                         }
                     }
                 },
-                "lineWidth": {
+                "lineStrokeWidth": {
                     "displayName": "Grosor de línea",
                     "type": {
                         "numeric": true
+                    }
+                },
+                "lineShowPoints": {
+                    "displayName": "Mostrar puntos",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "linePointRadius": {
+                    "displayName": "Radio de puntos",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "lineCurveType": {
+                    "displayName": "Tipo de curva",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "linear",
+                                "displayName": "Lineal"
+                            },
+                            {
+                                "value": "smooth",
+                                "displayName": "Suave"
+                            },
+                            {
+                                "value": "step",
+                                "displayName": "Escalones"
+                            }
+                        ]
+                    }
+                },
+                "areaStrokeWidth": {
+                    "displayName": "Grosor de línea",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "areaFillOpacity": {
+                    "displayName": "Opacidad de relleno",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "areaShowPoints": {
+                    "displayName": "Mostrar puntos",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "areaPointRadius": {
+                    "displayName": "Radio de puntos",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "areaCurveType": {
+                    "displayName": "Tipo de curva",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "linear",
+                                "displayName": "Lineal"
+                            },
+                            {
+                                "value": "smooth",
+                                "displayName": "Suave"
+                            },
+                            {
+                                "value": "step",
+                                "displayName": "Escalones"
+                            }
+                        ]
+                    }
+                },
+                "barSpacing": {
+                    "displayName": "Espaciado entre barras",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "barOpacity": {
+                    "displayName": "Opacidad",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "barShowValues": {
+                    "displayName": "Mostrar valores",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "pieStartAngle": {
+                    "displayName": "Ángulo inicial",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "pieShowLabels": {
+                    "displayName": "Mostrar etiquetas",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "pieLabelPosition": {
+                    "displayName": "Posición de etiquetas",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "inside",
+                                "displayName": "Interior"
+                            },
+                            {
+                                "value": "outside",
+                                "displayName": "Exterior"
+                            }
+                        ]
+                    }
+                },
+                "donutInnerRadius": {
+                    "displayName": "Radio interno",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "donutStartAngle": {
+                    "displayName": "Ángulo inicial",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "donutShowLabels": {
+                    "displayName": "Mostrar etiquetas",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "donutLabelPosition": {
+                    "displayName": "Posición de etiquetas",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "inside",
+                                "displayName": "Interior"
+                            },
+                            {
+                                "value": "outside",
+                                "displayName": "Exterior"
+                            }
+                        ]
                     }
                 }
             }

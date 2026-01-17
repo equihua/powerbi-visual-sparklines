@@ -1,4 +1,5 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import powerbi from "powerbi-visuals-api";
 import {
   GeneralCompositeCard,
   ColumnHeadersSettings,
@@ -40,9 +41,9 @@ export class VisualFormattingSettingsModel extends formattingSettings.Model {
       ...(this.sparklineCard ? [this.sparklineCard] : []),
     ];
 
-  public updateSparklineCards(sparklineColumnNames: string[]): void {
-    if (sparklineColumnNames && sparklineColumnNames.length > 0) {
-      this.sparklineCard = new SparklineCompositeCard(sparklineColumnNames);
+  public updateSparklineCards(sparklineColumns: powerbi.DataViewMetadataColumn[]): void {
+    if (sparklineColumns && sparklineColumns.length > 0) {
+      this.sparklineCard = new SparklineCompositeCard(sparklineColumns);
       this.rebuildCards();
     } else {
       this.sparklineCard = null;
